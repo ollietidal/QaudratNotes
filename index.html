@@ -238,6 +238,12 @@ textarea { min-height: 88px; resize: vertical; }
 .size-custom { margin-top: 10px; }
 .gps.blocked { color: var(--tape); }
 .gps-text { font-variant-numeric: tabular-nums; }
+.loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
+.loc-card.ask { border-color: var(--green); }
+.loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
+.loc-card p { margin: 0 0 10px; }
+.loc-card ol { margin: 0 0 12px; padding-left: 1.3em; }
+.loc-card li { margin-bottom: 6px; }
 .density { color: var(--muted); font-size: .9rem; margin-top: 4px; min-height: 1.3em; }
 .height-add { display: flex; gap: 10px; }
 .height-add input { flex: 1; min-width: 0; }
@@ -322,6 +328,12 @@ textarea { min-height: 88px; resize: vertical; }
     <button class="btn btn-small hidden" type="button" id="btn-gps">Use live GPS</button>
   </div>
   <p class="gps" id="gps-line"><span class="gps-dot" id="gps-dot"></span><span id="gps-text" class="gps-text">No location yet</span></p>
+  <div class="loc-card hidden" id="loc-card" role="region" aria-labelledby="loc-title">
+    <b id="loc-title"></b>
+    <p id="loc-body"></p>
+    <ol id="loc-steps" class="hidden"></ol>
+    <button class="btn btn-primary btn-wide" type="button" id="btn-allow-loc"></button>
+  </div>
   <div class="row" id="manual-gps">
     <div class="field"><label for="f-lat">Latitude</label><input type="number" id="f-lat" step="any" inputmode="decimal" placeholder="53.1234"></div>
     <div class="field"><label for="f-lon">Longitude</label><input type="number" id="f-lon" step="any" inputmode="decimal" placeholder="-4.5678"></div>
@@ -480,7 +492,7 @@ textarea { min-height: 88px; resize: vertical; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.1.0",
+  version: "0.1.1",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -596,6 +608,9 @@ const APP_CONFIG = {
     live: null,
     gpsMode: "live",
     gpsBlocked: false,
+    gpsNeedsAsk: false,
+    gpsAsked: false,
+    gpsRetrying: false,
     gpsWaitMsg: "",
     pendingPhotos: 0,
     heights: [],
@@ -785,12 +800,66 @@ const APP_CONFIG = {
   /* ---------- GPS ---------- */
   function setGpsText(text, status) {
     $("#gps-text").textContent = text;
-    const dot = $("#gps-dot");
-    dot.className = "gps-dot" + (status ? " " + status : "");
+    $("#gps-dot").className = "gps-dot" + (status ? " " + status : "");
   }
   let watchId = null;
   let gpsTicker = null;
-  const BLOCKED_MSG = "Location is turned off for this site. Allow location in your browser or phone settings, then tap Try GPS again. You can type coordinates below meanwhile.";
+  let permStatus = null;
+  let cardMode = null;
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(ua);
+  const isInstalled = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+
+  function blockedSteps() {
+    if (isIOS) {
+      const steps = [
+        "Open Settings, then Privacy & Security, then Location Services, and make sure it's switched on.",
+        "In the same list, tap Safari Websites and choose While Using the App.",
+        "If it's still blocked, open this site in Safari, tap aA in the address bar, choose Website Settings and set Location to Allow."
+      ];
+      if (isInstalled) steps.push("Close Quadrat Notebook fully (swipe it away), then open it again.");
+      return steps;
+    }
+    if (isAndroid) {
+      return [
+        "Swipe down from the top of the screen and make sure Location is on.",
+        isInstalled
+          ? "Long-press the Quadrat Notebook icon, tap App info, then Permissions, then Location, and choose Allow."
+          : "Tap the icon to the left of the web address, then Permissions, and set Location to Allow.",
+        "Come back here and tap the button below."
+      ];
+    }
+    return [
+      "Open your browser's settings for this site and set Location to Allow.",
+      "Make sure location is switched on for your device.",
+      "Come back here and tap the button below."
+    ];
+  }
+
+  function renderCard(mode) {
+    const card = $("#loc-card");
+    if (mode === cardMode) return;
+    cardMode = mode;
+    if (!mode) { card.classList.add("hidden"); return; }
+    card.classList.remove("hidden");
+    card.classList.toggle("ask", mode === "ask");
+    const steps = $("#loc-steps");
+    steps.innerHTML = "";
+    if (mode === "ask") {
+      $("#loc-title").textContent = "Turn on location";
+      $("#loc-body").textContent = "The app records where each quadrat is. Your phone will ask for permission; your location stays on this phone.";
+      steps.classList.add("hidden");
+      $("#btn-allow-loc").textContent = "Allow location";
+    } else {
+      $("#loc-title").textContent = "Location is blocked";
+      $("#loc-body").textContent = "Your phone is stopping this site from using GPS. To turn it on:";
+      blockedSteps().forEach(t => { const li = document.createElement("li"); li.textContent = t; steps.append(li); });
+      steps.classList.remove("hidden");
+      $("#btn-allow-loc").textContent = "I've turned it on, try again";
+    }
+  }
+
   function fillCoords(lat, lon) {
     $("#f-lat").value = lat.toFixed(6);
     $("#f-lon").value = lon.toFixed(6);
@@ -799,10 +868,18 @@ const APP_CONFIG = {
     const btn = $("#btn-gps");
     $("#gps-line").classList.toggle("blocked", state.gpsBlocked);
     if (state.gpsBlocked) {
-      setGpsText(BLOCKED_MSG, "");
-      btn.textContent = "Try GPS again"; btn.classList.remove("hidden");
+      renderCard("blocked");
+      setGpsText("Location is blocked. You can type coordinates below meanwhile.", "");
+      btn.classList.add("hidden");
       return;
     }
+    if (state.gpsNeedsAsk) {
+      renderCard("ask");
+      setGpsText("Location is off", "");
+      btn.classList.add("hidden");
+      return;
+    }
+    renderCard(null);
     if (state.gpsMode === "manual") {
       setGpsText("Using the coordinates you typed", "ok");
       btn.textContent = "Use live GPS"; btn.classList.remove("hidden");
@@ -823,17 +900,40 @@ const APP_CONFIG = {
   function onGpsFix(pos) {
     state.live = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy, t: Date.now() };
     state.gpsWaitMsg = "";
+    state.gpsBlocked = false;
+    state.gpsNeedsAsk = false;
     if (state.gpsMode === "live") fillCoords(state.live.lat, state.live.lon);
     renderGps();
   }
   function onGpsError(err) {
-    if (err && err.code === 1) { state.gpsBlocked = true; stopGps(); renderGps(); return; }
+    if (err && err.code === 1) {
+      const wasRetry = state.gpsRetrying;
+      state.gpsBlocked = true;
+      state.gpsRetrying = false;
+      stopGps();
+      renderGps();
+      if (wasRetry) toast("Location is still blocked. Check the steps on the Record tab.", true);
+      return;
+    }
     state.gpsWaitMsg = "No GPS fix yet. Still trying…";
     renderGps();
   }
-  function startGps() {
-    if (!("geolocation" in navigator)) { state.gpsBlocked = true; renderGps(); return; }
-    if (state.gpsBlocked) { renderGps(); return; }
+  async function gpsPermission() {
+    try {
+      if (!navigator.permissions || !navigator.permissions.query) return null;
+      if (!permStatus) {
+        permStatus = await navigator.permissions.query({ name: "geolocation" });
+        permStatus.onchange = () => {
+          if (permStatus.state === "granted") { state.gpsBlocked = false; state.gpsNeedsAsk = false; }
+          if (!$("#view-record").classList.contains("hidden")) startGps();
+        };
+      }
+      return permStatus.state;
+    } catch (e) {
+      return null;
+    }
+  }
+  function beginWatch() {
     if (watchId === null) {
       try { watchId = navigator.geolocation.watchPosition(onGpsFix, onGpsError, { enableHighAccuracy: true, maximumAge: 0 }); }
       catch (e) { state.gpsBlocked = true; }
@@ -841,16 +941,41 @@ const APP_CONFIG = {
     if (!gpsTicker) gpsTicker = setInterval(renderGps, 1000);
     renderGps();
   }
+  async function startGps() {
+    if (!("geolocation" in navigator)) { state.gpsBlocked = true; renderGps(); return; }
+    const perm = await gpsPermission();
+    if ($("#view-record").classList.contains("hidden")) return;
+    if (perm === "denied") state.gpsBlocked = true;
+    if (perm === "granted") { state.gpsBlocked = false; state.gpsNeedsAsk = false; }
+    if (state.gpsBlocked) { stopGps(); renderGps(); return; }
+    if (perm === "prompt" && !state.gpsAsked) { state.gpsNeedsAsk = true; renderGps(); return; }
+    state.gpsNeedsAsk = false;
+    beginWatch();
+  }
   function stopGps() {
     if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null; }
     if (gpsTicker) { clearInterval(gpsTicker); gpsTicker = null; }
   }
+  $("#btn-allow-loc").addEventListener("click", () => {
+    if (!("geolocation" in navigator)) return;
+    state.gpsRetrying = state.gpsBlocked;
+    state.gpsBlocked = false;
+    state.gpsNeedsAsk = false;
+    state.gpsAsked = true;
+    state.gpsWaitMsg = "";
+    renderGps();
+    // Asking from a tap is the most reliable way to get the phone's permission prompt.
+    navigator.geolocation.getCurrentPosition(
+      pos => { state.gpsRetrying = false; onGpsFix(pos); beginWatch(); },
+      err => { onGpsError(err); if (!(err && err.code === 1)) beginWatch(); },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+    );
+  });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stopGps();
     else if (!$("#view-record").classList.contains("hidden")) startGps();
   });
   $("#btn-gps").addEventListener("click", () => {
-    if (state.gpsBlocked) { state.gpsBlocked = false; startGps(); return; }
     state.gpsMode = "live";
     if (state.live) fillCoords(state.live.lat, state.live.lon);
     renderGps();
