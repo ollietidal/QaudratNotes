@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quadrat Notebook</title>
+<!-- PRE-LAUNCH: delete the next line when you're ready for search engines to list the app -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Free offline app for recording seagrass quadrat surveys on your phone, with CSV export ready for R.">
+<script src="jszip.min.js"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#17242C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Quadrats">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-style: italic; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+:root {
+  --paper: #F6EFC4;
+  --surface: #FFFBE6;
+  --ink: #17242C;
+  --muted: #56605B;
+  --line: #D6C98A;
+  --green: #2D6A4F;
+  --green-ink: #FFFBE6;
+  --green-soft: #CFE3C6;
+  --tape: #D9481F;
+  --focus: #1B5FA8;
+  --radius-s: 6px;
+  --radius-l: 14px;
+  --body: "Atkinson Hyperlegible", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --num: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10181B; --surface: #18242A; --ink: #F2EBC4; --muted: #A3AB9F;
+    --line: #2E3D43; --green: #6FBF8E; --green-ink: #0E1A14; --green-soft: #23402F;
+    --tape: #FF7A4D; --focus: #8CC4FF; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10181B; --surface: #18242A; --ink: #F2EBC4; --muted: #A3AB9F;
+  --line: #2E3D43; --green: #6FBF8E; --green-ink: #0E1A14; --green-soft: #23402F;
+  --tape: #FF7A4D; --focus: #8CC4FF; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--paper); }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--body); font-size: 17px; line-height: 1.45;
+  padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  -webkit-text-size-adjust: 100%;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+img { max-width: 100%; }
+
+/* Header */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--paper); border-bottom: 2px solid var(--ink);
+  display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+}
+.top-site { flex: 1; min-width: 0; }
+.top-site strong { display: block; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-site span { color: var(--muted); font-size: .9rem; }
+main { max-width: 640px; margin: 0 auto; padding: 16px; }
+h1 { font-family: var(--num); font-weight: 700; font-size: 2rem; line-height: 1.05; margin: 8px 0 4px; letter-spacing: .01em; }
+h2 { font-size: 1.1rem; margin: 28px 0 10px; }
+p.lead { color: var(--muted); margin: 0 0 18px; }
+.hidden { display: none !important; }
+
+/* Fields */
+.field { margin: 0 0 18px; }
+.field > label, .label { display: block; font-weight: 700; margin-bottom: 6px; }
+.hint { color: var(--muted); font-size: .9rem; font-weight: 400; }
+input[type=text], input[type=number], input[type=date], textarea {
+  width: 100%; min-height: 48px; padding: 10px 12px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-s);
+}
+input:focus, textarea:focus { border-color: var(--ink); outline: none; }
+textarea { min-height: 88px; resize: vertical; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 10px 16px; border-radius: var(--radius-s);
+  border: 2px solid var(--ink); background: transparent; font-weight: 700; cursor: pointer;
+}
+.btn-primary { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+.btn-wide { width: 100%; }
+.btn-small { min-height: 40px; padding: 6px 12px; font-size: .95rem; }
+.btn-danger { border-color: var(--tape); color: var(--tape); }
+.btn-danger.armed { background: var(--tape); color: var(--surface); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.linkish { background: none; border: 0; padding: 4px; text-decoration: underline; color: var(--ink); cursor: pointer; font-weight: 700; }
+
+/* Segmented choices */
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button {
+  min-height: 44px; padding: 8px 14px; border-radius: 999px;
+  border: 2px solid var(--line); background: var(--surface); cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); font-weight: 700; }
+.seg em { font-style: italic; }
+
+/* Quadrat block — the signature element */
+.quadrat-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.qnum { display: flex; align-items: center; gap: 8px; }
+.qnum label { font-weight: 700; }
+.qnum input { width: 86px; text-align: center; font-family: var(--num); font-size: 1.5rem; font-weight: 700; min-height: 44px; padding: 4px; }
+.gps { font-size: .95rem; color: var(--muted); margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.gps-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: inline-block; }
+.gps-dot.ok { background: var(--green); }
+.gps-dot.wait { background: var(--tape); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .gps-dot.wait { animation: none; } }
+
+.frame {
+  background: var(--surface); border: 2px solid var(--ink); border-radius: var(--radius-l);
+  padding: 14px; margin-bottom: 22px;
+}
+.cover-wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+  aspect-ratio: 1 / 1; width: 100%; max-width: 300px;
+  border: 4px solid var(--ink); border-radius: 2px; background: var(--paper);
+  touch-action: manipulation;
+}
+.grid button {
+  border: 0; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  background: transparent; padding: 0; cursor: pointer; min-width: 0;
+  transition: background-color .12s;
+}
+.grid button:nth-child(5n) { border-right: 0; }
+.grid button:nth-child(n+21) { border-bottom: 0; }
+.grid button[aria-pressed="true"] {
+  background-color: var(--green);
+  background-image: repeating-linear-gradient(100deg, transparent 0 7px, rgba(255,255,255,.18) 7px 9px);
+}
+.cover-read { text-align: center; min-width: 96px; }
+.cover-big { font-family: var(--num); font-weight: 700; font-size: 4.2rem; line-height: .9; font-variant-numeric: tabular-nums; }
+.cover-big small { font-size: 2rem; }
+.cover-read .hint { display: block; margin-top: 4px; }
+.cover-fine { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.cover-fine input { width: 96px; text-align: center; }
+@media (max-width: 380px) {
+  .cover-wrap { grid-template-columns: 1fr; }
+  .grid { margin: 0 auto; }
+}
+
+/* Photos */
+.photos { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.thumb { position: relative; width: 84px; height: 84px; border-radius: var(--radius-s); overflow: hidden; border: 2px solid var(--line); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb button {
+  position: absolute; top: 2px; right: 2px; width: 30px; height: 30px; border-radius: 50%;
+  border: 0; background: var(--ink); color: var(--paper); font-weight: 700; cursor: pointer; line-height: 1;
+}
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.editing-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  border: 2px dashed var(--tape); border-radius: var(--radius-s); padding: 10px 12px; margin-bottom: 16px;
+}
+.save-bar { display: grid; gap: 10px; margin-top: 8px; }
+
+/* Data list */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 18px; }
+.stat { border-top: 3px solid var(--ink); padding-top: 6px; }
+.stat b { display: block; font-family: var(--num); font-size: 2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: .88rem; }
+.qlist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.qlist li button {
+  width: 100%; display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 12px;
+  padding: 12px 4px; background: none; border: 0; border-bottom: 1px solid var(--line); text-align: left; cursor: pointer;
+}
+.qlist .qn { font-family: var(--num); font-size: 1.5rem; font-weight: 700; }
+.qlist .meta { color: var(--muted); font-size: .9rem; }
+.bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+.bar i { display: block; height: 100%; background: var(--green); }
+.qlist .pct { font-family: var(--num); font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.empty { border: 2px dashed var(--line); border-radius: var(--radius-l); padding: 22px; text-align: center; color: var(--muted); }
+
+.surveys { list-style: none; margin: 0; padding: 0; }
+.surveys li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.surveys li div { min-width: 0; }
+.surveys strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.surveys span { color: var(--muted); font-size: .9rem; }
+.tag { font-size: .8rem; font-weight: 700; color: var(--green); }
+
+.note { background: var(--surface); border-left: 4px solid var(--green); padding: 10px 12px; border-radius: 0 var(--radius-s) var(--radius-s) 0; font-size: .95rem; margin: 0 0 18px; }
+.export-actions { display: grid; gap: 10px; margin-bottom: 8px; }
+
+/* Tabs */
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  background: var(--ink); color: var(--paper);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: grid; grid-template-columns: repeat(3, 1fr);
+}
+.tabs button {
+  min-height: 64px; background: none; border: 0; color: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: .9rem;
+  opacity: .7;
+}
+.tabs button[aria-current="page"] { opacity: 1; font-weight: 700; box-shadow: inset 0 4px 0 var(--green); }
+.tabs svg { width: 24px; height: 24px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--green); color: var(--green-ink); padding: 12px 18px; border-radius: var(--radius-s);
+  font-weight: 700; z-index: 10; max-width: calc(100% - 32px); text-align: center;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.toast.show { opacity: 1; }
+.toast.err { background: var(--tape); color: #fff; }
+.about p { margin: 0 0 10px; }
+.about a { color: var(--ink); font-weight: 700; }
+.support-line { margin: 10px 0 0; }
+.support-line a { color: var(--ink); font-weight: 700; }
+.photo-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.sr-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.thumb.pending { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .8rem; background: var(--surface); }
+.size-custom { margin-top: 10px; }
+.gps.blocked { color: var(--tape); }
+.gps-text { font-variant-numeric: tabular-nums; }
+.density { color: var(--muted); font-size: .9rem; margin-top: 4px; min-height: 1.3em; }
+.height-add { display: flex; gap: 10px; }
+.height-add input { flex: 1; min-width: 0; }
+.heights { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.heights:empty { margin-top: 0; }
+.heights button { min-height: 40px; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); cursor: pointer; font-variant-numeric: tabular-nums; }
+.heights button span { color: var(--muted); margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-site">
+    <strong id="top-site">No survey open</strong>
+    <span id="top-date">Start a survey to record quadrats</span>
+  </div>
+  <button class="btn btn-small" id="btn-change" type="button">Surveys</button>
+</header>
+
+<main>
+
+<!-- SURVEY SETUP -->
+<section id="view-survey" class="hidden" aria-labelledby="h-survey">
+  <h1 id="h-survey">Start a survey</h1>
+  <p class="lead">Each survey is one site visit. Quadrats you record are saved to this phone as you go.</p>
+  <form id="survey-form" autocomplete="off">
+    <div class="field">
+      <label for="s-site">Site</label>
+      <input type="text" id="s-site" required placeholder="e.g. Porthdinllaen meadow">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="s-date">Date</label>
+        <input type="date" id="s-date" required>
+      </div>
+      <div class="field">
+        <label for="s-surveyor">Surveyor</label>
+        <input type="text" id="s-surveyor" placeholder="Initials or names">
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">Quadrat size</span>
+      <div class="seg" data-name="qsize">
+        <button type="button" data-value="0.0625">25 × 25 cm</button>
+        <button type="button" data-value="0.25" aria-pressed="true">50 × 50 cm</button>
+        <button type="button" data-value="1">1 × 1 m</button>
+        <button type="button" data-value="custom">Other</button>
+      </div>
+      <div class="size-custom hidden" id="qsize-custom">
+        <label for="s-side">Side length <span class="hint">cm, for a square quadrat</span></label>
+        <input type="number" id="s-side" inputmode="decimal" min="1" step="any">
+      </div>
+    </div>
+    <div class="field">
+      <label for="s-notes">Survey notes <span class="hint">optional: tide, weather, method</span></label>
+      <textarea id="s-notes"></textarea>
+    </div>
+    <button class="btn btn-primary btn-wide" type="submit">Start survey</button>
+  </form>
+
+  <div id="survey-list-wrap" class="hidden">
+    <h2>Previous surveys</h2>
+    <ul class="surveys" id="survey-list"></ul>
+  </div>
+</section>
+
+<!-- RECORD -->
+<section id="view-record" class="hidden" aria-label="Record a quadrat">
+  <div class="editing-bar hidden" id="editing-bar">
+    <span><b id="editing-label">Editing quadrat</b></span>
+    <span>
+      <button class="btn btn-small" type="button" id="btn-cancel-edit">Cancel</button>
+      <button class="btn btn-small btn-danger" type="button" id="btn-delete-q">Delete</button>
+    </span>
+  </div>
+
+  <div class="quadrat-head">
+    <div class="qnum">
+      <label for="f-qnum">Quadrat</label>
+      <input type="number" id="f-qnum" inputmode="numeric" min="1">
+    </div>
+    <button class="btn btn-small hidden" type="button" id="btn-gps">Use live GPS</button>
+  </div>
+  <p class="gps" id="gps-line"><span class="gps-dot" id="gps-dot"></span><span id="gps-text" class="gps-text">No location yet</span></p>
+  <div class="row" id="manual-gps">
+    <div class="field"><label for="f-lat">Latitude</label><input type="number" id="f-lat" step="any" inputmode="decimal" placeholder="53.1234"></div>
+    <div class="field"><label for="f-lon">Longitude</label><input type="number" id="f-lon" step="any" inputmode="decimal" placeholder="-4.5678"></div>
+  </div>
+
+  <div class="frame">
+    <div class="label">Seagrass cover <span class="hint" id="cover-size"></span></div>
+    <div class="cover-wrap">
+      <div class="grid" id="grid" role="group" aria-label="Quadrat grid, 25 squares, each 4 percent"></div>
+      <div class="cover-read">
+        <div class="cover-big" id="cover-big" aria-live="polite">–</div>
+        <span class="hint">Tap squares with seagrass</span>
+      </div>
+    </div>
+    <div class="cover-fine">
+      <label for="f-cover" class="hint">Exact %</label>
+      <input type="number" id="f-cover" inputmode="numeric" min="0" max="100" placeholder="0–100">
+      <button class="btn btn-small" type="button" id="btn-zero">None (0%)</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="label">Species</span>
+    <div class="seg" data-name="species">
+      <button type="button" data-value="Zostera marina"><em>Z. marina</em></button>
+      <button type="button" data-value="Zostera noltei"><em>Z. noltei</em></button>
+      <button type="button" data-value="Both">Both</button>
+      <button type="button" data-value="None">None</button>
+    </div>
+  </div>
+
+  <div class="field"><label for="f-shoots">Shoot count</label><input type="number" id="f-shoots" inputmode="numeric" min="0"><div class="density" id="density"></div></div>
+
+  <div class="field">
+    <label for="f-height">Canopy height <span class="hint">cm, add each measurement</span></label>
+    <div class="height-add">
+      <input type="number" id="f-height" inputmode="decimal" min="0" step="any" enterkeyhint="done">
+      <button class="btn" type="button" id="btn-add-height">Add</button>
+    </div>
+    <div class="heights" id="heights"></div>
+    <div class="density" id="height-summary" aria-live="polite"></div>
+  </div>
+
+  <div class="field">
+    <span class="label">Epiphytes on leaves</span>
+    <div class="seg" data-name="epiphytes">
+      <button type="button" data-value="None">None</button>
+      <button type="button" data-value="Low">Low</button>
+      <button type="button" data-value="Medium">Medium</button>
+      <button type="button" data-value="High">High</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="f-algae">Algae cover <span class="hint">%</span></label>
+    <input type="number" id="f-algae" inputmode="numeric" min="0" max="100">
+  </div>
+
+  <div class="field">
+    <span class="label">Sediment</span>
+    <div class="seg" data-name="sediment">
+      <button type="button" data-value="Mud">Mud</button>
+      <button type="button" data-value="Muddy sand">Muddy sand</button>
+      <button type="button" data-value="Sand">Sand</button>
+      <button type="button" data-value="Gravel">Gravel</button>
+      <button type="button" data-value="Mixed">Mixed</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="label">Photos</span>
+    <div class="photos" id="photos"></div>
+    <div class="photo-actions">
+      <button class="btn btn-small" type="button" id="btn-camera">Take photo</button>
+      <button class="btn btn-small" type="button" id="btn-gallery">Choose from phone</button>
+    </div>
+    <input type="file" id="f-camera" class="sr-file" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
+    <input type="file" id="f-gallery" class="sr-file" accept="image/*" multiple tabindex="-1" aria-hidden="true">
+  </div>
+
+  <div class="field">
+    <label for="f-notes">Notes <span class="hint">fauna, burrows, damage</span></label>
+    <textarea id="f-notes"></textarea>
+  </div>
+
+  <div class="save-bar">
+    <button class="btn btn-primary btn-wide" type="button" id="btn-save">Save quadrat</button>
+  </div>
+</section>
+
+<!-- DATA -->
+<section id="view-data" class="hidden" aria-labelledby="h-data">
+  <h1 id="h-data">This survey</h1>
+  <div class="stats">
+    <div class="stat"><b id="st-n">0</b><span>quadrats</span></div>
+    <div class="stat"><b id="st-mean">–</b><span>mean cover</span></div>
+    <div class="stat"><b id="st-occ">–</b><span>with seagrass</span></div>
+  </div>
+  <ul class="qlist" id="qlist"></ul>
+  <div class="empty hidden" id="q-empty">No quadrats yet. Record your first one on the Record tab.</div>
+</section>
+
+<!-- EXPORT -->
+<section id="view-export" class="hidden" aria-labelledby="h-export">
+  <h1 id="h-export">Export</h1>
+  <p class="note">Your data is stored only on this phone, in this browser. Export after every survey so you always have a copy.</p>
+
+  <div class="field">
+    <span class="label">What to export</span>
+    <div class="seg" data-name="scope">
+      <button type="button" data-value="current" aria-pressed="true">This survey</button>
+      <button type="button" data-value="all">All surveys</button>
+    </div>
+  </div>
+
+  <div class="export-actions">
+    <button class="btn btn-primary btn-wide" type="button" id="btn-zip">Download data and photos (.zip)</button>
+    <button class="btn btn-wide" type="button" id="btn-csv">Download data only (.csv)</button>
+  </div>
+  <p class="hint" id="export-hint">The CSV has one row per quadrat, with column names ready for R, e.g. <code>read.csv("quadrats.csv")</code>.</p>
+
+  <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
+
+  <h2>Storage</h2>
+  <p class="hint" id="storage-line">Checking storage…</p>
+  <button class="btn btn-danger btn-wide" type="button" id="btn-wipe">Delete all data on this phone</button>
+
+  <h2>About</h2>
+  <div class="about">
+    <p>Quadrat Notebook <span id="app-version"></span> is free to use for seagrass quadrat surveys.</p>
+    <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
+    <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
+    <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
+  </div>
+</section>
+
+</main>
+
+<nav class="tabs" aria-label="Sections">
+  <button type="button" data-tab="record">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16"/><path d="M4 12h16M12 4v16"/></svg>
+    Record
+  </button>
+  <button type="button" data-tab="data">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9"/></svg>
+    Data
+  </button>
+  <button type="button" data-tab="export">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+    Export
+  </button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Settings: fill these in before launch ===== */
+const APP_CONFIG = {
+  version: "0.1.0",
+  supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
+  contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
+};
+/* ================================================== */
+(function () {
+  "use strict";
+  const $ = (s, el) => (el || document).querySelector(s);
+  const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+  const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+  const num = v => (v === "" || v == null || isNaN(Number(v))) ? null : Number(v);
+  const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const slug = s => (s || "survey").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "survey";
+  const pad = n => String(n).padStart(2, "0");
+  const sizeLabel = s => { const c = s.quadratSideCm; return (c >= 100 && c % 100 === 0) ? (c / 100) + " × " + (c / 100) + " m" : c + " × " + c + " cm"; };
+
+  /* ---------- Storage (IndexedDB, on device) ---------- */
+  let dbPromise;
+  function openDB() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open("quadrat-notebook", 1);
+      req.onupgradeneeded = () => {
+        const d = req.result;
+        d.createObjectStore("sessions", { keyPath: "id" });
+        const q = d.createObjectStore("quadrats", { keyPath: "id" });
+        q.createIndex("sessionId", "sessionId");
+        const p = d.createObjectStore("photos", { keyPath: "id" });
+        p.createIndex("quadratId", "quadratId");
+        d.createObjectStore("meta", { keyPath: "key" });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbPromise;
+  }
+  async function tx(store, mode, fn) {
+    const d = await openDB();
+    return new Promise((resolve, reject) => {
+      const t = d.transaction(store, mode);
+      const s = t.objectStore(store);
+      let out;
+      const r = fn(s);
+      if (r) r.onsuccess = () => { out = r.result; };
+      t.oncomplete = () => resolve(out);
+      t.onerror = () => reject(t.error);
+      t.onabort = () => reject(t.error);
+    });
+  }
+  const put = (store, v) => tx(store, "readwrite", s => s.put(v));
+  const get = (store, k) => tx(store, "readonly", s => s.get(k));
+  const del = (store, k) => tx(store, "readwrite", s => s.delete(k));
+  const all = store => tx(store, "readonly", s => s.getAll());
+  const byIndex = (store, idx, k) => tx(store, "readonly", s => s.index(idx).getAll(k));
+  const clearStore = store => tx(store, "readwrite", s => s.clear());
+
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+
+  /* ---------- UI helpers ---------- */
+  let toastTimer;
+  function toast(msg, isErr) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.toggle("err", !!isErr);
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+  }
+  function setSeg(name, value) {
+    $$('.seg[data-name="' + name + '"] button').forEach(b => b.setAttribute("aria-pressed", String(b.dataset.value === value)));
+  }
+  function getSeg(name) {
+    const b = $('.seg[data-name="' + name + '"] button[aria-pressed="true"]');
+    return b ? b.dataset.value : null;
+  }
+  $$(".seg").forEach(seg => {
+    seg.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const name = seg.dataset.name;
+      const wasOn = b.getAttribute("aria-pressed") === "true";
+      if (name === "scope" || name === "qsize") {
+        setSeg(name, b.dataset.value);
+        if (name === "qsize") $("#qsize-custom").classList.toggle("hidden", b.dataset.value !== "custom");
+        return;
+      }
+      setSeg(name, wasOn ? null : b.dataset.value);
+    });
+  });
+  function armButton(btn, armedLabel, action) {
+    const original = btn.textContent;
+    let timer = null;
+    btn.addEventListener("click", async () => {
+      if (!btn.classList.contains("armed")) {
+        btn.classList.add("armed");
+        btn.textContent = armedLabel;
+        timer = setTimeout(() => { btn.classList.remove("armed"); btn.textContent = original; }, 4000);
+        return;
+      }
+      clearTimeout(timer);
+      btn.classList.remove("armed");
+      btn.textContent = original;
+      await action();
+    });
+  }
+
+  /* ---------- State ---------- */
+  const state = {
+    session: null,
+    editingId: null,
+    cells: new Set(),
+    cover: null,
+    gps: null,
+    live: null,
+    gpsMode: "live",
+    gpsBlocked: false,
+    gpsWaitMsg: "",
+    pendingPhotos: 0,
+    heights: [],
+    photos: [],
+    removedPhotoIds: []
+  };
+
+  /* ---------- Views ---------- */
+  function show(view) {
+    ["survey", "record", "data", "export"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== view));
+    $$(".tabs button").forEach(b => {
+      if (b.dataset.tab === view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    if (view === "data") renderData();
+    if (view === "export") renderExport();
+    if (view === "survey") renderSurveyList();
+    if (view === "record") startGps(); else stopGps();
+    window.scrollTo(0, 0);
+  }
+  $$(".tabs button").forEach(b => b.addEventListener("click", () => {
+    if (!state.session && b.dataset.tab !== "export") { show("survey"); toast("Start a survey first"); return; }
+    show(b.dataset.tab);
+  }));
+  $("#btn-change").addEventListener("click", () => show("survey"));
+
+  function renderHeader() {
+    if (state.session) {
+      $("#top-site").textContent = state.session.site;
+      const d = new Date(state.session.date + "T12:00:00");
+      $("#top-date").textContent = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) + (state.session.surveyor ? ", " + state.session.surveyor : "");
+      $("#cover-size").textContent = state.session.quadratSideCm ? "in a " + sizeLabel(state.session) + " quadrat" : "";
+    } else {
+      $("#top-site").textContent = "No survey open";
+      $("#top-date").textContent = "Start a survey to record quadrats";
+    }
+  }
+
+  /* ---------- Surveys ---------- */
+  $("#s-date").value = today();
+  $("#survey-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const site = $("#s-site").value.trim();
+    if (!site) { toast("Add a site name", true); return; }
+    const qsel = getSeg("qsize") || "0.25";
+    let side;
+    if (qsel === "custom") {
+      side = num($("#s-side").value);
+      if (!side || side <= 0) { toast("Add the quadrat side length in cm", true); $("#s-side").focus(); return; }
+    } else {
+      side = Math.round(Math.sqrt(Number(qsel)) * 100);
+    }
+    const session = {
+      id: uid(), site,
+      date: $("#s-date").value || today(),
+      surveyor: $("#s-surveyor").value.trim(),
+      notes: $("#s-notes").value.trim(),
+      quadratSideCm: side,
+      quadratAreaM2: Number((side * side / 10000).toFixed(4)),
+      created: new Date().toISOString()
+    };
+    await put("sessions", session);
+    await openSession(session);
+    $("#s-site").value = ""; $("#s-notes").value = ""; $("#s-side").value = "";
+    setSeg("qsize", "0.25"); $("#qsize-custom").classList.add("hidden");
+    toast("Survey started");
+  });
+
+  async function openSession(session) {
+    state.session = session;
+    await put("meta", { key: "active", value: session.id });
+    renderHeader();
+    await resetForm(false);
+    show("record");
+  }
+
+  async function renderSurveyList() {
+    const sessions = (await all("sessions")).sort((a, b) => (b.date + b.created).localeCompare(a.date + a.created));
+    const quads = await all("quadrats");
+    const counts = {};
+    quads.forEach(q => { counts[q.sessionId] = (counts[q.sessionId] || 0) + 1; });
+    const ul = $("#survey-list");
+    ul.innerHTML = "";
+    $("#survey-list-wrap").classList.toggle("hidden", sessions.length === 0);
+    sessions.forEach(s => {
+      const li = document.createElement("li");
+      const info = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = s.site;
+      const sub = document.createElement("span");
+      const n = counts[s.id] || 0;
+      sub.textContent = s.date + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "");
+      info.append(name, sub);
+      li.append(info);
+      if (state.session && state.session.id === s.id) {
+        const tag = document.createElement("span");
+        tag.className = "tag"; tag.textContent = "Open now";
+        li.append(tag);
+      } else {
+        const btn = document.createElement("button");
+        btn.className = "btn btn-small"; btn.type = "button"; btn.textContent = "Open";
+        btn.addEventListener("click", () => openSession(s));
+        li.append(btn);
+      }
+      ul.append(li);
+    });
+  }
+
+  /* ---------- Quadrat grid ---------- */
+  const grid = $("#grid");
+  for (let i = 0; i < 25; i++) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", "Square " + (i + 1));
+    b.addEventListener("click", () => {
+      if (state.cells.has(i)) state.cells.delete(i); else state.cells.add(i);
+      setCover(state.cells.size * 4, false);
+    });
+    grid.append(b);
+  }
+  function paintGrid() {
+    $$("button", grid).forEach((b, i) => b.setAttribute("aria-pressed", String(state.cells.has(i))));
+  }
+  function setCover(value, fromInput) {
+    if (value === null) {
+      state.cover = null;
+      $("#cover-big").textContent = "–";
+      if (!fromInput) $("#f-cover").value = "";
+      state.cells.clear(); paintGrid();
+      return;
+    }
+    value = Math.max(0, Math.min(100, Math.round(value)));
+    state.cover = value;
+    $("#cover-big").innerHTML = value + "<small>%</small>";
+    if (!fromInput) $("#f-cover").value = value;
+    if (fromInput) {
+      const n = Math.round(value / 4);
+      state.cells = new Set(Array.from({ length: n }, (_, i) => i));
+    }
+    paintGrid();
+  }
+  $("#f-cover").addEventListener("input", e => setCover(num(e.target.value), true));
+  function updateDensity() {
+    const n = num($("#f-shoots").value);
+    const a = state.session && state.session.quadratAreaM2;
+    $("#density").textContent = (n !== null && a) ? "About " + Math.round(n / a) + " shoots per m²" : "";
+  }
+  $("#f-shoots").addEventListener("input", updateDensity);
+
+  function addHeight(keepFocus) {
+    const raw = $("#f-height").value;
+    const v = num(raw);
+    if (v === null || v < 0) { if (raw !== "") toast("Enter a height in cm", true); return; }
+    state.heights.push(v);
+    $("#f-height").value = "";
+    if (keepFocus) $("#f-height").focus();
+    renderHeights();
+  }
+  function renderHeights() {
+    const wrap = $("#heights");
+    wrap.innerHTML = "";
+    state.heights.forEach((h, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", "Remove " + h + " cm");
+      b.textContent = h + " cm";
+      const x = document.createElement("span");
+      x.textContent = "×";
+      x.setAttribute("aria-hidden", "true");
+      b.append(x);
+      b.addEventListener("click", () => { state.heights.splice(i, 1); renderHeights(); });
+      wrap.append(b);
+    });
+    const n = state.heights.length;
+    $("#height-summary").textContent = n
+      ? n + (n === 1 ? " measurement" : " measurements") + ", mean " + (state.heights.reduce((a, b) => a + b, 0) / n).toFixed(1) + " cm. Tap one to remove it."
+      : "";
+  }
+  $("#btn-add-height").addEventListener("click", () => addHeight(true));
+  $("#f-height").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addHeight(true); } });
+  $("#btn-zero").addEventListener("click", () => {
+    state.cells.clear();
+    setCover(0, false);
+    if (!getSeg("species")) setSeg("species", "None");
+  });
+
+  /* ---------- GPS ---------- */
+  function setGpsText(text, status) {
+    $("#gps-text").textContent = text;
+    const dot = $("#gps-dot");
+    dot.className = "gps-dot" + (status ? " " + status : "");
+  }
+  let watchId = null;
+  let gpsTicker = null;
+  const BLOCKED_MSG = "Location is turned off for this site. Allow location in your browser or phone settings, then tap Try GPS again. You can type coordinates below meanwhile.";
+  function fillCoords(lat, lon) {
+    $("#f-lat").value = lat.toFixed(6);
+    $("#f-lon").value = lon.toFixed(6);
+  }
+  function renderGps() {
+    const btn = $("#btn-gps");
+    $("#gps-line").classList.toggle("blocked", state.gpsBlocked);
+    if (state.gpsBlocked) {
+      setGpsText(BLOCKED_MSG, "");
+      btn.textContent = "Try GPS again"; btn.classList.remove("hidden");
+      return;
+    }
+    if (state.gpsMode === "manual") {
+      setGpsText("Using the coordinates you typed", "ok");
+      btn.textContent = "Use live GPS"; btn.classList.remove("hidden");
+      return;
+    }
+    if (state.gpsMode === "saved") {
+      setGpsText("Keeping this quadrat's saved location", "ok");
+      btn.textContent = "Use current location"; btn.classList.remove("hidden");
+      return;
+    }
+    btn.classList.add("hidden");
+    const L = state.live;
+    if (!L) { setGpsText(state.gpsWaitMsg || "Finding location…", "wait"); return; }
+    const age = Math.max(0, Math.round((Date.now() - L.t) / 1000));
+    const weak = L.acc > 15;
+    setGpsText(L.lat.toFixed(5) + ", " + L.lon.toFixed(5) + " ±" + Math.round(L.acc) + " m, " + (age < 3 ? "live" : "updated " + age + " s ago") + (weak ? ". Weak fix, give it a moment" : ""), weak ? "wait" : "ok");
+  }
+  function onGpsFix(pos) {
+    state.live = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy, t: Date.now() };
+    state.gpsWaitMsg = "";
+    if (state.gpsMode === "live") fillCoords(state.live.lat, state.live.lon);
+    renderGps();
+  }
+  function onGpsError(err) {
+    if (err && err.code === 1) { state.gpsBlocked = true; stopGps(); renderGps(); return; }
+    state.gpsWaitMsg = "No GPS fix yet. Still trying…";
+    renderGps();
+  }
+  function startGps() {
+    if (!("geolocation" in navigator)) { state.gpsBlocked = true; renderGps(); return; }
+    if (state.gpsBlocked) { renderGps(); return; }
+    if (watchId === null) {
+      try { watchId = navigator.geolocation.watchPosition(onGpsFix, onGpsError, { enableHighAccuracy: true, maximumAge: 0 }); }
+      catch (e) { state.gpsBlocked = true; }
+    }
+    if (!gpsTicker) gpsTicker = setInterval(renderGps, 1000);
+    renderGps();
+  }
+  function stopGps() {
+    if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null; }
+    if (gpsTicker) { clearInterval(gpsTicker); gpsTicker = null; }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopGps();
+    else if (!$("#view-record").classList.contains("hidden")) startGps();
+  });
+  $("#btn-gps").addEventListener("click", () => {
+    if (state.gpsBlocked) { state.gpsBlocked = false; startGps(); return; }
+    state.gpsMode = "live";
+    if (state.live) fillCoords(state.live.lat, state.live.lon);
+    renderGps();
+  });
+  ["#f-lat", "#f-lon"].forEach(s => $(s).addEventListener("input", () => { state.gpsMode = "manual"; renderGps(); }));
+
+  /* ---------- Photos ---------- */
+  async function compress(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const max = 1600;
+      const w = img.naturalWidth, h = img.naturalHeight;
+      const s = Math.min(1, max / Math.max(w, h));
+      const c = document.createElement("canvas");
+      c.width = Math.round(w * s); c.height = Math.round(h * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return await new Promise(res => c.toBlob(b => res(b || file), "image/jpeg", 0.82));
+    } catch (e) {
+      return file;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+  $("#btn-camera").addEventListener("click", () => $("#f-camera").click());
+  $("#btn-gallery").addEventListener("click", () => $("#f-gallery").click());
+  async function addPhotos(e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length) return;
+    state.pendingPhotos += files.length;
+    renderPhotos();
+    let added = 0;
+    for (const f of files) {
+      try {
+        const blob = await compress(f);
+        state.photos.push({ id: uid(), blob, url: URL.createObjectURL(blob), isNew: true });
+        added++;
+      } catch (err) {
+        toast("Couldn't add that photo. Try choosing it from your phone instead.", true);
+      }
+      state.pendingPhotos--;
+      renderPhotos();
+    }
+    if (added) toast(added === 1 ? "Photo added" : added + " photos added");
+  }
+  $("#f-camera").addEventListener("change", addPhotos);
+  $("#f-gallery").addEventListener("change", addPhotos);
+  function renderPhotos() {
+    const wrap = $("#photos");
+    wrap.innerHTML = "";
+    state.photos.forEach((p, idx) => {
+      const d = document.createElement("div");
+      d.className = "thumb";
+      const img = document.createElement("img");
+      img.src = p.url; img.alt = "Quadrat photo " + (idx + 1);
+      const x = document.createElement("button");
+      x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Remove photo " + (idx + 1));
+      x.addEventListener("click", () => {
+        URL.revokeObjectURL(p.url);
+        if (!p.isNew) state.removedPhotoIds.push(p.id);
+        state.photos.splice(idx, 1);
+        renderPhotos();
+      });
+      d.append(img, x);
+      wrap.append(d);
+    });
+    for (let i = 0; i < state.pendingPhotos; i++) {
+      const d = document.createElement("div");
+      d.className = "thumb pending";
+      d.textContent = "Adding…";
+      wrap.append(d);
+    }
+  }
+
+  /* ---------- Form ---------- */
+  async function nextQuadratNumber() {
+    if (!state.session) return 1;
+    const qs = await byIndex("quadrats", "sessionId", state.session.id);
+    return qs.reduce((m, q) => Math.max(m, q.quadrat || 0), 0) + 1;
+  }
+  async function resetForm(keepSticky) {
+    state.editingId = null;
+    state.photos.forEach(p => URL.revokeObjectURL(p.url));
+    state.photos = []; state.removedPhotoIds = [];
+    renderPhotos();
+    setCover(null, false);
+    ["#f-shoots", "#f-height", "#f-algae", "#f-notes"].forEach(s => { $(s).value = ""; });
+    setSeg("epiphytes", null);
+    if (!keepSticky) { setSeg("species", null); setSeg("sediment", null); }
+    $("#f-qnum").value = await nextQuadratNumber();
+    $("#editing-bar").classList.add("hidden");
+    $("#btn-save").textContent = "Save quadrat";
+    updateDensity();
+    state.heights = [];
+    renderHeights();
+    state.gpsMode = "live";
+    if (state.live) fillCoords(state.live.lat, state.live.lon); else { $("#f-lat").value = ""; $("#f-lon").value = ""; }
+    renderGps();
+  }
+
+  $("#btn-save").addEventListener("click", async () => {
+    if (!state.session) { show("survey"); return; }
+    if (state.pendingPhotos > 0) { toast("Wait a moment, photos are still being added", true); return; }
+    if (num($("#f-height").value) !== null) addHeight(false);
+    const qn = parseInt($("#f-qnum").value, 10);
+    if (!qn || qn < 1) { toast("Add a quadrat number", true); $("#f-qnum").focus(); return; }
+    if (state.cover === null) { toast("Set seagrass cover (tap None if there's none)", true); return; }
+    const existing = state.editingId ? await get("quadrats", state.editingId) : null;
+    const id = state.editingId || uid();
+
+    for (const p of state.photos) {
+      if (p.isNew) { await put("photos", { id: p.id, quadratId: id, blob: p.blob }); p.isNew = false; }
+    }
+    for (const pid of state.removedPhotoIds) await del("photos", pid);
+
+    const lat = num($("#f-lat").value), lon = num($("#f-lon").value);
+    const record = {
+      id,
+      sessionId: state.session.id,
+      quadrat: qn,
+      recordedAt: existing ? existing.recordedAt : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lat, lon,
+      acc: (state.gpsMode === "live" && state.live && lat !== null) ? Math.round(state.live.acc) : (state.gpsMode === "saved" && existing ? existing.acc : null),
+      cover: state.cover,
+      species: getSeg("species"),
+      shoots: num($("#f-shoots").value),
+      heights: state.heights.slice(),
+      height: state.heights.length ? Number((state.heights.reduce((a, b) => a + b, 0) / state.heights.length).toFixed(1)) : null,
+      epiphytes: getSeg("epiphytes"),
+      algae: num($("#f-algae").value),
+      sediment: getSeg("sediment"),
+      notes: $("#f-notes").value.trim(),
+      photoIds: state.photos.map(p => p.id)
+    };
+    await put("quadrats", record);
+    const wasEditing = !!existing;
+    toast((wasEditing ? "Changes saved to quadrat " : "Quadrat " + qn + " saved") + (wasEditing ? qn : ""));
+    await resetForm(true);
+    window.scrollTo(0, 0);
+    if (wasEditing) show("data");
+  });
+
+  async function editQuadrat(id) {
+    const q = await get("quadrats", id);
+    if (!q) return;
+    show("record");
+    state.photos.forEach(p => URL.revokeObjectURL(p.url));
+    state.editingId = id;
+    state.removedPhotoIds = [];
+    $("#f-qnum").value = q.quadrat;
+    $("#f-lat").value = q.lat != null ? q.lat : "";
+    $("#f-lon").value = q.lon != null ? q.lon : "";
+    state.gpsMode = "saved";
+    renderGps();
+    setCover(q.cover, true);
+    $("#f-cover").value = q.cover;
+    setSeg("species", q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
+    $("#f-shoots").value = q.shoots ?? "";
+    updateDensity();
+    $("#f-height").value = "";
+    state.heights = Array.isArray(q.heights) ? q.heights.slice() : (q.height != null ? [q.height] : []);
+    renderHeights();
+    $("#f-algae").value = q.algae ?? "";
+    $("#f-notes").value = q.notes || "";
+    const photos = await byIndex("photos", "quadratId", id);
+    state.photos = photos.map(p => ({ id: p.id, blob: p.blob, url: URL.createObjectURL(p.blob), isNew: false }));
+    renderPhotos();
+    $("#editing-label").textContent = "Editing quadrat " + q.quadrat;
+    $("#editing-bar").classList.remove("hidden");
+    $("#btn-save").textContent = "Save changes";
+  }
+  $("#btn-cancel-edit").addEventListener("click", async () => { await resetForm(true); show("data"); });
+  armButton($("#btn-delete-q"), "Tap again to delete", async () => {
+    if (!state.editingId) return;
+    const photos = await byIndex("photos", "quadratId", state.editingId);
+    for (const p of photos) await del("photos", p.id);
+    await del("quadrats", state.editingId);
+    toast("Quadrat deleted");
+    await resetForm(true);
+    show("data");
+  });
+
+  /* ---------- Data view ---------- */
+  async function renderData() {
+    if (!state.session) return;
+    $("#h-data").textContent = state.session.site;
+    const qs = (await byIndex("quadrats", "sessionId", state.session.id)).sort((a, b) => a.quadrat - b.quadrat);
+    $("#st-n").textContent = qs.length;
+    if (qs.length) {
+      const mean = qs.reduce((s, q) => s + (q.cover || 0), 0) / qs.length;
+      const occ = qs.filter(q => q.cover > 0).length / qs.length * 100;
+      $("#st-mean").textContent = mean.toFixed(1) + "%";
+      $("#st-occ").textContent = Math.round(occ) + "%";
+    } else {
+      $("#st-mean").textContent = "–"; $("#st-occ").textContent = "–";
+    }
+    const ul = $("#qlist");
+    ul.innerHTML = "";
+    $("#q-empty").classList.toggle("hidden", qs.length > 0);
+    qs.forEach(q => {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", "Edit quadrat " + q.quadrat);
+      const qn = document.createElement("span"); qn.className = "qn"; qn.textContent = "Q" + q.quadrat;
+      const mid = document.createElement("span");
+      const meta = document.createElement("span"); meta.className = "meta";
+      const bits = [];
+      if (q.species) bits.push(q.species);
+      if (q.sediment) bits.push(q.sediment);
+      if (q.photoIds && q.photoIds.length) bits.push(q.photoIds.length + (q.photoIds.length === 1 ? " photo" : " photos"));
+      meta.textContent = bits.join(", ") || new Date(q.recordedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+      const bar = document.createElement("div"); bar.className = "bar";
+      const fill = document.createElement("i"); fill.style.width = (q.cover || 0) + "%";
+      bar.append(fill);
+      mid.append(meta, bar);
+      const pct = document.createElement("span"); pct.className = "pct"; pct.textContent = q.cover + "%";
+      b.append(qn, mid, pct);
+      b.addEventListener("click", () => editQuadrat(q.id));
+      li.append(b);
+      ul.append(li);
+    });
+  }
+
+  /* ---------- Export ---------- */
+  const COLS = ["survey_id", "site", "surveyor", "survey_date", "quadrat_side_cm", "quadrat_area_m2", "quadrat", "recorded_at", "latitude", "longitude",
+    "gps_accuracy_m", "seagrass_cover_pct", "species", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm", "epiphytes",
+    "algae_cover_pct", "sediment", "photo_files", "notes"];
+  function csvCell(v) {
+    if (v === null || v === undefined) return "";
+    const s = String(v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  async function gather(scope) {
+    const sessions = await all("sessions");
+    const chosen = scope === "all" ? sessions : sessions.filter(s => state.session && s.id === state.session.id);
+    const rows = [];
+    const photoFiles = [];
+    for (const s of chosen.sort((a, b) => a.date.localeCompare(b.date))) {
+      const qs = (await byIndex("quadrats", "sessionId", s.id)).sort((a, b) => a.quadrat - b.quadrat);
+      for (const q of qs) {
+        const names = [];
+        const photos = await byIndex("photos", "quadratId", q.id);
+        const ordered = (q.photoIds || []).map(pid => photos.find(p => p.id === pid)).filter(Boolean);
+        ordered.forEach((p, i) => {
+          const name = slug(s.site) + "_" + s.date + "_Q" + pad(q.quadrat) + "_" + (i + 1) + ".jpg";
+          names.push(name);
+          photoFiles.push({ name, blob: p.blob });
+        });
+        const hs = Array.isArray(q.heights) ? q.heights : (q.height != null ? [q.height] : []);
+        const area = s.quadratAreaM2 || null;
+        const density = (area && q.shoots != null) ? Number((q.shoots / area).toFixed(1)) : null;
+        rows.push([s.id, s.site, s.surveyor, s.date, s.quadratSideCm || null, area, q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
+          q.species, q.shoots, density, q.height, hs.length || null, hs.join(";"), q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
+      }
+    }
+    const csv = [COLS.join(",")].concat(rows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
+    const base = scope === "all" ? "all-surveys_" + today() : (state.session ? slug(state.session.site) + "_" + state.session.date : "survey");
+    return { csv, photoFiles, rows: rows.length, base };
+  }
+
+  function afterExport() {
+    if (APP_CONFIG.supportUrl) $("#support-line").classList.remove("hidden");
+  }
+  async function saveFile(filename, data) {
+    let downloads = null;
+    if (window.claude && typeof window.claude.use === "function") {
+      try { downloads = await window.claude.use("downloads"); } catch (e) { downloads = null; }
+    }
+    if (downloads) {
+      try {
+        await downloads.save({ filename, data });
+        toast("Downloaded " + filename);
+        afterExport();
+      } catch (e) {
+        if (e && e.code === "declined") return;
+        if (e && e.code === "rate_limited") { toast("A download is already waiting for you to confirm", true); return; }
+        toast("Download didn't work here" + (e && e.message ? ": " + e.message : ""), true);
+      }
+      return;
+    }
+    const blob = data instanceof Blob ? data : new Blob([data], { type: "text/csv" });
+    const isPhone = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    if (isPhone && navigator.canShare && window.File) {
+      try {
+        const type = filename.endsWith(".zip") ? "application/zip" : "text/csv";
+        const file = new File([blob], filename, { type });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: filename });
+          afterExport();
+          return;
+        }
+      } catch (e) {
+        if (e && e.name === "AbortError") return;
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.append(a); a.click(); a.remove();
+    afterExport();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
+  $("#btn-csv").addEventListener("click", async () => {
+    const scope = getSeg("scope") || "current";
+    if (scope === "current" && !state.session) { toast("Open a survey first", true); return; }
+    const out = await gather(scope);
+    if (!out.rows) { toast("Nothing to export yet", true); return; }
+    await saveFile(out.base + "_quadrats.csv", out.csv);
+  });
+  $("#btn-zip").addEventListener("click", async () => {
+    const scope = getSeg("scope") || "current";
+    if (scope === "current" && !state.session) { toast("Open a survey first", true); return; }
+    if (typeof JSZip === "undefined") { toast("Zip export needs a connection the first time. Use the CSV download for now.", true); return; }
+    const btn = $("#btn-zip");
+    btn.disabled = true; btn.textContent = "Preparing…";
+    try {
+      const out = await gather(scope);
+      if (!out.rows) { toast("Nothing to export yet", true); return; }
+      const zip = new JSZip();
+      zip.file(out.base + "_quadrats.csv", out.csv);
+      const folder = zip.folder("photos");
+      out.photoFiles.forEach(p => folder.file(p.name, p.blob));
+      const blob = await zip.generateAsync({ type: "blob" });
+      await saveFile(out.base + ".zip", blob);
+    } finally {
+      btn.disabled = false; btn.textContent = "Download data and photos (.zip)";
+    }
+  });
+
+  async function renderExport() {
+    const line = $("#storage-line");
+    const [sessions, quads, photos] = await Promise.all([all("sessions"), all("quadrats"), all("photos")]);
+    let text = sessions.length + (sessions.length === 1 ? " survey, " : " surveys, ") + quads.length + (quads.length === 1 ? " quadrat and " : " quadrats and ") + photos.length + (photos.length === 1 ? " photo" : " photos") + " on this phone.";
+    try {
+      if (navigator.storage && navigator.storage.estimate) {
+        const est = await navigator.storage.estimate();
+        if (est.usage != null) text += " Using about " + (est.usage / 1048576).toFixed(1) + " MB.";
+      }
+    } catch (e) {}
+    line.textContent = text;
+    if (!state.session) setSeg("scope", "all");
+  }
+  armButton($("#btn-wipe"), "Tap again to delete everything", async () => {
+    await Promise.all(["sessions", "quadrats", "photos", "meta"].map(clearStore));
+    state.session = null;
+    renderHeader();
+    await resetForm(false);
+    toast("All data deleted");
+    show("survey");
+  });
+
+  /* ---------- About and support ---------- */
+  $("#app-version").textContent = "v" + APP_CONFIG.version;
+  if (APP_CONFIG.supportUrl) {
+    ["#support-link-1", "#support-link-2"].forEach(s => { $(s).href = APP_CONFIG.supportUrl; });
+    $("#support-about").classList.remove("hidden");
+  }
+  if (APP_CONFIG.contactEmail) {
+    const c = $("#contact-link");
+    c.href = "mailto:" + APP_CONFIG.contactEmail + "?subject=" + encodeURIComponent("Quadrat Notebook");
+    c.textContent = APP_CONFIG.contactEmail;
+    $("#contact-about").classList.remove("hidden");
+  }
+
+  /* ---------- Offline support ---------- */
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  }
+
+  /* ---------- Start ---------- */
+  (async function init() {
+    try {
+      await openDB();
+    } catch (e) {
+      toast("This browser can't store data, so nothing would be saved. Try another browser.", true);
+      show("survey");
+      return;
+    }
+    const active = await get("meta", "active");
+    const session = active ? await get("sessions", active.value) : null;
+    if (session) {
+      state.session = session;
+      renderHeader();
+      await resetForm(false);
+      show("record");
+    } else {
+      renderHeader();
+      show("survey");
+    }
+  })();
+})();
+</script>
+</body>
+</html>
