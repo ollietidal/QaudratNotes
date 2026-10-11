@@ -238,6 +238,10 @@ textarea { min-height: 88px; resize: vertical; }
 .size-custom { margin-top: 10px; }
 .gps.blocked { color: var(--tape); }
 .gps-text { font-variant-numeric: tabular-nums; }
+select { width: 100%; min-height: 48px; padding: 10px 12px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-s); }
+select:focus { border-color: var(--ink); outline: none; }
+.species-more { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 8px; }
+.other-species { margin-top: 8px; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -283,6 +287,10 @@ textarea { min-height: 88px; resize: vertical; }
         <label for="s-surveyor">Surveyor</label>
         <input type="text" id="s-surveyor" placeholder="Initials or names">
       </div>
+    </div>
+    <div class="field">
+      <label for="s-region">Region <span class="hint">sets which seagrass species are listed</span></label>
+      <select id="s-region"></select>
     </div>
     <div class="field">
       <span class="label">Quadrat size</span>
@@ -356,12 +364,15 @@ textarea { min-height: 88px; resize: vertical; }
   </div>
 
   <div class="field">
-    <span class="label">Species</span>
-    <div class="seg" data-name="species">
-      <button type="button" data-value="Zostera marina"><em>Z. marina</em></button>
-      <button type="button" data-value="Zostera noltei"><em>Z. noltei</em></button>
-      <button type="button" data-value="Both">Both</button>
-      <button type="button" data-value="None">None</button>
+    <span class="label">Species present <span class="hint" id="species-region"></span></span>
+    <div class="seg" id="species-chips" data-multi="1" role="group" aria-label="Species present, choose all that apply"></div>
+    <div class="species-more">
+      <button class="linkish" type="button" id="btn-more-species"></button>
+      <button class="linkish" type="button" id="btn-other-species">Add a species not listed</button>
+    </div>
+    <div class="other-species hidden" id="other-wrap">
+      <label for="f-other-species" class="hint">Other species, separated by commas</label>
+      <input type="text" id="f-other-species" autocomplete="off" autocapitalize="sentences">
     </div>
   </div>
 
@@ -492,7 +503,7 @@ textarea { min-height: 88px; resize: vertical; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.1.1",
+  version: "0.2.0",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -568,6 +579,7 @@ const APP_CONFIG = {
     return b ? b.dataset.value : null;
   }
   $$(".seg").forEach(seg => {
+    if (seg.dataset.multi) return;
     seg.addEventListener("click", e => {
       const b = e.target.closest("button");
       if (!b) return;
@@ -667,11 +679,13 @@ const APP_CONFIG = {
       date: $("#s-date").value || today(),
       surveyor: $("#s-surveyor").value.trim(),
       notes: $("#s-notes").value.trim(),
+      region: $("#s-region").value || "tna",
       quadratSideCm: side,
       quadratAreaM2: Number((side * side / 10000).toFixed(4)),
       created: new Date().toISOString()
     };
     await put("sessions", session);
+    await put("meta", { key: "lastRegion", value: session.region });
     await openSession(session);
     $("#s-site").value = ""; $("#s-notes").value = ""; $("#s-side").value = "";
     setSeg("qsize", "0.25"); $("#qsize-custom").classList.add("hidden");
@@ -701,7 +715,7 @@ const APP_CONFIG = {
       name.textContent = s.site;
       const sub = document.createElement("span");
       const n = counts[s.id] || 0;
-      sub.textContent = s.date + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "");
+      sub.textContent = s.date + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (s.region ? ", " + regionLabel(s.region) : "");
       info.append(name, sub);
       li.append(info);
       if (state.session && state.session.id === s.id) {
@@ -716,6 +730,110 @@ const APP_CONFIG = {
       }
       ul.append(li);
     });
+  }
+
+  /* ---------- Regions and species ---------- */
+  // Seagrass bioregions follow Short et al. (2007). Species flagged 1 are shown by default; the rest sit behind "Show more".
+  const REGIONS = [
+    { id: "tna", name: "North Atlantic, temperate", hint: "UK, Europe, eastern Canada, northeast USA" },
+    { id: "med", name: "Mediterranean and Black Sea", hint: "" },
+    { id: "tat", name: "Tropical Atlantic", hint: "Caribbean, Gulf of Mexico, Brazil, West Africa" },
+    { id: "tnp", name: "North Pacific, temperate", hint: "Japan, Korea, northern China, Pacific North America" },
+    { id: "tip", name: "Tropical Indo-Pacific", hint: "East Africa, Red Sea, Asia, northern Australia, Pacific islands" },
+    { id: "tso", name: "Southern temperate", hint: "southern Australia, New Zealand, South Africa, South America" }
+  ];
+  const SPECIES = {
+    tna: [["Zostera marina", 1], ["Zostera noltei", 1], ["Ruppia maritima"], ["Ruppia cirrhosa"], ["Cymodocea nodosa"]],
+    med: [["Posidonia oceanica", 1], ["Cymodocea nodosa", 1], ["Zostera noltei", 1], ["Zostera marina", 1], ["Halophila stipulacea"], ["Ruppia cirrhosa"], ["Ruppia maritima"]],
+    tat: [["Thalassia testudinum", 1], ["Syringodium filiforme", 1], ["Halodule wrightii", 1], ["Halophila decipiens"], ["Halophila engelmannii"], ["Halophila baillonii"], ["Halophila stipulacea"], ["Halodule emarginata"], ["Cymodocea nodosa"], ["Ruppia maritima"]],
+    tnp: [["Zostera marina", 1], ["Zostera japonica", 1], ["Phyllospadix scouleri", 1], ["Phyllospadix torreyi"], ["Phyllospadix serrulatus"], ["Phyllospadix iwatensis"], ["Phyllospadix japonicus"], ["Zostera asiatica"], ["Zostera caespitosa"], ["Zostera caulescens"], ["Halophila nipponica"], ["Ruppia maritima"]],
+    tip: [["Enhalus acoroides", 1], ["Thalassia hemprichii", 1], ["Cymodocea rotundata", 1], ["Cymodocea serrulata", 1], ["Halodule uninervis", 1], ["Halophila ovalis", 1], ["Syringodium isoetifolium", 1], ["Halodule pinifolia"], ["Halophila beccarii"], ["Halophila capricorni"], ["Halophila decipiens"], ["Halophila minor"], ["Halophila spinulosa"], ["Halophila stipulacea"], ["Halophila tricostata"], ["Thalassodendron ciliatum"], ["Zostera muelleri"], ["Ruppia maritima"]],
+    tso: [["Zostera muelleri", 1], ["Zostera tasmanica", 1], ["Posidonia australis", 1], ["Posidonia sinuosa", 1], ["Amphibolis antarctica", 1], ["Halophila ovalis", 1], ["Amphibolis griffithii"], ["Halophila australis"], ["Halophila decipiens"], ["Posidonia angustifolia"], ["Posidonia coriacea"], ["Posidonia denhartogii"], ["Posidonia kirkmanii"], ["Posidonia ostenfeldii"], ["Posidonia robertsoniae"], ["Zostera nigricaulis"], ["Zostera capensis"], ["Zostera chilensis"], ["Syringodium isoetifolium"], ["Thalassodendron pachyrhizum"], ["Ruppia megacarpa"], ["Ruppia tuberosa"], ["Ruppia maritima"]]
+  };
+  const regionOf = sess => (sess && SPECIES[sess.region]) ? sess.region : "tna";
+  const regionLabel = id => { const r = REGIONS.find(x => x.id === id); return r ? r.name : ""; };
+  const shortName = n => { const p = n.split(" "); return (p.length > 1 && /^[A-Z][a-z]+$/.test(p[0])) ? p[0][0] + ". " + p.slice(1).join(" ") : n; };
+  function speciesList(sp) {
+    if (Array.isArray(sp)) return sp;
+    if (!sp) return [];
+    if (sp === "Both") return ["Zostera marina", "Zostera noltei"];
+    return [sp];
+  }
+  const speciesText = sp => speciesList(sp).map(shortName).join(", ");
+
+  (function fillRegions() {
+    const sel = $("#s-region");
+    REGIONS.forEach(r => {
+      const o = document.createElement("option");
+      o.value = r.id;
+      o.textContent = r.hint ? r.name + " (" + r.hint + ")" : r.name;
+      sel.append(o);
+    });
+  })();
+
+  state.species = new Set();
+  state.showAllSpecies = false;
+  function renderSpecies() {
+    const reg = regionOf(state.session);
+    const list = SPECIES[reg];
+    const wrap = $("#species-chips");
+    wrap.innerHTML = "";
+    const addChip = (value, isTaxon) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.value = value;
+      b.setAttribute("aria-pressed", String(state.species.has(value)));
+      if (isTaxon) {
+        const em = document.createElement("em");
+        em.textContent = shortName(value);
+        b.append(em);
+        b.setAttribute("aria-label", value);
+      } else {
+        b.textContent = value;
+      }
+      wrap.append(b);
+    };
+    list.filter(([n, common]) => common || state.showAllSpecies || state.species.has(n)).forEach(([n]) => addChip(n, true));
+    addChip("None", false);
+    const rare = list.filter(([n, common]) => !common && !state.species.has(n)).length;
+    const more = $("#btn-more-species");
+    if (state.showAllSpecies && list.some(([, c]) => !c)) { more.textContent = "Show fewer species"; more.classList.remove("hidden"); }
+    else if (rare > 0) { more.textContent = "Show " + rare + " more species"; more.classList.remove("hidden"); }
+    else more.classList.add("hidden");
+    $("#species-region").textContent = "(" + regionLabel(reg) + ")";
+  }
+  $("#species-chips").addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const v = b.dataset.value;
+    if (v === "None") {
+      state.species = state.species.has("None") ? new Set() : new Set(["None"]);
+      $("#f-other-species").value = "";
+    } else {
+      state.species.delete("None");
+      if (state.species.has(v)) state.species.delete(v); else state.species.add(v);
+    }
+    renderSpecies();
+  });
+  $("#btn-more-species").addEventListener("click", () => { state.showAllSpecies = !state.showAllSpecies; renderSpecies(); });
+  $("#btn-other-species").addEventListener("click", () => { $("#other-wrap").classList.remove("hidden"); $("#f-other-species").focus(); });
+  $("#f-other-species").addEventListener("input", () => {
+    if ($("#f-other-species").value.trim() && state.species.has("None")) { state.species.delete("None"); renderSpecies(); }
+  });
+  function currentSpecies() {
+    const others = $("#f-other-species").value.split(",").map(x => x.trim()).filter(Boolean);
+    const all = Array.from(state.species).concat(others);
+    const unique = Array.from(new Set(all));
+    return unique.length > 1 ? unique.filter(x => x !== "None") : unique;
+  }
+  function setSpeciesFromRecord(sp) {
+    const arr = speciesList(sp);
+    const known = new Set(SPECIES[regionOf(state.session)].map(x => x[0]).concat(["None"]));
+    state.species = new Set(arr.filter(x => known.has(x)));
+    const others = arr.filter(x => !known.has(x));
+    $("#f-other-species").value = others.join(", ");
+    $("#other-wrap").classList.toggle("hidden", others.length === 0);
+    renderSpecies();
   }
 
   /* ---------- Quadrat grid ---------- */
@@ -794,7 +912,7 @@ const APP_CONFIG = {
   $("#btn-zero").addEventListener("click", () => {
     state.cells.clear();
     setCover(0, false);
-    if (!getSeg("species")) setSeg("species", "None");
+    if (!state.species.size && !$("#f-other-species").value.trim()) { state.species = new Set(["None"]); renderSpecies(); }
   });
 
   /* ---------- GPS ---------- */
@@ -1065,7 +1183,13 @@ const APP_CONFIG = {
     setCover(null, false);
     ["#f-shoots", "#f-height", "#f-algae", "#f-notes"].forEach(s => { $(s).value = ""; });
     setSeg("epiphytes", null);
-    if (!keepSticky) { setSeg("species", null); setSeg("sediment", null); }
+    if (!keepSticky) {
+      state.species = new Set();
+      $("#f-other-species").value = "";
+      $("#other-wrap").classList.add("hidden");
+      setSeg("sediment", null);
+    }
+    renderSpecies();
     $("#f-qnum").value = await nextQuadratNumber();
     $("#editing-bar").classList.add("hidden");
     $("#btn-save").textContent = "Save quadrat";
@@ -1102,7 +1226,7 @@ const APP_CONFIG = {
       lat, lon,
       acc: (state.gpsMode === "live" && state.live && lat !== null) ? Math.round(state.live.acc) : (state.gpsMode === "saved" && existing ? existing.acc : null),
       cover: state.cover,
-      species: getSeg("species"),
+      species: currentSpecies(),
       shoots: num($("#f-shoots").value),
       heights: state.heights.slice(),
       height: state.heights.length ? Number((state.heights.reduce((a, b) => a + b, 0) / state.heights.length).toFixed(1)) : null,
@@ -1134,7 +1258,7 @@ const APP_CONFIG = {
     renderGps();
     setCover(q.cover, true);
     $("#f-cover").value = q.cover;
-    setSeg("species", q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
+    setSpeciesFromRecord(q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
     $("#f-shoots").value = q.shoots ?? "";
     updateDensity();
     $("#f-height").value = "";
@@ -1186,7 +1310,8 @@ const APP_CONFIG = {
       const mid = document.createElement("span");
       const meta = document.createElement("span"); meta.className = "meta";
       const bits = [];
-      if (q.species) bits.push(q.species);
+      const spText = speciesText(q.species);
+      if (spText) bits.push(spText);
       if (q.sediment) bits.push(q.sediment);
       if (q.photoIds && q.photoIds.length) bits.push(q.photoIds.length + (q.photoIds.length === 1 ? " photo" : " photos"));
       meta.textContent = bits.join(", ") || new Date(q.recordedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -1203,7 +1328,7 @@ const APP_CONFIG = {
   }
 
   /* ---------- Export ---------- */
-  const COLS = ["survey_id", "site", "surveyor", "survey_date", "quadrat_side_cm", "quadrat_area_m2", "quadrat", "recorded_at", "latitude", "longitude",
+  const COLS = ["survey_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2", "quadrat", "recorded_at", "latitude", "longitude",
     "gps_accuracy_m", "seagrass_cover_pct", "species", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm", "epiphytes",
     "algae_cover_pct", "sediment", "photo_files", "notes"];
   function csvCell(v) {
@@ -1230,8 +1355,8 @@ const APP_CONFIG = {
         const hs = Array.isArray(q.heights) ? q.heights : (q.height != null ? [q.height] : []);
         const area = s.quadratAreaM2 || null;
         const density = (area && q.shoots != null) ? Number((q.shoots / area).toFixed(1)) : null;
-        rows.push([s.id, s.site, s.surveyor, s.date, s.quadratSideCm || null, area, q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
-          q.species, q.shoots, density, q.height, hs.length || null, hs.join(";"), q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
+        rows.push([s.id, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area, q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
+          speciesList(q.species).join("; "), q.shoots, density, q.height, hs.length || null, hs.join(";"), q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
       }
     }
     const csv = [COLS.join(",")].concat(rows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
@@ -1358,6 +1483,8 @@ const APP_CONFIG = {
       show("survey");
       return;
     }
+    const lastRegion = await get("meta", "lastRegion");
+    if (lastRegion && SPECIES[lastRegion.value]) $("#s-region").value = lastRegion.value;
     const active = await get("meta", "active");
     const session = active ? await get("sessions", active.value) : null;
     if (session) {
