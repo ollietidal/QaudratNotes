@@ -1,7 +1,7 @@
 {
-  "name": "Quadrat Notebook",
-  "short_name": "Quadrats",
-  "description": "Offline seagrass quadrat survey recorder with CSV export",
+  "name": "Tidetally",
+  "short_name": "Tidetally",
+  "description": "Free offline app for shore and seagrass quadrat surveys, with CSV export for R",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
