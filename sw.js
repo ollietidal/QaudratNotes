@@ -1,9 +1,9 @@
 // QuadratNotes offline cache. Bump the version when you change jszip, fonts or icons.
-const CACHE = "quadratnotes-v4";
+const CACHE = "quadratnotes-v5";
 const CORE = ["./", "./index.html", "./jszip.min.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "./fonts/atkinson-hyperlegible-latin-400-normal.woff2", "./fonts/atkinson-hyperlegible-latin-400-italic.woff2",
   "./fonts/atkinson-hyperlegible-latin-700-normal.woff2", "./fonts/barlow-condensed-latin-600-normal.woff2",
-  "./fonts/barlow-condensed-latin-700-normal.woff2"];
+  "./fonts/barlow-condensed-latin-700-normal.woff2", "./fonts/nunito-latin-800-normal.woff2"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));

@@ -26,4 +26,4 @@ without permission. If you fork the project, please use a different name and ico
 
 ## Third-party code and fonts
 - `jszip.min.js`: JSZip 3.10.1 (https://stuk.github.io/jszip/), dual-licensed MIT or GPLv3.
-- Atkinson Hyperlegible and Barlow Condensed fonts: SIL Open Font License 1.1 (see `fonts/`).
+- Atkinson Hyperlegible, Barlow Condensed and Nunito fonts: SIL Open Font License 1.1 (see `fonts/`).
