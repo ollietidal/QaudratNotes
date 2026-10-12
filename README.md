@@ -1,4 +1,4 @@
-# Tidetally
+# QuadratNotes
 
 A free, offline-first seagrass quadrat survey recorder. Data stays on the
 device and is exported as CSV (plus photos in a zip), ready for R.

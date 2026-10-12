@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Tidetally. Copyright (c) 2026 Oliver Thomas. MIT License: see LICENSE.txt -->
+<!-- QuadratNotes. Copyright (c) 2026 Oliver Thomas. MIT License: see LICENSE.txt -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tidetally</title>
+<title>QuadratNotes</title>
 <!-- PRE-LAUNCH: delete the next line when you're ready for search engines to list the app -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Free offline app for recording seagrass quadrat surveys on your phone, with CSV export ready for R.">
@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#17242C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Tidetally">
+<meta name="apple-mobile-web-app-title" content="QuadratNotes">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <style>
@@ -475,7 +475,7 @@ select:focus { border-color: var(--ink); outline: none; }
 
   <h2>About</h2>
   <div class="about">
-    <p>Tidetally <span id="app-version"></span> is a free app for recording seagrass quadrat surveys.</p>
+    <p>QuadratNotes <span id="app-version"></span> is a free app for recording seagrass quadrat surveys.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
     <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
     <p>&copy; 2026 Oliver Thomas. Free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>.</p>
@@ -505,7 +505,7 @@ select:focus { border-color: var(--ink); outline: none; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.3.0",
+  version: "0.3.1",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -938,14 +938,14 @@ const APP_CONFIG = {
         "In the same list, tap Safari Websites and choose While Using the App.",
         "If it's still blocked, open this site in Safari, tap aA in the address bar, choose Website Settings and set Location to Allow."
       ];
-      if (isInstalled) steps.push("Close Tidetally fully (swipe it away), then open it again.");
+      if (isInstalled) steps.push("Close QuadratNotes fully (swipe it away), then open it again.");
       return steps;
     }
     if (isAndroid) {
       return [
         "Swipe down from the top of the screen and make sure Location is on.",
         isInstalled
-          ? "Long-press the Tidetally icon, tap App info, then Permissions, then Location, and choose Allow."
+          ? "Long-press the QuadratNotes icon, tap App info, then Permissions, then Location, and choose Allow."
           : "Tap the icon to the left of the web address, then Permissions, and set Location to Allow.",
         "Come back here and tap the button below."
       ];
@@ -1466,7 +1466,7 @@ const APP_CONFIG = {
   }
   if (APP_CONFIG.contactEmail) {
     const c = $("#contact-link");
-    c.href = "mailto:" + APP_CONFIG.contactEmail + "?subject=" + encodeURIComponent("Tidetally");
+    c.href = "mailto:" + APP_CONFIG.contactEmail + "?subject=" + encodeURIComponent("QuadratNotes");
     c.textContent = APP_CONFIG.contactEmail;
     $("#contact-about").classList.remove("hidden");
   }
