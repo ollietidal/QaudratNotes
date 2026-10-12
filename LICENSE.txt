@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Oliver Thomas
+Copyright (c) 2026 Oliver R Thomas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+----------------------------------------------------------------------
+Name and logo
+
+The MIT License above covers the source code only. The name
+"QuadratNotes" and the QuadratNotes logo (the quadrat grid icon files
+icon-192.png, icon-512.png and icon-maskable-512.png) are not licensed
+under it. Copyright (c) 2026 Oliver R Thomas. All rights reserved.
+They may not be used to name, brand or promote other products or
+services without written permission. Forks and modified versions must
+use a different name and icon.
