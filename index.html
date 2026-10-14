@@ -282,6 +282,9 @@ details.about-box[open] > summary::after { content: "−"; }
 details.about-box .about { padding-bottom: 8px; }
 .check { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 0 0 14px; }
 .check input { width: 22px; height: 22px; accent-color: var(--green); }
+input[type=date] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; text-align: left; }
+.warn-text { color: var(--tape); font-weight: 700; font-size: .9rem; margin-top: 6px; }
+.share-note { font-size: .92rem; margin: 0 0 14px; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -362,7 +365,7 @@ details.about-box .about { padding-bottom: 8px; }
       <label for="s-site">Site</label>
       <input type="text" id="s-site" required placeholder="e.g. Porthdinllaen meadow">
     </div>
-    <div class="row">
+    <div>
       <div class="field">
         <label for="s-date">Date</label>
         <input type="date" id="s-date" required>
@@ -501,6 +504,7 @@ details.about-box .about { padding-bottom: 8px; }
   <div class="field">
     <label for="f-algae">Algae cover <span class="hint">%</span></label>
     <input type="number" id="f-algae" inputmode="numeric" min="0" max="100">
+    <div class="warn-text hidden" id="algae-warn" role="status"></div>
   </div>
 
   <div class="field">
@@ -567,8 +571,15 @@ details.about-box .about { padding-bottom: 8px; }
   </div>
   <p class="hint" id="export-hint">The quadrats table has one row per quadrat: location, time, conditions, total cover and habitat details. The species table has one row per species per quadrat, with cover, shoots and canopy heights. Join them in R on <code>quadrat_id</code>.</p>
 
-  <h2>Share with biodiversity databases</h2>
-  <p class="hint">Make a Darwin Core archive, the standard format for OBIS, GBIF and the NBN Atlas. Send it to a data node such as EurOBIS, and check it first with GBIF's free data validator if you like.</p>
+  <h2>Share with biodiversity databases?</h2>
+  <div class="field">
+    <div class="seg" data-name="dwc-share">
+      <button type="button" data-value="no" aria-pressed="true">No</button>
+      <button type="button" data-value="yes">Yes</button>
+    </div>
+  </div>
+  <div class="hidden" id="dwc-options">
+  <p class="hint share-note">This downloads a Darwin Core file to your phone. Nothing is uploaded. You send it on yourself, for example to an OBIS data node such as EurOBIS. GBIF's free data validator can check it first.</p>
   <div class="field">
     <label for="dwc-licence">Licence for your data</label>
     <select id="dwc-licence">
@@ -591,6 +602,7 @@ details.about-box .about { padding-bottom: 8px; }
   </div>
   <label class="check"><input type="checkbox" id="dwc-names"> Include surveyor names in the records</label>
   <button class="btn btn-wide" type="button" id="btn-dwc">Download Darwin Core archive (.zip)</button>
+  </div>
 
   <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
 
@@ -637,7 +649,7 @@ details.about-box .about { padding-bottom: 8px; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.7.0",
+  version: "0.7.1",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -719,8 +731,9 @@ const APP_CONFIG = {
       if (!b) return;
       const name = seg.dataset.name;
       const wasOn = b.getAttribute("aria-pressed") === "true";
-      if (name === "scope" || name === "qsize" || name === "dwc-precision") {
+      if (name === "scope" || name === "qsize" || name === "dwc-precision" || name === "dwc-share") {
         setSeg(name, b.dataset.value);
+        if (name === "dwc-share") $("#dwc-options").classList.toggle("hidden", b.dataset.value !== "yes");
         if (name === "qsize") $("#qsize-custom").classList.toggle("hidden", b.dataset.value !== "custom");
         return;
       }
@@ -1129,6 +1142,18 @@ const APP_CONFIG = {
     }
     paintGrid();
     if (state.taxa) updateTaxaSum();
+    checkAlgae();
+  }
+  function checkAlgae() {
+    const w = $("#algae-warn");
+    if (!w) return;
+    const a = num($("#f-algae").value);
+    let msg = "";
+    if (a !== null && a > 100) msg = "Algae cover can't be more than 100% of the quadrat.";
+    else if (a !== null && state.cover !== null && a + state.cover > 100)
+      msg = "Seagrass (" + state.cover + "%) and algae (" + a + "%) add up to " + (a + state.cover) + "%, more than the whole quadrat. Fine if algae lie over the seagrass; otherwise check the values.";
+    w.textContent = msg;
+    w.classList.toggle("hidden", !msg);
   }
   $("#f-cover").addEventListener("input", e => setCover(num(e.target.value), true));
   function updateDensity() {
@@ -1137,6 +1162,7 @@ const APP_CONFIG = {
     $("#density").textContent = (n !== null && a) ? "About " + Math.round(n / a) + " shoots per m²" : "";
   }
   $("#f-shoots").addEventListener("input", updateDensity);
+  $("#f-algae").addEventListener("input", checkAlgae);
 
   function addHeight(keepFocus) {
     const raw = $("#f-height").value;
@@ -1442,6 +1468,7 @@ const APP_CONFIG = {
     renderPhotos();
     setCover(null, false);
     ["#f-shoots", "#f-height", "#f-algae", "#f-notes"].forEach(s => { $(s).value = ""; });
+    checkAlgae();
     setSeg("epiphytes", null);
     if (!keepSticky) {
       state.species = new Set();
@@ -1470,6 +1497,7 @@ const APP_CONFIG = {
     const qn = parseInt($("#f-qnum").value, 10);
     if (!qn || qn < 1) { toast("Add a quadrat number", true); $("#f-qnum").focus(); return; }
     if (state.cover === null) { toast("Set seagrass cover (tap None if there's none)", true); return; }
+    if ((num($("#f-algae").value) ?? 0) > 100) { toast("Algae cover can't be more than 100%", true); return; }
     const mNames = measuredSpecies();
     const multi = mNames.length >= 2;
     if (multi) {
@@ -1545,6 +1573,7 @@ const APP_CONFIG = {
     $("#taxa-cards").dataset.key = "";
     setSpeciesFromRecord(q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
     $("#f-algae").value = q.algae ?? "";
+    checkAlgae();
     $("#f-notes").value = q.notes || "";
     const photos = await byIndex("photos", "quadratId", id);
     state.photos = photos.map(p => ({ id: p.id, blob: p.blob, url: URL.createObjectURL(p.blob), isNew: false }));
@@ -1691,17 +1720,29 @@ const APP_CONFIG = {
   async function aphiaId(name) {
     const cached = await get("meta", "aphia:" + name);
     if (cached && cached.value) return cached.value;
+    const timed = async url => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 10000);
+      try { return await fetch(url, { signal: ctrl.signal }); } finally { clearTimeout(t); }
+    };
+    const save = async v => { await put("meta", { key: "aphia:" + name, value: v }); return v; };
+    // OBIS uses WoRMS AphiaIDs as taxon IDs and its API works from web pages.
+    try {
+      const r = await timed("https://api.obis.org/v3/checklist?scientificname=" + encodeURIComponent(name) + "&size=20");
+      if (r.ok) {
+        const j = await r.json();
+        const hit = (j.results || []).find(x => (x.scientificName || "").toLowerCase() === name.toLowerCase() && Number(x.taxonID) > 0);
+        if (hit) return save(Number(hit.taxonID));
+      }
+    } catch (e) {}
     for (const marineOnly of [true, false]) {
       try {
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 10000);
-        const r = await fetch("https://www.marinespecies.org/rest/AphiaIDByName/" + encodeURIComponent(name) + "?marine_only=" + marineOnly, { signal: ctrl.signal });
-        clearTimeout(t);
+        const r = await timed("https://www.marinespecies.org/rest/AphiaIDByName/" + encodeURIComponent(name) + "?marine_only=" + marineOnly);
         if (r.status === 200) {
           const v = await r.json();
-          if (typeof v === "number" && v > 0) { await put("meta", { key: "aphia:" + name, value: v }); return v; }
+          if (typeof v === "number" && v > 0) return save(v);
         }
-      } catch (e) { return null; }
+      } catch (e) { break; }
     }
     return null;
   }
@@ -1851,7 +1892,7 @@ const APP_CONFIG = {
       Object.entries(out.files).forEach(([n, c]) => zip.file(n, c));
       const blob = await zip.generateAsync({ type: "blob" });
       await saveFile(out.base + "_darwin-core.zip", blob);
-      if (out.taxa && out.lookedUp < out.taxa) toast("Archive saved. Some species IDs couldn't be looked up (no signal?); the data node can add them.", true);
+      if (out.taxa && out.lookedUp < out.taxa) toast("Archive saved with species names. " + (out.taxa - out.lookedUp) + " of " + out.taxa + " official species IDs couldn't be added; a data node can add them.", true);
     } catch (e) {
       toast("Couldn't build the archive", true);
     } finally {
