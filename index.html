@@ -274,6 +274,14 @@ select:focus { border-color: var(--ink); outline: none; }
 .taxon .field { margin-bottom: 12px; }
 .taxon .field:last-child { margin-bottom: 0; }
 .taxon label { font-size: .95rem; }
+details.about-box { border-top: 2px solid var(--ink); margin-top: 28px; }
+details.about-box > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; min-height: 52px; font-weight: 700; font-size: 1.1rem; }
+details.about-box > summary::-webkit-details-marker { display: none; }
+details.about-box > summary::after { content: "+"; font-family: var(--num); font-size: 1.8rem; line-height: 1; color: var(--muted); }
+details.about-box[open] > summary::after { content: "−"; }
+details.about-box .about { padding-bottom: 8px; }
+.check { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 0 0 14px; }
+.check input { width: 22px; height: 22px; accent-color: var(--green); }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -554,10 +562,35 @@ select:focus { border-color: var(--ink); outline: none; }
 
   <div class="export-actions">
     <button class="btn btn-primary btn-wide" type="button" id="btn-zip">Download data and photos (.zip)</button>
-    <button class="btn btn-wide" type="button" id="btn-csv">Download data only (.csv)</button>
+    <button class="btn btn-wide" type="button" id="btn-csv">Download quadrats table (.csv)</button>
     <button class="btn btn-wide" type="button" id="btn-sp-csv">Download species table (.csv)</button>
   </div>
-  <p class="hint" id="export-hint">The quadrats CSV has one row per quadrat. The species table has one row per species per quadrat, with each species' cover, shoots and canopy heights. Both are ready for R, e.g. <code>read.csv("quadrats.csv")</code>.</p>
+  <p class="hint" id="export-hint">The quadrats table has one row per quadrat: location, time, conditions, total cover and habitat details. The species table has one row per species per quadrat, with cover, shoots and canopy heights. Join them in R on <code>quadrat_id</code>.</p>
+
+  <h2>Share with biodiversity databases</h2>
+  <p class="hint">Make a Darwin Core archive, the standard format for OBIS, GBIF and the NBN Atlas. Send it to a data node such as EurOBIS, and check it first with GBIF's free data validator if you like.</p>
+  <div class="field">
+    <label for="dwc-licence">Licence for your data</label>
+    <select id="dwc-licence">
+      <option value="CC0">CC0: no restrictions</option>
+      <option value="CC-BY" selected>CC BY 4.0: credit required</option>
+      <option value="CC-BY-NC">CC BY-NC 4.0: credit, non-commercial only</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="dwc-creator">Name to credit for the dataset <span class="hint">optional</span></label>
+    <input type="text" id="dwc-creator" autocomplete="name">
+  </div>
+  <div class="field">
+    <span class="label">Location precision</span>
+    <div class="seg" data-name="dwc-precision">
+      <button type="button" data-value="exact" aria-pressed="true">Exact</button>
+      <button type="button" data-value="0.01">About 1 km</button>
+      <button type="button" data-value="0.1">About 10 km</button>
+    </div>
+  </div>
+  <label class="check"><input type="checkbox" id="dwc-names"> Include surveyor names in the records</label>
+  <button class="btn btn-wide" type="button" id="btn-dwc">Download Darwin Core archive (.zip)</button>
 
   <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
 
@@ -565,7 +598,8 @@ select:focus { border-color: var(--ink); outline: none; }
   <p class="hint" id="storage-line">Checking storage…</p>
   <button class="btn btn-danger btn-wide" type="button" id="btn-wipe">Delete all data on this phone</button>
 
-  <h2>About</h2>
+  <details class="about-box">
+  <summary>About QuadratNotes</summary>
   <div class="about">
     <p>QuadratNotes <span id="app-version"></span> is a free app for recording seagrass quadrat surveys.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
@@ -574,6 +608,7 @@ select:focus { border-color: var(--ink); outline: none; }
     <p>&copy; 2026 Oliver R Thomas. The code is free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>; the QuadratNotes name and logo are not covered by it.</p>
     <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
   </div>
+  </details>
 </section>
 
 </main>
@@ -602,7 +637,7 @@ select:focus { border-color: var(--ink); outline: none; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.6.0",
+  version: "0.7.0",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -684,7 +719,7 @@ const APP_CONFIG = {
       if (!b) return;
       const name = seg.dataset.name;
       const wasOn = b.getAttribute("aria-pressed") === "true";
-      if (name === "scope" || name === "qsize") {
+      if (name === "scope" || name === "qsize" || name === "dwc-precision") {
         setSeg(name, b.dataset.value);
         if (name === "qsize") $("#qsize-custom").classList.toggle("hidden", b.dataset.value !== "custom");
         return;
@@ -775,8 +810,13 @@ const APP_CONFIG = {
     } else {
       side = Math.round(Math.sqrt(Number(qsel)) * 100);
     }
+    const existingSessions = await all("sessions");
+    const taken = new Set(codeMap(existingSessions).values());
+    const baseCode = codeBase(site, $("#s-date").value || today());
+    let code = baseCode, n = 2;
+    while (taken.has(code)) code = baseCode + "-" + n++;
     const session = {
-      id: uid(), site,
+      id: uid(), code, site,
       date: $("#s-date").value || today(),
       surveyor: $("#s-surveyor").value.trim(),
       notes: $("#s-notes").value.trim(),
@@ -1568,12 +1608,25 @@ const APP_CONFIG = {
   }
 
   /* ---------- Export ---------- */
-  const COLS = ["survey_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2",
-    "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state", "quadrat", "recorded_at", "latitude", "longitude",
-    "gps_accuracy_m", "seagrass_cover_pct", "species", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm", "epiphytes",
+  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2",
+    "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state",
+    "quadrat", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
     "algae_cover_pct", "sediment", "photo_files", "notes"];
-  const SP_COLS = ["survey_id", "site", "survey_date", "quadrat", "species", "species_cover_pct", "shoot_count", "shoot_density_m2",
+  const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "quadrat", "species", "species_cover_pct", "shoot_count", "shoot_density_m2",
     "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
+  // Readable survey codes, e.g. "porthdinllaen-2026-10-14". Older surveys without a stored code get one by creation order.
+  function codeBase(site, date) { return slug(site).slice(0, 30) + "-" + date; }
+  function codeMap(sessions) {
+    const map = new Map(), used = new Set();
+    sessions.filter(x => x.code).forEach(x => { map.set(x.id, x.code); used.add(x.code); });
+    sessions.filter(x => !x.code).sort((a, b) => (a.created || "").localeCompare(b.created || "")).forEach(x => {
+      const base = codeBase(x.site, x.date); let c = base, n = 2;
+      while (used.has(c)) c = base + "-" + n++;
+      map.set(x.id, c); used.add(c);
+    });
+    return map;
+  }
+  const quadratId = (code, q) => code + "-Q" + pad(q);
   function taxaOf(q) {
     if (Array.isArray(q.taxa)) return q.taxa;
     const names = speciesList(q.species).filter(x => x !== "None");
@@ -1588,6 +1641,7 @@ const APP_CONFIG = {
   }
   async function gather(scope) {
     const sessions = await all("sessions");
+    const codes = codeMap(sessions);
     const chosen = scope === "all" ? sessions : sessions.filter(s => state.session && s.id === state.session.id);
     const rows = [];
     const spRows = [];
@@ -1603,17 +1657,16 @@ const APP_CONFIG = {
           names.push(name);
           photoFiles.push({ name, blob: p.blob });
         });
-        const hs = Array.isArray(q.heights) ? q.heights : (q.height != null ? [q.height] : []);
         const area = s.quadratAreaM2 || null;
-        const density = (area && q.shoots != null) ? Number((q.shoots / area).toFixed(1)) : null;
-        rows.push([s.id, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area,
-          ...condCells(s.conditions), q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
-          speciesList(q.species).join("; "), q.shoots, density, q.height, hs.length || null, hs.join(";"), q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
+        const code = codes.get(s.id), qid = quadratId(code, q.quadrat);
         const tx = taxaOf(q);
-        if (!tx.length) spRows.push([s.id, s.site, s.date, q.quadrat, "None", 0, null, null, null, null, ""]);
+        rows.push([code, qid, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area,
+          ...condCells(s.conditions), q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
+          tx.length, q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
+        if (!tx.length) spRows.push([code, qid, s.site, s.date, q.quadrat, "None", 0, null, null, null, null, ""]);
         tx.forEach(t => {
           const th = t.heights || [];
-          spRows.push([s.id, s.site, s.date, q.quadrat, t.name, t.cover ?? null, t.shoots ?? null,
+          spRows.push([code, qid, s.site, s.date, q.quadrat, t.name, t.cover ?? null, t.shoots ?? null,
             (area && t.shoots != null) ? Number((t.shoots / area).toFixed(1)) : null,
             th.length ? Number((th.reduce((a, b) => a + b, 0) / th.length).toFixed(1)) : null, th.length || null, th.join(";")]);
         });
@@ -1624,6 +1677,188 @@ const APP_CONFIG = {
     const spCsv = [SP_COLS.join(",")].concat(spRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
     return { csv, spCsv, photoFiles, rows: rows.length, base };
   }
+
+  /* ---------- Darwin Core archive (OBIS event core + occurrence + extended measurement or fact) ---------- */
+  const LICENCES = {
+    "CC0": { name: "Creative Commons Zero v1.0 Universal (CC0 1.0)", url: "https://creativecommons.org/publicdomain/zero/1.0/legalcode" },
+    "CC-BY": { name: "Creative Commons Attribution 4.0 International (CC BY 4.0)", url: "https://creativecommons.org/licenses/by/4.0/legalcode" },
+    "CC-BY-NC": { name: "Creative Commons Attribution Non Commercial 4.0 International (CC BY-NC 4.0)", url: "https://creativecommons.org/licenses/by-nc/4.0/legalcode" }
+  };
+  const xmlEsc = v => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const tsvCell = v => (v === null || v === undefined) ? "" : String(v).replace(/[\t\r\n]+/g, " ").trim();
+  const tsv = (cols, rows) => [cols.join("\t")].concat(rows.map(r => cols.map(c => tsvCell(r[c])).join("\t"))).join("\n") + "\n";
+
+  async function aphiaId(name) {
+    const cached = await get("meta", "aphia:" + name);
+    if (cached && cached.value) return cached.value;
+    for (const marineOnly of [true, false]) {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 10000);
+        const r = await fetch("https://www.marinespecies.org/rest/AphiaIDByName/" + encodeURIComponent(name) + "?marine_only=" + marineOnly, { signal: ctrl.signal });
+        clearTimeout(t);
+        if (r.status === 200) {
+          const v = await r.json();
+          if (typeof v === "number" && v > 0) { await put("meta", { key: "aphia:" + name, value: v }); return v; }
+        }
+      } catch (e) { return null; }
+    }
+    return null;
+  }
+
+  const EVENT_COLS = ["eventID", "parentEventID", "eventDate", "samplingProtocol", "sampleSizeValue", "sampleSizeUnit", "habitat", "locality",
+    "decimalLatitude", "decimalLongitude", "geodeticDatum", "coordinateUncertaintyInMeters", "dataGeneralizations", "eventRemarks"];
+  const OCC_COLS = ["eventID", "occurrenceID", "basisOfRecord", "scientificName", "scientificNameID", "kingdom", "occurrenceStatus", "recordedBy"];
+  const MOF_COLS = ["eventID", "occurrenceID", "measurementType", "measurementValue", "measurementUnit", "measurementRemarks"];
+
+  async function buildDwc(scope) {
+    const sessions = await all("sessions");
+    const codes = codeMap(sessions);
+    const chosen = (scope === "all" ? sessions : sessions.filter(x => state.session && x.id === state.session.id)).sort((a, b) => a.date.localeCompare(b.date));
+    const licKey = $("#dwc-licence").value, lic = LICENCES[licKey];
+    const prec = getSeg("dwc-precision") || "exact";
+    const withNames = $("#dwc-names").checked;
+    const creator = $("#dwc-creator").value.trim();
+    const events = [], occ = [], mof = [];
+    const allNames = new Set();
+    const perSession = [];
+    for (const s of chosen) {
+      const qs = (await byIndex("quadrats", "sessionId", s.id)).sort((a, b) => a.quadrat - b.quadrat);
+      if (!qs.length) continue;
+      perSession.push({ s, qs });
+      qs.forEach(q => taxaOf(q).forEach(t => allNames.add(t.name)));
+    }
+    if (!perSession.length) return null;
+    const ids = {};
+    let lookedUp = 0;
+    await Promise.all(Array.from(allNames).map(async n => { ids[n] = await aphiaId(n); if (ids[n]) lookedUp++; }));
+
+    const lats = [], lons = [], dates = [];
+    const round = v => prec === "exact" ? v : Number((Math.round(v / Number(prec)) * Number(prec)).toFixed(prec === "0.01" ? 2 : 1));
+    for (const { s, qs } of perSession) {
+      const code = codes.get(s.id);
+      const side = s.quadratSideCm, area = s.quadratAreaM2;
+      const protocol = "Seagrass quadrat survey" + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + ", recorded with the QuadratNotes app";
+      events.push({ eventID: code, eventDate: s.date, samplingProtocol: protocol, habitat: "Seagrass meadow", locality: s.site,
+        eventRemarks: s.notes || "" });
+      dates.push(s.date);
+      const c = s.conditions;
+      if (c) {
+        const add = (type, value, unit, remark) => { if (value !== null && value !== undefined && value !== "") mof.push({ eventID: code, measurementType: type, measurementValue: value, measurementUnit: unit || "", measurementRemarks: remark || "" }); };
+        const src = "Open-Meteo, looked up at " + c.time;
+        add("air temperature", c.airTempC != null ? Number(c.airTempC.toFixed(1)) : null, "degrees Celsius", src);
+        add("wind speed", c.windKmh, "km/h", src);
+        add("wind direction (from)", c.windFrom, "", src);
+        add("wind gust speed", c.gustKmh, "km/h", src);
+        add("atmospheric pressure at mean sea level", c.pressureHpa, "hPa", src);
+        add("weather", c.weather, "", src);
+        add("sea level height relative to mean sea level (modelled tide)", c.tideM != null ? Number(c.tideM.toFixed(2)) : null, "m", src + "; modelled at about 8 km resolution, not chart datum");
+        add("tide state", c.tideState, "", src);
+      }
+      const present = new Set();
+      qs.forEach(q => taxaOf(q).forEach(t => present.add(t.name)));
+      for (const q of qs) {
+        const qid = quadratId(code, q.quadrat);
+        let lat = q.lat, lon = q.lon, unc = q.acc ?? null, gen = "";
+        if (lat != null && lon != null && prec !== "exact") {
+          lat = round(lat); lon = round(lon);
+          unc = prec === "0.01" ? 1000 : 10000;
+          gen = "Coordinates rounded to " + prec + " degrees";
+        }
+        if (lat != null) lats.push(lat);
+        if (lon != null) lons.push(lon);
+        events.push({ eventID: qid, parentEventID: code, eventDate: q.recordedAt, samplingProtocol: protocol,
+          sampleSizeValue: area ?? "", sampleSizeUnit: area ? "square metre" : "", habitat: "Seagrass meadow" + (q.sediment ? "; sediment: " + q.sediment : ""),
+          locality: s.site, decimalLatitude: lat ?? "", decimalLongitude: lon ?? "", geodeticDatum: lat != null ? "WGS84" : "",
+          coordinateUncertaintyInMeters: unc ?? "", dataGeneralizations: gen, eventRemarks: q.notes || "" });
+        const ev = (type, value, unit) => { if (value !== null && value !== undefined && value !== "") mof.push({ eventID: qid, measurementType: type, measurementValue: value, measurementUnit: unit || "" }); };
+        ev("seagrass cover (all species)", q.cover, "%");
+        ev("macroalgae cover", q.algae, "%");
+        ev("epiphyte load on seagrass leaves", q.epiphytes, "");
+        ev("sediment type", q.sediment, "");
+        const tx = taxaOf(q);
+        const here = new Set(tx.map(t => t.name));
+        tx.forEach(t => {
+          const oid = qid + "-" + slug(t.name);
+          occ.push({ eventID: qid, occurrenceID: oid, basisOfRecord: "HumanObservation", scientificName: t.name,
+            scientificNameID: ids[t.name] ? "urn:lsid:marinespecies.org:taxname:" + ids[t.name] : "", kingdom: "Plantae",
+            occurrenceStatus: "present", recordedBy: withNames ? (s.surveyor || "") : "" });
+          const om = (type, value, unit, remark) => { if (value !== null && value !== undefined && value !== "") mof.push({ eventID: qid, occurrenceID: oid, measurementType: type, measurementValue: value, measurementUnit: unit || "", measurementRemarks: remark || "" }); };
+          om("percent cover", t.cover ?? (tx.length === 1 ? q.cover : null), "%");
+          om("shoot count", t.shoots, "shoots per quadrat");
+          if (area && t.shoots != null) om("shoot density", Number((t.shoots / area).toFixed(1)), "shoots per square metre", "Calculated from shoot count and quadrat area");
+          (t.heights || []).forEach((h, i, arr) => om("canopy height", h, "cm", "Measurement " + (i + 1) + " of " + arr.length));
+        });
+        present.forEach(name => {
+          if (here.has(name)) return;
+          occ.push({ eventID: qid, occurrenceID: qid + "-" + slug(name), basisOfRecord: "HumanObservation", scientificName: name,
+            scientificNameID: ids[name] ? "urn:lsid:marinespecies.org:taxname:" + ids[name] : "", kingdom: "Plantae",
+            occurrenceStatus: "absent", recordedBy: withNames ? (s.surveyor || "") : "" });
+        });
+      }
+    }
+
+    const fieldsXml = (cols, ns) => cols.map((c, i) => '    <field index="' + i + '" term="' + (ns[c] || "http://rs.tdwg.org/dwc/terms/") + c + '"/>').join("\n");
+    const OBIS = "http://rs.iobis.org/obis/terms/";
+    const meta = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<archive xmlns="http://rs.tdwg.org/dwc/text/" metadata="eml.xml">\n' +
+      '  <core encoding="UTF-8" fieldsTerminatedBy="\\t" linesTerminatedBy="\\n" fieldsEnclosedBy="" ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Event">\n' +
+      '    <files><location>event.txt</location></files>\n    <id index="0"/>\n' + fieldsXml(EVENT_COLS, {}) + '\n  </core>\n' +
+      '  <extension encoding="UTF-8" fieldsTerminatedBy="\\t" linesTerminatedBy="\\n" fieldsEnclosedBy="" ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Occurrence">\n' +
+      '    <files><location>occurrence.txt</location></files>\n    <coreid index="0"/>\n' + fieldsXml(OCC_COLS, {}) + '\n  </extension>\n' +
+      '  <extension encoding="UTF-8" fieldsTerminatedBy="\\t" linesTerminatedBy="\\n" fieldsEnclosedBy="" ignoreHeaderLines="1" rowType="' + OBIS + 'ExtendedMeasurementOrFact">\n' +
+      '    <files><location>extendedmeasurementorfact.txt</location></files>\n    <coreid index="0"/>\n' + fieldsXml(MOF_COLS, {}) + '\n  </extension>\n' +
+      '</archive>\n';
+
+    const sites = Array.from(new Set(perSession.map(p => p.s.site)));
+    const d0 = dates.slice().sort()[0], d1 = dates.slice().sort().slice(-1)[0];
+    const title = "Seagrass quadrat surveys: " + sites.join(", ") + " (" + (d0 === d1 ? d0 : d0 + " to " + d1) + ")";
+    const party = creator ? (() => { const p = creator.split(/\s+/); const sur = p.pop(); return "<individualName>" + (p.length ? "<givenName>" + xmlEsc(p.join(" ")) + "</givenName>" : "") + "<surName>" + xmlEsc(sur) + "</surName></individualName>"; })()
+      : "<organizationName>QuadratNotes user</organizationName>";
+    const bbox = lats.length ? "<boundingCoordinates><westBoundingCoordinate>" + Math.min(...lons) + "</westBoundingCoordinate><eastBoundingCoordinate>" + Math.max(...lons) +
+      "</eastBoundingCoordinate><northBoundingCoordinate>" + Math.max(...lats) + "</northBoundingCoordinate><southBoundingCoordinate>" + Math.min(...lats) + "</southBoundingCoordinate></boundingCoordinates>" : "";
+    const nQ = perSession.reduce((a, p) => a + p.qs.length, 0);
+    const eml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
+      'xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.2/eml.xsd" packageId="' + xmlEsc(perSession[0] && codes.get(perSession[0].s.id)) + '" system="QuadratNotes" scope="system" xml:lang="en">\n' +
+      '<dataset>\n<title xml:lang="en">' + xmlEsc(title) + '</title>\n' +
+      '<creator>' + party + '</creator>\n<metadataProvider>' + party + '</metadataProvider>\n' +
+      '<pubDate>' + today() + '</pubDate>\n<language>en</language>\n' +
+      '<abstract><para>' + xmlEsc("Quadrat-based seagrass survey data from " + sites.join(", ") + ": " + nQ + " quadrats with seagrass cover, species present and absent, shoot counts and canopy heights where measured, sediment type and survey conditions. Recorded in the field with the QuadratNotes app.") + '</para></abstract>\n' +
+      '<intellectualRights><para>This work is licensed under a <ulink url="' + lic.url + '"><citetitle>' + xmlEsc(lic.name) + '</citetitle></ulink>.</para></intellectualRights>\n' +
+      '<coverage><geographicCoverage><geographicDescription>' + xmlEsc(sites.join("; ")) + '</geographicDescription>' + bbox + '</geographicCoverage>' +
+      '<temporalCoverage><rangeOfDates><beginDate><calendarDate>' + d0 + '</calendarDate></beginDate><endDate><calendarDate>' + d1 + '</calendarDate></endDate></rangeOfDates></temporalCoverage></coverage>\n' +
+      '<contact>' + party + '</contact>\n' +
+      '<methods><methodStep><description><para>' + xmlEsc("Each survey is a parent event; each quadrat is a child event with its own position and time. Seagrass cover was estimated per quadrat, and per species where more than one species was present. Absences are recorded for species found elsewhere in the same survey. Weather and modelled tide values were looked up from Open-Meteo at the start of the survey.") + '</para></description></methodStep>' +
+      '<sampling><studyExtent><description><para>' + xmlEsc(sites.join("; ")) + '</para></description></studyExtent><samplingDescription><para>' + xmlEsc("Quadrat surveys of intertidal and shallow subtidal seagrass.") + '</para></samplingDescription></sampling></methods>\n' +
+      '</dataset>\n</eml:eml>\n';
+
+    const base = scope === "all" ? "all-surveys_" + today() : (state.session ? slug(state.session.site) + "_" + state.session.date : "survey");
+    return { base, files: { "event.txt": tsv(EVENT_COLS, events), "occurrence.txt": tsv(OCC_COLS, occ), "extendedmeasurementorfact.txt": tsv(MOF_COLS, mof), "meta.xml": meta, "eml.xml": eml },
+      taxa: allNames.size, lookedUp };
+  }
+  $("#btn-dwc").addEventListener("click", async () => {
+    const scope = getSeg("scope") || "current";
+    if (scope === "current" && !state.session) { toast("Open a survey first", true); return; }
+    if (typeof JSZip === "undefined") { toast("Zip export needs a connection the first time.", true); return; }
+    const btn = $("#btn-dwc");
+    btn.disabled = true; btn.textContent = "Preparing archive…";
+    try {
+      await put("meta", { key: "dwcCreator", value: $("#dwc-creator").value.trim() });
+      const out = await buildDwc(scope);
+      if (!out) { toast("Nothing to export yet", true); return; }
+      const zip = new JSZip();
+      Object.entries(out.files).forEach(([n, c]) => zip.file(n, c));
+      const blob = await zip.generateAsync({ type: "blob" });
+      await saveFile(out.base + "_darwin-core.zip", blob);
+      if (out.taxa && out.lookedUp < out.taxa) toast("Archive saved. Some species IDs couldn't be looked up (no signal?); the data node can add them.", true);
+    } catch (e) {
+      toast("Couldn't build the archive", true);
+    } finally {
+      btn.disabled = false; btn.textContent = "Download Darwin Core archive (.zip)";
+    }
+  });
+  get("meta", "dwcCreator").then(r => { if (r && r.value) $("#dwc-creator").value = r.value; }).catch(() => {});
 
   function afterExport() {
     if (APP_CONFIG.supportUrl) $("#support-line").classList.remove("hidden");
