@@ -288,6 +288,16 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 .share-note a { color: var(--ink); font-weight: 700; }
 .switcher { margin-bottom: 10px; }
 .switcher .linkish { margin-top: 8px; display: inline-block; }
+.label-info { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.info-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink); background: transparent; color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: .95rem; line-height: 1; cursor: pointer; padding: 0; position: relative; }
+.info-btn::before { content: ""; position: absolute; inset: -8px; }
+.info-btn[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+.info-panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; margin: 0 0 12px; font-size: .92rem; }
+.info-panel dl { margin: 0; }
+.info-panel dt { font-weight: 700; }
+.info-panel dd { margin: 0 0 8px; color: var(--muted); }
+.info-panel dd:last-child { margin-bottom: 0; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -407,6 +417,32 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
       </div>
     </div>
     <div class="field">
+      <span class="label label-info">Quadrat placement <span class="hint">optional</span>
+        <button class="info-btn" type="button" id="btn-design-info" aria-expanded="false" aria-controls="design-info" aria-label="What do these options mean?">i</button></span>
+      <div class="info-panel hidden" id="design-info">
+        <dl>
+          <dt>Random</dt><dd>Positions chosen by chance before you start, e.g. random coordinates or random numbers on a grid.</dd>
+          <dt>Haphazard</dt><dd>Placed without deliberately choosing the spot, e.g. thrown or dropped as you walk. Not truly random.</dd>
+          <dt>Non-random</dt><dd>Positions chosen on purpose, e.g. targeting patches, edges or features of interest.</dd>
+          <dt>Along transects</dt><dd>Placed at set intervals along a line, e.g. every 10&nbsp;m across the meadow or down the shore.</dd>
+          <dt>Fixed plots</dt><dd>Permanent positions revisited over time, e.g. marked or GPS-located monitoring or restoration plots.</dd>
+          <dt>Other</dt><dd>Anything else, such as a stratified design. Describe it in the box that appears.</dd>
+        </dl>
+      </div>
+      <div class="seg" data-name="design">
+        <button type="button" data-value="random">Random</button>
+        <button type="button" data-value="haphazard">Haphazard</button>
+        <button type="button" data-value="nonrandom">Non-random</button>
+        <button type="button" data-value="transect">Along transects</button>
+        <button type="button" data-value="fixed">Fixed plots</button>
+        <button type="button" data-value="other">Other</button>
+      </div>
+      <div class="size-custom hidden" id="design-other-wrap">
+        <label for="s-design-other">Describe how quadrats were placed</label>
+        <input type="text" id="s-design-other" autocomplete="off" placeholder="e.g. stratified by shore height">
+      </div>
+    </div>
+    <div class="field">
       <span class="label">Conditions <span class="hint">optional, needs signal</span></span>
       <button class="btn btn-small" type="button" id="btn-conditions">Get current conditions</button>
       <div class="cond hidden" id="cond-card" aria-live="polite">
@@ -452,6 +488,11 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     <ol id="loc-steps" class="hidden"></ol>
     <button class="btn btn-primary btn-wide" type="button" id="btn-allow-loc"></button>
   </div>
+  <div class="row hidden" id="transect-fields">
+    <div class="field"><label for="f-transect">Transect</label><input type="text" id="f-transect" autocomplete="off" placeholder="e.g. T1"></div>
+    <div class="field"><label for="f-dist">Distance <span class="hint">m</span></label><input type="number" id="f-dist" inputmode="decimal" min="0" step="any"></div>
+  </div>
+  <div class="field hidden" id="plot-field"><label for="f-plot">Plot ID</label><input type="text" id="f-plot" autocomplete="off" placeholder="e.g. P3"></div>
   <div class="row" id="manual-gps">
     <div class="field"><label for="f-lat">Latitude</label><input type="number" id="f-lat" step="any" inputmode="decimal" placeholder="53.1234"></div>
     <div class="field"><label for="f-lon">Longitude</label><input type="number" id="f-lon" step="any" inputmode="decimal" placeholder="-4.5678"></div>
@@ -657,7 +698,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.7.3",
+  version: "0.8.1",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -831,6 +872,7 @@ const APP_CONFIG = {
     } else {
       side = Math.round(Math.sqrt(Number(qsel)) * 100);
     }
+    if (getSeg("design") === "other" && !$("#s-design-other").value.trim()) { toast("Describe how quadrats were placed, or pick another option", true); $("#s-design-other").focus(); return; }
     const existingSessions = await all("sessions");
     const taken = new Set(codeMap(existingSessions).values());
     const baseCode = codeBase(site, $("#s-date").value || today());
@@ -842,6 +884,8 @@ const APP_CONFIG = {
       surveyor: $("#s-surveyor").value.trim(),
       notes: $("#s-notes").value.trim(),
       region: $("#s-region").value || "tna",
+      design: getSeg("design"),
+      designOther: getSeg("design") === "other" ? $("#s-design-other").value.trim() : "",
       quadratSideCm: side,
       quadratAreaM2: Number((side * side / 10000).toFixed(4)),
       conditions: state.conditions || null,
@@ -849,6 +893,7 @@ const APP_CONFIG = {
     };
     await put("sessions", session);
     await put("meta", { key: "lastRegion", value: session.region });
+    await put("meta", { key: "lastDesign", value: session.design || "", other: session.designOther || "" });
     await openSession(session);
     $("#s-site").value = ""; $("#s-notes").value = ""; $("#s-side").value = "";
     setSeg("qsize", "0.25"); $("#qsize-custom").classList.add("hidden");
@@ -1502,7 +1547,10 @@ const APP_CONFIG = {
     state.photos = []; state.removedPhotoIds = [];
     renderPhotos();
     setCover(null, false);
-    ["#f-shoots", "#f-height", "#f-algae", "#f-notes"].forEach(s => { $(s).value = ""; });
+    ["#f-shoots", "#f-height", "#f-algae", "#f-notes", "#f-plot"].forEach(s => { $(s).value = ""; });
+    if (!keepSticky) $("#f-transect").value = "";
+    renderDesignFields();
+    suggestDistance();
     checkAlgae();
     setSeg("epiphytes", null);
     if (!keepSticky) {
@@ -1571,7 +1619,10 @@ const APP_CONFIG = {
       algae: num($("#f-algae").value),
       sediment: getSeg("sediment"),
       notes: $("#f-notes").value.trim(),
-      photoIds: state.photos.map(p => p.id)
+      photoIds: state.photos.map(p => p.id),
+      transect: designOf() === "transect" ? ($("#f-transect").value.trim() || null) : null,
+      distance: designOf() === "transect" ? num($("#f-dist").value) : null,
+      plot: designOf() === "fixed" ? ($("#f-plot").value.trim() || null) : null
     };
     await put("quadrats", record);
     const wasEditing = !!existing;
@@ -1608,6 +1659,10 @@ const APP_CONFIG = {
     $("#taxa-cards").dataset.key = "";
     setSpeciesFromRecord(q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
     $("#f-algae").value = q.algae ?? "";
+    renderDesignFields();
+    $("#f-transect").value = q.transect || "";
+    $("#f-dist").value = q.distance ?? "";
+    $("#f-plot").value = q.plot || "";
     checkAlgae();
     $("#f-notes").value = q.notes || "";
     const photos = await byIndex("photos", "quadratId", id);
@@ -1661,6 +1716,8 @@ const APP_CONFIG = {
       const bits = [];
       const spText = speciesText(q.species);
       if (spText) bits.push(spText);
+      if (q.transect || q.distance != null) bits.unshift((q.transect || "Transect") + (q.distance != null ? " at " + q.distance + " m" : ""));
+      if (q.plot) bits.unshift("Plot " + q.plot);
       if (q.sediment) bits.push(q.sediment);
       if (q.photoIds && q.photoIds.length) bits.push(q.photoIds.length + (q.photoIds.length === 1 ? " photo" : " photos"));
       meta.textContent = bits.join(", ") || new Date(q.recordedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -1677,9 +1734,9 @@ const APP_CONFIG = {
   }
 
   /* ---------- Export ---------- */
-  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2",
+  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design",
     "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state",
-    "quadrat", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
+    "quadrat", "transect", "distance_m", "plot_id", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
     "algae_cover_pct", "sediment", "photo_files", "notes"];
   const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "quadrat", "species", "species_cover_pct", "shoot_count", "shoot_density_m2",
     "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
@@ -1729,8 +1786,8 @@ const APP_CONFIG = {
         const area = s.quadratAreaM2 || null;
         const code = codes.get(s.id), qid = quadratId(code, q.quadrat);
         const tx = taxaOf(q);
-        rows.push([code, qid, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area,
-          ...condCells(s.conditions), q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
+        rows.push([code, qid, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area, designLabel(s),
+          ...condCells(s.conditions), q.quadrat, q.transect ?? null, q.distance ?? null, q.plot ?? null, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
           tx.length, q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
         if (!tx.length) spRows.push([code, qid, s.site, s.date, q.quadrat, "None", 0, null, null, null, null, ""]);
         tx.forEach(t => {
@@ -1822,7 +1879,7 @@ const APP_CONFIG = {
     for (const { s, qs } of perSession) {
       const code = codes.get(s.id);
       const side = s.quadratSideCm, area = s.quadratAreaM2;
-      const protocol = "Seagrass quadrat survey" + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + ", recorded with the QuadratNotes app";
+      const protocol = "Seagrass quadrat survey" + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + (s.design ? ", " + designSentence(s) : "") + ", recorded with the QuadratNotes app";
       events.push({ eventID: code, eventDate: s.date, samplingProtocol: protocol, habitat: "Seagrass meadow", locality: s.site,
         eventRemarks: s.notes || "" });
       dates.push(s.date);
@@ -1862,6 +1919,9 @@ const APP_CONFIG = {
         ev("macroalgae cover", q.algae, "%");
         ev("epiphyte load on seagrass leaves", q.epiphytes, "");
         ev("sediment type", q.sediment, "");
+        ev("transect", q.transect, "");
+        ev("distance along transect", q.distance, "m");
+        ev("fixed plot", q.plot, "");
         const tx = taxaOf(q);
         const here = new Set(tx.map(t => t.name));
         tx.forEach(t => {
@@ -2198,6 +2258,42 @@ const APP_CONFIG = {
     toast("Added to notes");
   });
 
+  /* ---------- Sampling design ---------- */
+  const DESIGN_TEXT = { random: "quadrats placed randomly", haphazard: "quadrats placed haphazardly", nonrandom: "quadrats placed non-randomly at chosen positions",
+    transect: "quadrats placed at intervals along transects", fixed: "quadrats at fixed plots revisited over time" };
+  const designLabel = sess => !sess || !sess.design ? null : sess.design === "other" ? "other: " + (sess.designOther || "") : sess.design;
+  const designSentence = sess => !sess || !sess.design ? "" : sess.design === "other" ? "quadrat placement: " + (sess.designOther || "other") : DESIGN_TEXT[sess.design];
+  $("#btn-design-info").addEventListener("click", () => {
+    const b = $("#btn-design-info"), open = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", String(open));
+    $("#design-info").classList.toggle("hidden", !open);
+  });
+  $('.seg[data-name="design"]').addEventListener("click", () => {
+    $("#design-other-wrap").classList.toggle("hidden", getSeg("design") !== "other");
+  });
+  const designOf = () => (state.session && state.session.design) || null;
+  function renderDesignFields() {
+    const d = designOf();
+    $("#transect-fields").classList.toggle("hidden", d !== "transect");
+    $("#plot-field").classList.toggle("hidden", d !== "fixed");
+  }
+  // Suggest the next distance along the same transect from the last two quadrats.
+  async function suggestDistance() {
+    if (designOf() !== "transect" || !state.session) return;
+    const t = $("#f-transect").value.trim();
+    const qs = (await byIndex("quadrats", "sessionId", state.session.id))
+      .filter(q => (q.transect || "") === t && typeof q.distance === "number")
+      .sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+    if (qs.length >= 2) {
+      const a = qs[qs.length - 2].distance, b = qs[qs.length - 1].distance;
+      const next = b + (b - a);
+      if (next >= 0) $("#f-dist").value = Math.round(next * 100) / 100;
+    } else {
+      $("#f-dist").value = "";
+    }
+  }
+  $("#f-transect").addEventListener("change", () => { if (!state.editingId) suggestDistance(); });
+
   /* ---------- Home ---------- */
   async function renderHome() {
     const card = $("#continue-card");
@@ -2224,6 +2320,12 @@ const APP_CONFIG = {
       toast("This browser can't store data, so nothing would be saved. Try another browser.", true);
       show("survey");
       return;
+    }
+    const lastDesign = await get("meta", "lastDesign");
+    if (lastDesign && lastDesign.value) {
+      setSeg("design", lastDesign.value);
+      $("#s-design-other").value = lastDesign.other || "";
+      $("#design-other-wrap").classList.toggle("hidden", lastDesign.value !== "other");
     }
     const lastRegion = await get("meta", "lastRegion");
     if (lastRegion && SPECIES[lastRegion.value]) $("#s-region").value = lastRegion.value;
