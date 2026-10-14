@@ -261,6 +261,11 @@ select:focus { border-color: var(--ink); outline: none; }
 @media (max-width: 360px) { .habitat-card { grid-template-columns: 1fr; } .habitat-art { max-width: 180px; margin: 0 auto; } }
 .home-soon { text-align: center; color: var(--muted); font-size: .92rem; margin: 18px 0 0; }
 .home-foot { text-align: center; color: var(--muted); font-size: .85rem; margin: 26px 0 0; }
+.cond { margin-top: 10px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; }
+.cond-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 10px; font-variant-numeric: tabular-nums; }
+.cond-grid dt { color: var(--muted); }
+.cond-grid dd { margin: 0; font-weight: 700; }
+.cond .hint { margin: 0 0 12px; font-size: .85rem; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -366,6 +371,15 @@ select:focus { border-color: var(--ink); outline: none; }
       <div class="size-custom hidden" id="qsize-custom">
         <label for="s-side">Side length <span class="hint">cm, for a square quadrat</span></label>
         <input type="number" id="s-side" inputmode="decimal" min="1" step="any">
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">Conditions <span class="hint">optional, needs signal</span></span>
+      <button class="btn btn-small" type="button" id="btn-conditions">Get current conditions</button>
+      <div class="cond hidden" id="cond-card" aria-live="polite">
+        <dl class="cond-grid" id="cond-grid"></dl>
+        <p class="hint" id="cond-note"></p>
+        <button class="btn btn-small btn-primary" type="button" id="btn-cond-notes">Add to notes</button>
       </div>
     </div>
     <div class="field">
@@ -539,6 +553,7 @@ select:focus { border-color: var(--ink); outline: none; }
   <div class="about">
     <p>QuadratNotes <span id="app-version"></span> is a free app for recording seagrass quadrat surveys.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
+    <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
     <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
     <p>&copy; 2026 Oliver R Thomas. The code is free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>; the QuadratNotes name and logo are not covered by it.</p>
     <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
@@ -571,7 +586,7 @@ select:focus { border-color: var(--ink); outline: none; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.4.1",
+  version: "0.5.0",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -752,6 +767,7 @@ const APP_CONFIG = {
       region: $("#s-region").value || "tna",
       quadratSideCm: side,
       quadratAreaM2: Number((side * side / 10000).toFixed(4)),
+      conditions: state.conditions || null,
       created: new Date().toISOString()
     };
     await put("sessions", session);
@@ -759,6 +775,8 @@ const APP_CONFIG = {
     await openSession(session);
     $("#s-site").value = ""; $("#s-notes").value = ""; $("#s-side").value = "";
     setSeg("qsize", "0.25"); $("#qsize-custom").classList.add("hidden");
+    state.conditions = null;
+    $("#cond-card").classList.add("hidden");
     toast("Survey started");
   });
 
@@ -1398,7 +1416,8 @@ const APP_CONFIG = {
   }
 
   /* ---------- Export ---------- */
-  const COLS = ["survey_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2", "quadrat", "recorded_at", "latitude", "longitude",
+  const COLS = ["survey_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2",
+    "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state", "quadrat", "recorded_at", "latitude", "longitude",
     "gps_accuracy_m", "seagrass_cover_pct", "species", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm", "epiphytes",
     "algae_cover_pct", "sediment", "photo_files", "notes"];
   function csvCell(v) {
@@ -1425,7 +1444,8 @@ const APP_CONFIG = {
         const hs = Array.isArray(q.heights) ? q.heights : (q.height != null ? [q.height] : []);
         const area = s.quadratAreaM2 || null;
         const density = (area && q.shoots != null) ? Number((q.shoots / area).toFixed(1)) : null;
-        rows.push([s.id, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area, q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
+        rows.push([s.id, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area,
+          ...condCells(s.conditions), q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
           speciesList(q.species).join("; "), q.shoots, density, q.height, hs.length || null, hs.join(";"), q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
       }
     }
@@ -1538,6 +1558,145 @@ const APP_CONFIG = {
     c.textContent = APP_CONFIG.contactEmail;
     $("#contact-about").classList.remove("hidden");
   }
+
+  /* ---------- Conditions (Open-Meteo) ---------- */
+  state.conditions = null;
+  const WMO = { 0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast", 45: "Fog", 48: "Freezing fog",
+    51: "Light drizzle", 53: "Drizzle", 55: "Heavy drizzle", 56: "Freezing drizzle", 57: "Freezing drizzle",
+    61: "Light rain", 63: "Rain", 65: "Heavy rain", 66: "Freezing rain", 67: "Freezing rain",
+    71: "Light snow", 73: "Snow", 75: "Heavy snow", 77: "Snow grains", 80: "Light showers", 81: "Showers", 82: "Heavy showers",
+    85: "Snow showers", 86: "Heavy snow showers", 95: "Thunderstorm", 96: "Thunderstorm with hail", 99: "Thunderstorm with hail" };
+  const compass = d => ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round((((d % 360) + 360) % 360) / 22.5) % 16];
+  const hhmm = t => new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const signed = v => { const r = Math.round(v * 100) / 100; return (r > 0 ? "+" : r < 0 ? "−" : "") + Math.abs(r).toFixed(2) + " m"; };
+  const toEpoch = (str, off) => Date.parse(str + "Z") - (off || 0) * 1000;
+
+  function condCells(c) {
+    if (!c) return [null, null, null, null, null, null, null, null, null];
+    return [c.time || null, c.weather ?? null, c.airTempC ?? null, c.windKmh ?? null, c.windFrom ?? null, c.gustKmh ?? null,
+      c.pressureHpa ?? null, c.tideM != null ? Number(c.tideM.toFixed(2)) : null, c.tideState ?? null];
+  }
+  function getPosition() {
+    return new Promise((resolve, reject) => {
+      if (state.live && Date.now() - state.live.t < 5 * 60 * 1000) return resolve({ lat: state.live.lat, lon: state.live.lon });
+      if (!("geolocation" in navigator)) return reject({ code: 2 });
+      navigator.geolocation.getCurrentPosition(
+        p => resolve({ lat: p.coords.latitude, lon: p.coords.longitude }),
+        reject, { enableHighAccuracy: false, timeout: 20000, maximumAge: 300000 });
+    });
+  }
+  async function fetchJSON(url) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const r = await fetch(url, { signal: ctrl.signal });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return await r.json();
+    } finally { clearTimeout(timer); }
+  }
+  function analyseTide(m) {
+    const h = m && m.hourly;
+    if (!h || !h.time || !h.sea_level_height_msl) return null;
+    const off = m.utc_offset_seconds || 0;
+    const pts = h.time.map((t, i) => ({ t: toEpoch(t, off), v: h.sea_level_height_msl[i] })).filter(p => typeof p.v === "number");
+    if (pts.length < 6) return null;
+    const now = Date.now();
+    const i = pts.findIndex(p => p.t > now);
+    if (i <= 0) return null;
+    const a = pts[i - 1], b = pts[i];
+    const cur = a.v + (b.v - a.v) * ((now - a.t) / (b.t - a.t));
+    const ex = [];
+    for (let k = 1; k < pts.length - 1; k++) {
+      const y0 = pts[k - 1].v, y1 = pts[k].v, y2 = pts[k + 1].v;
+      if ((y1 > y0 && y1 >= y2) || (y1 < y0 && y1 <= y2)) {
+        const denom = y0 - 2 * y1 + y2;
+        const dx = denom ? 0.5 * (y0 - y2) / denom : 0;
+        ex.push({ t: pts[k].t + dx * (pts[k + 1].t - pts[k].t), v: y1 - 0.25 * (y0 - y2) * dx, type: y1 > y0 ? "High" : "Low" });
+      }
+    }
+    const next = ex.filter(e => e.t > now);
+    const rising = next.length ? next[0].type === "High" : b.v > a.v;
+    return { cur, rising, nextLow: next.find(e => e.type === "Low") || null, nextHigh: next.find(e => e.type === "High") || null };
+  }
+  function renderConditions() {
+    const c = state.conditions;
+    const grid = $("#cond-grid");
+    grid.innerHTML = "";
+    const row = (k, v) => { const dt = document.createElement("dt"); dt.textContent = k; const dd = document.createElement("dd"); dd.textContent = v; grid.append(dt, dd); };
+    if (c.weather) row("Weather", c.weather);
+    if (c.airTempC != null) row("Air", c.airTempC.toFixed(1) + " °C");
+    if (c.windKmh != null) row("Wind", Math.round(c.windKmh) + " km/h (" + Math.round(c.windKmh / 1.609) + " mph)" + (c.windFrom ? " from " + c.windFrom : "") + (c.gustKmh != null ? ", gusts " + Math.round(c.gustKmh) : ""));
+    if (c.pressureHpa != null) row("Pressure", Math.round(c.pressureHpa) + " hPa");
+    if (c.tideM != null) {
+      row("Tide", signed(c.tideM) + ", " + c.tideState);
+      if (c.nextLow) row("Next low", hhmm(c.nextLow.t) + " (" + signed(c.nextLow.v) + ")");
+      if (c.nextHigh) row("Next high", hhmm(c.nextHigh.t) + " (" + signed(c.nextHigh.v) + ")");
+    } else {
+      row("Tide", "Not available here");
+    }
+    const notToday = $("#s-date").value && $("#s-date").value !== today();
+    $("#cond-note").textContent = "For your area at " + hhmm(c.time) + (notToday ? " today, not your survey date" : "") +
+      ". Tides are modelled heights relative to mean sea level, not chart datum, so use official tide tables for exact times. Data: Open-Meteo.com";
+    $("#cond-card").classList.remove("hidden");
+  }
+  $("#btn-conditions").addEventListener("click", async () => {
+    const btn = $("#btn-conditions");
+    btn.disabled = true; btn.textContent = "Getting conditions…";
+    try {
+      let pos;
+      try { pos = await getPosition(); }
+      catch (err) { toast(err && err.code === 1 ? "Allow location to look up conditions for your site" : "Couldn't get your location", true); return; }
+      const lat = pos.lat.toFixed(2), lon = pos.lon.toFixed(2);
+      const [w, m] = await Promise.allSettled([
+        fetchJSON("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
+          "&current=temperature_2m,weather_code,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=kmh&timezone=auto"),
+        fetchJSON("https://marine-api.open-meteo.com/v1/marine?latitude=" + lat + "&longitude=" + lon +
+          "&hourly=sea_level_height_msl&past_days=1&forecast_days=2&timezone=auto")
+      ]);
+      if (w.status !== "fulfilled" && m.status !== "fulfilled") { toast("No connection. Conditions need signal; try again later.", true); return; }
+      const c = { time: new Date().toISOString() };
+      if (w.status === "fulfilled" && w.value.current) {
+        const cu = w.value.current;
+        c.weather = WMO[cu.weather_code] || null;
+        c.airTempC = typeof cu.temperature_2m === "number" ? cu.temperature_2m : null;
+        c.pressureHpa = typeof cu.pressure_msl === "number" ? Math.round(cu.pressure_msl) : null;
+        c.windKmh = typeof cu.wind_speed_10m === "number" ? Math.round(cu.wind_speed_10m) : null;
+        c.windFrom = typeof cu.wind_direction_10m === "number" ? compass(cu.wind_direction_10m) : null;
+        c.gustKmh = typeof cu.wind_gusts_10m === "number" ? Math.round(cu.wind_gusts_10m) : null;
+      }
+      const tide = m.status === "fulfilled" ? analyseTide(m.value) : null;
+      if (tide) {
+        c.tideM = tide.cur;
+        c.tideState = tide.rising ? "rising" : "falling";
+        c.nextLow = tide.nextLow; c.nextHigh = tide.nextHigh;
+      }
+      state.conditions = c;
+      renderConditions();
+    } catch (e) {
+      toast("Couldn't get conditions just now", true);
+    } finally {
+      btn.disabled = false; btn.textContent = "Refresh conditions";
+    }
+  });
+  $("#btn-cond-notes").addEventListener("click", () => {
+    const c = state.conditions;
+    if (!c) return;
+    const bits = [];
+    if (c.weather) bits.push(c.weather);
+    if (c.airTempC != null) bits.push(c.airTempC.toFixed(1) + " °C");
+    if (c.windKmh != null) bits.push("wind " + (c.windFrom ? c.windFrom + " " : "") + Math.round(c.windKmh) + " km/h" + (c.gustKmh != null ? " (gusts " + Math.round(c.gustKmh) + ")" : ""));
+    if (c.pressureHpa != null) bits.push(Math.round(c.pressureHpa) + " hPa");
+    let line = "Conditions " + hhmm(c.time) + ": " + bits.join(", ") + ".";
+    if (c.tideM != null) {
+      line += " Tide " + signed(c.tideM) + " MSL, " + c.tideState;
+      const ev = [c.nextLow && "low " + hhmm(c.nextLow.t), c.nextHigh && "high " + hhmm(c.nextHigh.t)].filter(Boolean);
+      if (ev.length) line += "; " + ev.join(", ");
+      line += " (modelled).";
+    }
+    const box = $("#s-notes");
+    box.value = box.value.trim() ? box.value.trim() + "\n" + line : line;
+    toast("Added to notes");
+  });
 
   /* ---------- Home ---------- */
   async function renderHome() {
