@@ -266,6 +266,14 @@ select:focus { border-color: var(--ink); outline: none; }
 .cond-grid dt { color: var(--muted); }
 .cond-grid dd { margin: 0; font-weight: 700; }
 .cond .hint { margin: 0 0 12px; font-size: .85rem; }
+.taxa-sum { font-size: .92rem; color: var(--muted); margin: 0 0 12px; }
+.taxa-sum.warn { color: var(--tape); font-weight: 700; }
+.taxa-sum .linkish { font-size: .92rem; padding: 0 2px; }
+.taxon { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; margin-bottom: 12px; }
+.taxon h3 { margin: 0 0 10px; font-size: 1.05rem; font-style: italic; }
+.taxon .field { margin-bottom: 12px; }
+.taxon .field:last-child { margin-bottom: 0; }
+.taxon label { font-size: .95rem; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -425,7 +433,7 @@ select:focus { border-color: var(--ink); outline: none; }
   </div>
 
   <div class="frame">
-    <div class="label">Seagrass cover <span class="hint" id="cover-size"></span></div>
+    <div class="label"><span id="cover-title">Seagrass cover</span> <span class="hint" id="cover-size"></span></div>
     <div class="cover-wrap">
       <div class="grid" id="grid" role="group" aria-label="Quadrat grid, 25 squares, each 4 percent"></div>
       <div class="cover-read">
@@ -453,6 +461,12 @@ select:focus { border-color: var(--ink); outline: none; }
     </div>
   </div>
 
+  <div class="hidden" id="taxa-wrap">
+    <p class="taxa-sum" id="taxa-sum" aria-live="polite"></p>
+    <div id="taxa-cards"></div>
+  </div>
+
+  <div id="single-measures">
   <div class="field"><label for="f-shoots">Shoot count</label><input type="number" id="f-shoots" inputmode="numeric" min="0"><div class="density" id="density"></div></div>
 
   <div class="field">
@@ -464,6 +478,7 @@ select:focus { border-color: var(--ink); outline: none; }
     <div class="heights" id="heights"></div>
     <div class="density" id="height-summary" aria-live="polite"></div>
   </div>
+  </div><!-- /single-measures -->
 
   <div class="field">
     <span class="label">Epiphytes on leaves</span>
@@ -540,8 +555,9 @@ select:focus { border-color: var(--ink); outline: none; }
   <div class="export-actions">
     <button class="btn btn-primary btn-wide" type="button" id="btn-zip">Download data and photos (.zip)</button>
     <button class="btn btn-wide" type="button" id="btn-csv">Download data only (.csv)</button>
+    <button class="btn btn-wide" type="button" id="btn-sp-csv">Download species table (.csv)</button>
   </div>
-  <p class="hint" id="export-hint">The CSV has one row per quadrat, with column names ready for R, e.g. <code>read.csv("quadrats.csv")</code>.</p>
+  <p class="hint" id="export-hint">The quadrats CSV has one row per quadrat. The species table has one row per species per quadrat, with each species' cover, shoots and canopy heights. Both are ready for R, e.g. <code>read.csv("quadrats.csv")</code>.</p>
 
   <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
 
@@ -586,7 +602,7 @@ select:focus { border-color: var(--ink); outline: none; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.5.0",
+  version: "0.6.0",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -889,11 +905,13 @@ const APP_CONFIG = {
     else if (rare > 0) { more.textContent = "Show " + rare + " more species"; more.classList.remove("hidden"); }
     else more.classList.add("hidden");
     $("#species-region").textContent = "(" + regionLabel(reg) + ")";
+    if (state.taxa) renderTaxa();
   }
   $("#species-chips").addEventListener("click", e => {
     const b = e.target.closest("button");
     if (!b) return;
     const v = b.dataset.value;
+    const wasMulti = isMulti();
     if (v === "None") {
       state.species = state.species.has("None") ? new Set() : new Set(["None"]);
       $("#f-other-species").value = "";
@@ -902,6 +920,7 @@ const APP_CONFIG = {
       if (state.species.has(v)) state.species.delete(v); else state.species.add(v);
     }
     renderSpecies();
+    carryBetweenModes(wasMulti);
   });
   $("#btn-more-species").addEventListener("click", () => { state.showAllSpecies = !state.showAllSpecies; renderSpecies(); });
   $("#btn-other-species").addEventListener("click", () => { $("#other-wrap").classList.remove("hidden"); $("#f-other-species").focus(); });
@@ -923,6 +942,118 @@ const APP_CONFIG = {
     $("#other-wrap").classList.toggle("hidden", others.length === 0);
     renderSpecies();
   }
+
+  /* ---------- Per-species measurements ---------- */
+  // Every quadrat stores a list of taxa, each with its own measurements. Seagrass uses one layer,
+  // so species cover is a share of the quadrat and can't add up to more than 100%.
+  state.taxa = new Map();
+  const measuredSpecies = () => currentSpecies().filter(x => x !== "None");
+  const isMulti = () => measuredSpecies().length >= 2;
+  function taxonData(name) {
+    if (!state.taxa.has(name)) state.taxa.set(name, { cover: null, shoots: null, heights: [] });
+    return state.taxa.get(name);
+  }
+  function taxaCoverSum() {
+    return measuredSpecies().reduce((a, n) => a + (taxonData(n).cover || 0), 0);
+  }
+  function updateTaxaSum() {
+    const p = $("#taxa-sum");
+    if (!p || !isMulti()) return;
+    const names = measuredSpecies();
+    const entered = names.some(n => taxonData(n).cover !== null);
+    const sum = Math.round(taxaCoverSum() * 10) / 10;
+    const total = state.cover;
+    p.classList.remove("warn");
+    p.textContent = "";
+    if (!entered) { p.textContent = "Give each species its share of the quadrat. Together they can't add up to more than 100%."; return; }
+    if (sum > 100) { p.classList.add("warn"); p.textContent = "Species cover adds up to " + sum + "%, more than the whole quadrat. Check the values."; return; }
+    if (total === null || total !== sum) {
+      p.append("Species add up to " + sum + "%" + (total === null ? ". " : "; total cover is " + total + "%. "));
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "linkish"; b.textContent = "Set total to " + sum + "%";
+      b.addEventListener("click", () => setCover(sum, false));
+      p.append(b);
+      return;
+    }
+    p.textContent = "Species add up to " + sum + "%, matching the total.";
+  }
+  function addTaxonHeight(name, input) {
+    const v = num(input.value);
+    if (v === null || v < 0) return false;
+    taxonData(name).heights.push(v);
+    input.value = "";
+    return true;
+  }
+  function renderTaxonHeights(name, chips, summary) {
+    const t = taxonData(name);
+    chips.innerHTML = "";
+    t.heights.forEach((h, i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.setAttribute("aria-label", "Remove " + h + " cm");
+      b.textContent = h + " cm";
+      const x = document.createElement("span"); x.textContent = "×"; x.setAttribute("aria-hidden", "true"); b.append(x);
+      b.addEventListener("click", () => { t.heights.splice(i, 1); renderTaxonHeights(name, chips, summary); });
+      chips.append(b);
+    });
+    const n = t.heights.length;
+    summary.textContent = n ? n + (n === 1 ? " measurement" : " measurements") + ", mean " + (t.heights.reduce((a, b) => a + b, 0) / n).toFixed(1) + " cm" : "";
+  }
+  function renderTaxa() {
+    const names = measuredSpecies();
+    const multi = names.length >= 2;
+    $("#taxa-wrap").classList.toggle("hidden", !multi);
+    $("#single-measures").classList.toggle("hidden", multi);
+    $("#cover-title").textContent = multi ? "Total seagrass cover" : "Seagrass cover";
+    const wrap = $("#taxa-cards");
+    if (!multi) { wrap.dataset.key = ""; wrap.innerHTML = ""; return; }
+    const key = names.join("|");
+    if (wrap.dataset.key === key) { updateTaxaSum(); return; }
+    wrap.dataset.key = key;
+    wrap.innerHTML = "";
+    const area = state.session && state.session.quadratAreaM2;
+    names.forEach((name, idx) => {
+      const t = taxonData(name);
+      const card = document.createElement("div");
+      card.className = "taxon";
+      const h = document.createElement("h3"); h.textContent = name; card.append(h);
+      const id = "tx" + idx;
+      card.insertAdjacentHTML("beforeend",
+        '<div class="row"><div class="field"><label for="' + id + 'c">Cover <span class="hint">% of quadrat</span></label><input type="number" id="' + id + 'c" inputmode="decimal" min="0" max="100" step="any"></div>' +
+        '<div class="field"><label for="' + id + 's">Shoot count</label><input type="number" id="' + id + 's" inputmode="numeric" min="0"><div class="density"></div></div></div>' +
+        '<div class="field"><label for="' + id + 'h">Canopy height <span class="hint">cm</span></label><div class="height-add"><input type="number" id="' + id + 'h" inputmode="decimal" min="0" step="any" enterkeyhint="done" data-taxon="1"><button class="btn" type="button">Add</button></div><div class="heights"></div><div class="density"></div></div>');
+      const cIn = card.querySelector("#" + id + "c"), sIn = card.querySelector("#" + id + "s"), hIn = card.querySelector("#" + id + "h");
+      hIn.dataset.name = name;
+      const dens = card.querySelectorAll(".density")[0], chips = card.querySelector(".heights"), hSum = card.querySelectorAll(".density")[1];
+      const showDensity = () => { dens.textContent = (t.shoots !== null && area) ? "About " + Math.round(t.shoots / area) + " shoots per m²" : ""; };
+      cIn.value = t.cover ?? ""; sIn.value = t.shoots ?? "";
+      cIn.addEventListener("input", () => { const v = num(cIn.value); t.cover = v === null ? null : Math.max(0, Math.min(100, v)); updateTaxaSum(); });
+      sIn.addEventListener("input", () => { t.shoots = num(sIn.value); showDensity(); });
+      const add = () => { if (addTaxonHeight(name, hIn)) { renderTaxonHeights(name, chips, hSum); hIn.focus(); } };
+      card.querySelector(".height-add .btn").addEventListener("click", add);
+      hIn.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); add(); } });
+      showDensity();
+      renderTaxonHeights(name, chips, hSum);
+      wrap.append(card);
+    });
+    updateTaxaSum();
+  }
+  // Carry measurements across when switching between one species and several.
+  function carryBetweenModes(wasMulti) {
+    const names = measuredSpecies();
+    if (!wasMulti && names.length >= 2) {
+      const first = taxonData(names[0]);
+      const sh = num($("#f-shoots").value);
+      if (first.shoots === null && sh !== null) first.shoots = sh;
+      if (!first.heights.length && state.heights.length) first.heights = state.heights.slice();
+    } else if (wasMulti && names.length === 1) {
+      const t = taxonData(names[0]);
+      if (num($("#f-shoots").value) === null && t.shoots !== null) { $("#f-shoots").value = t.shoots; updateDensity(); }
+      if (!state.heights.length && t.heights.length) { state.heights = t.heights.slice(); renderHeights(); }
+    }
+    $("#taxa-cards").dataset.key = "";
+    renderTaxa();
+  }
+  $("#f-other-species").addEventListener("change", () => { const was = $("#taxa-cards").dataset.key.includes("|"); carryBetweenModes(was); });
 
   /* ---------- Quadrat grid ---------- */
   const grid = $("#grid");
@@ -957,6 +1088,7 @@ const APP_CONFIG = {
       state.cells = new Set(Array.from({ length: n }, (_, i) => i));
     }
     paintGrid();
+    if (state.taxa) updateTaxaSum();
   }
   $("#f-cover").addEventListener("input", e => setCover(num(e.target.value), true));
   function updateDensity() {
@@ -1277,6 +1409,8 @@ const APP_CONFIG = {
       $("#other-wrap").classList.add("hidden");
       setSeg("sediment", null);
     }
+    state.taxa = new Map();
+    $("#taxa-cards").dataset.key = "";
     renderSpecies();
     $("#f-qnum").value = await nextQuadratNumber();
     $("#editing-bar").classList.add("hidden");
@@ -1296,6 +1430,17 @@ const APP_CONFIG = {
     const qn = parseInt($("#f-qnum").value, 10);
     if (!qn || qn < 1) { toast("Add a quadrat number", true); $("#f-qnum").focus(); return; }
     if (state.cover === null) { toast("Set seagrass cover (tap None if there's none)", true); return; }
+    const mNames = measuredSpecies();
+    const multi = mNames.length >= 2;
+    if (multi) {
+      document.querySelectorAll('#taxa-cards input[data-taxon]').forEach(inp => addTaxonHeight(inp.dataset.name, inp));
+      if (taxaCoverSum() > 100) { toast("Species cover adds up to more than 100%. Check the values.", true); return; }
+    }
+    const taxa = multi
+      ? mNames.map(n => { const t = taxonData(n); return { name: n, cover: t.cover, shoots: t.shoots, heights: t.heights.slice() }; })
+      : mNames.length === 1 ? [{ name: mNames[0], cover: state.cover, shoots: num($("#f-shoots").value), heights: state.heights.slice() }] : [];
+    const shootVals = taxa.map(t => t.shoots).filter(v => v !== null && v !== undefined);
+    const allHeights = taxa.reduce((a, t) => a.concat(t.heights), []);
     const existing = state.editingId ? await get("quadrats", state.editingId) : null;
     const id = state.editingId || uid();
 
@@ -1315,9 +1460,10 @@ const APP_CONFIG = {
       acc: (state.gpsMode === "live" && state.live && lat !== null) ? Math.round(state.live.acc) : (state.gpsMode === "saved" && existing ? existing.acc : null),
       cover: state.cover,
       species: currentSpecies(),
-      shoots: num($("#f-shoots").value),
-      heights: state.heights.slice(),
-      height: state.heights.length ? Number((state.heights.reduce((a, b) => a + b, 0) / state.heights.length).toFixed(1)) : null,
+      taxa,
+      shoots: multi ? (shootVals.length ? shootVals.reduce((a, b) => a + b, 0) : null) : num($("#f-shoots").value),
+      heights: multi ? allHeights : state.heights.slice(),
+      height: (multi ? allHeights : state.heights).length ? Number(((multi ? allHeights : state.heights).reduce((a, b) => a + b, 0) / (multi ? allHeights : state.heights).length).toFixed(1)) : null,
       epiphytes: getSeg("epiphytes"),
       algae: num($("#f-algae").value),
       sediment: getSeg("sediment"),
@@ -1346,12 +1492,18 @@ const APP_CONFIG = {
     renderGps();
     setCover(q.cover, true);
     $("#f-cover").value = q.cover;
-    setSpeciesFromRecord(q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
-    $("#f-shoots").value = q.shoots ?? "";
+    state.taxa = new Map();
+    if (Array.isArray(q.taxa) && q.taxa.length >= 2) {
+      q.taxa.forEach(t => state.taxa.set(t.name, { cover: t.cover ?? null, shoots: t.shoots ?? null, heights: (t.heights || []).slice() }));
+    }
+    const multiRec = Array.isArray(q.taxa) && q.taxa.length >= 2;
+    $("#f-shoots").value = multiRec ? "" : (q.shoots ?? "");
     updateDensity();
     $("#f-height").value = "";
-    state.heights = Array.isArray(q.heights) ? q.heights.slice() : (q.height != null ? [q.height] : []);
+    state.heights = multiRec ? [] : (Array.isArray(q.heights) ? q.heights.slice() : (q.height != null ? [q.height] : []));
     renderHeights();
+    $("#taxa-cards").dataset.key = "";
+    setSpeciesFromRecord(q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
     $("#f-algae").value = q.algae ?? "";
     $("#f-notes").value = q.notes || "";
     const photos = await byIndex("photos", "quadratId", id);
@@ -1420,6 +1572,15 @@ const APP_CONFIG = {
     "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state", "quadrat", "recorded_at", "latitude", "longitude",
     "gps_accuracy_m", "seagrass_cover_pct", "species", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm", "epiphytes",
     "algae_cover_pct", "sediment", "photo_files", "notes"];
+  const SP_COLS = ["survey_id", "site", "survey_date", "quadrat", "species", "species_cover_pct", "shoot_count", "shoot_density_m2",
+    "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
+  function taxaOf(q) {
+    if (Array.isArray(q.taxa)) return q.taxa;
+    const names = speciesList(q.species).filter(x => x !== "None");
+    const hs = Array.isArray(q.heights) ? q.heights : (q.height != null ? [q.height] : []);
+    if (names.length === 1) return [{ name: names[0], cover: q.cover, shoots: q.shoots, heights: hs }];
+    return names.map(n => ({ name: n, cover: null, shoots: null, heights: [] }));
+  }
   function csvCell(v) {
     if (v === null || v === undefined) return "";
     const s = String(v);
@@ -1429,6 +1590,7 @@ const APP_CONFIG = {
     const sessions = await all("sessions");
     const chosen = scope === "all" ? sessions : sessions.filter(s => state.session && s.id === state.session.id);
     const rows = [];
+    const spRows = [];
     const photoFiles = [];
     for (const s of chosen.sort((a, b) => a.date.localeCompare(b.date))) {
       const qs = (await byIndex("quadrats", "sessionId", s.id)).sort((a, b) => a.quadrat - b.quadrat);
@@ -1447,11 +1609,20 @@ const APP_CONFIG = {
         rows.push([s.id, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area,
           ...condCells(s.conditions), q.quadrat, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
           speciesList(q.species).join("; "), q.shoots, density, q.height, hs.length || null, hs.join(";"), q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
+        const tx = taxaOf(q);
+        if (!tx.length) spRows.push([s.id, s.site, s.date, q.quadrat, "None", 0, null, null, null, null, ""]);
+        tx.forEach(t => {
+          const th = t.heights || [];
+          spRows.push([s.id, s.site, s.date, q.quadrat, t.name, t.cover ?? null, t.shoots ?? null,
+            (area && t.shoots != null) ? Number((t.shoots / area).toFixed(1)) : null,
+            th.length ? Number((th.reduce((a, b) => a + b, 0) / th.length).toFixed(1)) : null, th.length || null, th.join(";")]);
+        });
       }
     }
     const csv = [COLS.join(",")].concat(rows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
     const base = scope === "all" ? "all-surveys_" + today() : (state.session ? slug(state.session.site) + "_" + state.session.date : "survey");
-    return { csv, photoFiles, rows: rows.length, base };
+    const spCsv = [SP_COLS.join(",")].concat(spRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
+    return { csv, spCsv, photoFiles, rows: rows.length, base };
   }
 
   function afterExport() {
@@ -1504,6 +1675,13 @@ const APP_CONFIG = {
     if (!out.rows) { toast("Nothing to export yet", true); return; }
     await saveFile(out.base + "_quadrats.csv", out.csv);
   });
+  $("#btn-sp-csv").addEventListener("click", async () => {
+    const scope = getSeg("scope") || "current";
+    if (scope === "current" && !state.session) { toast("Open a survey first", true); return; }
+    const out = await gather(scope);
+    if (!out.rows) { toast("Nothing to export yet", true); return; }
+    await saveFile(out.base + "_species.csv", out.spCsv);
+  });
   $("#btn-zip").addEventListener("click", async () => {
     const scope = getSeg("scope") || "current";
     if (scope === "current" && !state.session) { toast("Open a survey first", true); return; }
@@ -1515,6 +1693,7 @@ const APP_CONFIG = {
       if (!out.rows) { toast("Nothing to export yet", true); return; }
       const zip = new JSZip();
       zip.file(out.base + "_quadrats.csv", out.csv);
+      zip.file(out.base + "_species.csv", out.spCsv);
       const folder = zip.folder("photos");
       out.photoFiles.forEach(p => folder.file(p.name, p.blob));
       const blob = await zip.generateAsync({ type: "blob" });
