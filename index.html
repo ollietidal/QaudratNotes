@@ -374,6 +374,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
     <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
+    <p><strong>How to cite:</strong> <span id="cite-text"></span> <button class="linkish" type="button" id="btn-copy-cite">Copy</button></p>
     <p>&copy; 2026 Oliver R Thomas. The code is free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>; the QuadratNotes name and logo are not covered by it.</p>
     <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
   </div>
@@ -490,7 +491,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   </div>
   <div class="row hidden" id="transect-fields">
     <div class="field"><label for="f-transect">Transect</label><input type="text" id="f-transect" autocomplete="off" placeholder="e.g. T1"></div>
-    <div class="field"><label for="f-dist">Distance <span class="hint">m</span></label><input type="number" id="f-dist" inputmode="decimal" min="0" step="any"></div>
+    <div class="field"><label for="f-dist">Distance from start <span class="hint">m</span></label><input type="number" id="f-dist" inputmode="decimal" min="0" step="any"></div>
   </div>
   <div class="field hidden" id="plot-field"><label for="f-plot">Plot ID</label><input type="text" id="f-plot" autocomplete="off" placeholder="e.g. P3"></div>
   <div class="row" id="manual-gps">
@@ -700,7 +701,9 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 const APP_CONFIG = {
   version: "0.8.1",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
-  contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
+  contactEmail: "",  // e.g. "hello@quadratnotes.com" (leave empty to hide)
+  citeUrl: "https://quadratnotes.com",  // the app's public address
+  doi: ""            // e.g. "10.5281/zenodo.1234567" once archived on Zenodo; replaces the address in the citation
 };
 /* ================================================== */
 (function () {
@@ -1736,7 +1739,7 @@ const APP_CONFIG = {
   /* ---------- Export ---------- */
   const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design",
     "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state",
-    "quadrat", "transect", "distance_m", "plot_id", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
+    "quadrat", "transect", "distance_from_start_m", "plot_id", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
     "algae_cover_pct", "sediment", "photo_files", "notes"];
   const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "quadrat", "species", "species_cover_pct", "shoot_count", "shoot_density_m2",
     "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
@@ -1920,7 +1923,7 @@ const APP_CONFIG = {
         ev("epiphyte load on seagrass leaves", q.epiphytes, "");
         ev("sediment type", q.sediment, "");
         ev("transect", q.transect, "");
-        ev("distance along transect", q.distance, "m");
+        ev("distance from start of transect", q.distance, "m");
         ev("fixed plot", q.plot, "");
         const tx = taxaOf(q);
         const here = new Set(tx.map(t => t.name));
@@ -2112,6 +2115,13 @@ const APP_CONFIG = {
     ["#support-link-1", "#support-link-2"].forEach(s => { $(s).href = APP_CONFIG.supportUrl; });
     $("#support-about").classList.remove("hidden");
   }
+  const citation = "Thomas, O. R. (2026). QuadratNotes (Version " + APP_CONFIG.version + ") [Computer software]. " +
+    (APP_CONFIG.doi ? "https://doi.org/" + APP_CONFIG.doi : APP_CONFIG.citeUrl);
+  $("#cite-text").textContent = citation;
+  $("#btn-copy-cite").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(citation); toast("Citation copied"); }
+    catch (e) { toast("Couldn't copy. Press and hold the text to copy it.", true); }
+  });
   if (APP_CONFIG.contactEmail) {
     const c = $("#contact-link");
     c.href = "mailto:" + APP_CONFIG.contactEmail + "?subject=" + encodeURIComponent("QuadratNotes");
