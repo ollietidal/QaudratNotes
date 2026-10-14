@@ -285,6 +285,9 @@ details.about-box .about { padding-bottom: 8px; }
 input[type=date] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; text-align: left; }
 .warn-text { color: var(--tape); font-weight: 700; font-size: .9rem; margin-top: 6px; }
 .share-note { font-size: .92rem; margin: 0 0 14px; }
+.share-note a { color: var(--ink); font-weight: 700; }
+.switcher { margin-bottom: 10px; }
+.switcher .linkish { margin-top: 8px; display: inline-block; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -354,6 +357,17 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   <p class="home-soon">Rocky shore and mudflat surveys are on the way.</p>
   <p class="home-soon"><button class="linkish" type="button" id="btn-all-surveys">See all your surveys</button></p>
   <p class="home-foot">Free to use. Your data stays on this phone until you export it.</p>
+  <details class="about-box">
+  <summary>About QuadratNotes</summary>
+  <div class="about">
+    <p>QuadratNotes <span id="app-version"></span> is a free app for recording seagrass quadrat surveys.</p>
+    <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
+    <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
+    <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
+    <p>&copy; 2026 Oliver R Thomas. The code is free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>; the QuadratNotes name and logo are not covered by it.</p>
+    <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
+  </div>
+  </details>
 </section>
 
 <!-- SURVEY SETUP -->
@@ -541,6 +555,11 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 
 <!-- DATA -->
 <section id="view-data" class="hidden" aria-labelledby="h-data">
+  <div class="field switcher">
+    <label for="survey-switch">Survey</label>
+    <select id="survey-switch"></select>
+    <button class="linkish" type="button" id="btn-new-from-data">Start a new survey</button>
+  </div>
   <h1 id="h-data">This survey</h1>
   <div class="stats">
     <div class="stat"><b id="st-n">0</b><span>quadrats</span></div>
@@ -579,7 +598,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     </div>
   </div>
   <div class="hidden" id="dwc-options">
-  <p class="hint share-note">This downloads a Darwin Core file to your phone. Nothing is uploaded. You send it on yourself, for example to an OBIS data node such as EurOBIS. GBIF's free data validator can check it first.</p>
+  <p class="hint share-note">This downloads a Darwin Core file to your phone. Nothing is uploaded. You send it on yourself, for example to an OBIS data node such as <a href="https://www.eurobis.org/" target="_blank" rel="noopener">EurOBIS</a>. You can check the file first with <a href="https://www.gbif.org/tools/data-validator" target="_blank" rel="noopener">GBIF's free data validator</a>.</p>
   <div class="field">
     <label for="dwc-licence">Licence for your data</label>
     <select id="dwc-licence">
@@ -610,17 +629,6 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   <p class="hint" id="storage-line">Checking storage…</p>
   <button class="btn btn-danger btn-wide" type="button" id="btn-wipe">Delete all data on this phone</button>
 
-  <details class="about-box">
-  <summary>About QuadratNotes</summary>
-  <div class="about">
-    <p>QuadratNotes <span id="app-version"></span> is a free app for recording seagrass quadrat surveys.</p>
-    <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
-    <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
-    <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
-    <p>&copy; 2026 Oliver R Thomas. The code is free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>; the QuadratNotes name and logo are not covered by it.</p>
-    <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
-  </div>
-  </details>
 </section>
 
 </main>
@@ -649,7 +657,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.7.1",
+  version: "0.7.3",
   supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: ""   // e.g. "quadratnotebook@gmail.com" (leave empty to hide)
 };
@@ -792,7 +800,7 @@ const APP_CONFIG = {
     window.scrollTo(0, 0);
   }
   $$(".tabs button").forEach(b => b.addEventListener("click", () => {
-    if (!state.session && b.dataset.tab !== "export" && b.dataset.tab !== "home") { show("survey"); toast("Start a survey first"); return; }
+    if (!state.session && b.dataset.tab !== "export" && b.dataset.tab !== "home" && b.dataset.tab !== "data") { show("survey"); toast("Start a survey first"); return; }
     show(b.dataset.tab);
   }));
   $("#btn-change").addEventListener("click", () => show("survey"));
@@ -849,13 +857,40 @@ const APP_CONFIG = {
     toast("Survey started");
   });
 
-  async function openSession(session) {
+  async function openSession(session, stayOn) {
     state.session = session;
     await put("meta", { key: "active", value: session.id });
     renderHeader();
     await resetForm(false);
-    show("record");
+    show(stayOn || "record");
   }
+  async function renderSwitcher() {
+    const sel = $("#survey-switch");
+    const sessions = (await all("sessions")).sort((a, b) => (b.date + (b.created || "")).localeCompare(a.date + (a.created || "")));
+    const quads = await all("quadrats");
+    const counts = {};
+    quads.forEach(q => { counts[q.sessionId] = (counts[q.sessionId] || 0) + 1; });
+    sel.innerHTML = "";
+    if (!state.session) {
+      const o = document.createElement("option");
+      o.value = ""; o.textContent = sessions.length ? "Choose a survey" : "No surveys yet";
+      sel.append(o);
+    }
+    sessions.forEach(x => {
+      const o = document.createElement("option");
+      const n = counts[x.id] || 0;
+      o.value = x.id;
+      o.textContent = x.site + ", " + x.date + " (" + n + (n === 1 ? " quadrat)" : " quadrats)");
+      if (state.session && state.session.id === x.id) o.selected = true;
+      sel.append(o);
+    });
+    sel.disabled = sessions.length === 0;
+  }
+  $("#survey-switch").addEventListener("change", async e => {
+    const target = await get("sessions", e.target.value);
+    if (target) await openSession(target, "data");
+  });
+  $("#btn-new-from-data").addEventListener("click", () => show("survey"));
 
   async function renderSurveyList() {
     const sessions = (await all("sessions")).sort((a, b) => (b.date + b.created).localeCompare(a.date + a.created));
@@ -1595,7 +1630,12 @@ const APP_CONFIG = {
 
   /* ---------- Data view ---------- */
   async function renderData() {
-    if (!state.session) return;
+    await renderSwitcher();
+    const hasSession = !!state.session;
+    $("#h-data").classList.toggle("hidden", !hasSession);
+    $(".stats").classList.toggle("hidden", !hasSession);
+    if (!hasSession) { $("#qlist").innerHTML = ""; $("#q-empty").textContent = "Choose a survey above, or start a new one."; $("#q-empty").classList.remove("hidden"); return; }
+    $("#q-empty").textContent = "No quadrats yet. Record your first one on the Record tab.";
     $("#h-data").textContent = state.session.site;
     const qs = (await byIndex("quadrats", "sessionId", state.session.id)).sort((a, b) => a.quadrat - b.quadrat);
     $("#st-n").textContent = qs.length;
@@ -1770,6 +1810,9 @@ const APP_CONFIG = {
       qs.forEach(q => taxaOf(q).forEach(t => allNames.add(t.name)));
     }
     if (!perSession.length) return null;
+    perSession.forEach(({ s, qs }) => {
+      if (!qs.some(q => taxaOf(q).length)) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => allNames.add(x[0]));
+    });
     const ids = {};
     let lookedUp = 0;
     await Promise.all(Array.from(allNames).map(async n => { ids[n] = await aphiaId(n); if (ids[n]) lookedUp++; }));
@@ -1798,6 +1841,8 @@ const APP_CONFIG = {
       }
       const present = new Set();
       qs.forEach(q => taxaOf(q).forEach(t => present.add(t.name)));
+      // A survey that found no seagrass at all still says something: record absences of the region's main species.
+      if (!present.size) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => { present.add(x[0]); allNames.add(x[0]); });
       for (const q of qs) {
         const qid = quadratId(code, q.quadrat);
         let lat = q.lat, lon = q.lon, unc = q.acc ?? null, gen = "";
@@ -1870,7 +1915,7 @@ const APP_CONFIG = {
       '<coverage><geographicCoverage><geographicDescription>' + xmlEsc(sites.join("; ")) + '</geographicDescription>' + bbox + '</geographicCoverage>' +
       '<temporalCoverage><rangeOfDates><beginDate><calendarDate>' + d0 + '</calendarDate></beginDate><endDate><calendarDate>' + d1 + '</calendarDate></endDate></rangeOfDates></temporalCoverage></coverage>\n' +
       '<contact>' + party + '</contact>\n' +
-      '<methods><methodStep><description><para>' + xmlEsc("Each survey is a parent event; each quadrat is a child event with its own position and time. Seagrass cover was estimated per quadrat, and per species where more than one species was present. Absences are recorded for species found elsewhere in the same survey. Weather and modelled tide values were looked up from Open-Meteo at the start of the survey.") + '</para></description></methodStep>' +
+      '<methods><methodStep><description><para>' + xmlEsc("Each survey is a parent event; each quadrat is a child event with its own position and time. Seagrass cover was estimated per quadrat, and per species where more than one species was present. Absences are recorded for species found elsewhere in the same survey; where a survey found no seagrass at all, absences are recorded for the main seagrass species of the region. Weather and modelled tide values were looked up from Open-Meteo at the start of the survey.") + '</para></description></methodStep>' +
       '<sampling><studyExtent><description><para>' + xmlEsc(sites.join("; ")) + '</para></description></studyExtent><samplingDescription><para>' + xmlEsc("Quadrat surveys of intertidal and shallow subtidal seagrass.") + '</para></samplingDescription></sampling></methods>\n' +
       '</dataset>\n</eml:eml>\n';
 
