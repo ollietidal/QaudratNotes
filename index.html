@@ -247,6 +247,7 @@ select:focus { border-color: var(--ink); outline: none; }
 .home-hero { text-align: center; padding: 18px 0 8px; }
 .home-logo { width: 96px; height: 96px; display: block; margin: 0 auto 14px; }
 .home-title { font-family: "Nunito", "Varela Round", "Segoe UI", system-ui, sans-serif; font-weight: 800; font-size: 2.4rem; line-height: 1.05; margin: 0; letter-spacing: -.01em; }
+.back-link { font-size: .92rem; padding: 4px 0; margin: 4px 0 2px; }
 .home-byline { color: var(--muted); font-size: .88rem; font-style: italic; margin: 6px auto 0; }
 .home-tagline { color: var(--muted); font-size: 1.05rem; margin: 8px auto 0; max-width: 32ch; text-wrap: balance; }
 .continue-card { background: var(--green); color: var(--green-ink); border-radius: var(--radius-l); padding: 14px 16px; margin: 22px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -461,11 +462,11 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 
 <!-- SURVEY SETUP -->
 <section id="view-survey" class="hidden" aria-labelledby="h-survey">
+  <button class="linkish back-link" type="button" id="btn-change-habitat">← Choose a different habitat</button>
   <h1 id="h-survey">Start a survey</h1>
   <p class="lead">Each survey is one site visit. Quadrats you record are saved to this phone as you go.</p>
   <form id="survey-form" autocomplete="off">
-    <div class="field">
-      <span class="label">Habitat</span>
+    <div class="field hidden" aria-hidden="true">
       <div class="seg" data-name="habitat">
         <button type="button" data-value="seagrass" aria-pressed="true">Seagrass</button>
         <button type="button" data-value="rocky">Rocky shore</button>
@@ -3365,6 +3366,7 @@ const APP_CONFIG = {
   $("#btn-continue").addEventListener("click", () => show("record"));
   $("#btn-start-seagrass").addEventListener("click", () => { setSurveyHabitat("seagrass"); show("survey"); });
   $("#btn-start-rocky").addEventListener("click", () => { setSurveyHabitat("rocky"); show("survey"); });
+  $("#btn-change-habitat").addEventListener("click", () => show("home"));
   $("#btn-start-saltmarsh").addEventListener("click", () => { setSurveyHabitat("saltmarsh"); show("survey"); });
   $("#btn-start-mudflat").addEventListener("click", () => { setSurveyHabitat("mudflat"); show("survey"); });
   $("#btn-all-surveys").addEventListener("click", () => show("survey"));
