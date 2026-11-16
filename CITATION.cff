@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use QuadratNotes in your work, please cite it as below."
+title: "QuadratNotes"
+abstract: "Free, offline, open-source app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, with analysis-ready CSV and Darwin Core exports."
+type: software
+authors:
+  - family-names: Thomas
+    given-names: Oliver R
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+version: 0.15.0
+date-released: 2026-11-16
+url: "https://quadratnotes.com"
+repository-code: "https://github.com/ollietidal/quadratnotes"
+license: MIT
+keywords:
+  - seagrass
+  - quadrat survey
+  - intertidal ecology
+  - field data collection
+  - rocky shore
+  - saltmarsh
+  - Darwin Core
