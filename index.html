@@ -475,7 +475,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     </div>
     <div class="field">
       <label for="s-site">Site</label>
-      <input type="text" id="s-site" required placeholder="e.g. Porthdinllaen meadow">
+      <input type="text" id="s-site" required placeholder="e.g. Wilcove meadow">
     </div>
     <div>
       <div class="field">
@@ -2135,7 +2135,7 @@ const APP_CONFIG = {
     "count", "subsample_area_m2", "count_per_quadrat", "count_density_m2", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
   const COND_COLS = ["conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state"];
   const r1 = v => Number(v.toFixed(1));
-  // Readable survey codes, e.g. "porthdinllaen-2026-10-14". Older surveys without a stored code get one by creation order.
+  // Readable survey codes, e.g. "wilcove-2026-10-14". Older surveys without a stored code get one by creation order.
   function codeBase(site, date) { return slug(site).slice(0, 30) + "-" + date; }
   function codeMap(sessions) {
     const map = new Map(), used = new Set();
@@ -2792,7 +2792,7 @@ const APP_CONFIG = {
     $("#region-field").classList.toggle("hidden", h !== "seagrass");
     $("#rocky-region-field").classList.toggle("hidden", h === "seagrass");
     $("#h-survey").textContent = "Start a " + HABITAT_NAME[h].toLowerCase() + " survey";
-    $("#s-site").placeholder = h === "rocky" ? "e.g. Wembury reef" : h === "saltmarsh" ? "e.g. Tamar saltmarsh" : h === "mudflat" ? "e.g. Erme estuary flats" : "e.g. Porthdinllaen meadow";
+    $("#s-site").placeholder = h === "rocky" ? "e.g. Wembury reef" : h === "saltmarsh" ? "e.g. Tamar saltmarsh" : h === "mudflat" ? "e.g. Erme estuary flats" : "e.g. Wilcove meadow";
   }
   // Hide habitats that are switched off. Surveys already recorded in them still open, show and export.
   ["mudflat"].forEach(h => {
