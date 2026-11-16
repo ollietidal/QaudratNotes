@@ -7,7 +7,7 @@
 <title>QuadratNotes</title>
 <!-- PRE-LAUNCH: delete the next line when you're ready for search engines to list the app -->
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Free offline app for recording seagrass quadrat surveys on your phone, with CSV export ready for R.">
+<meta name="description" content="Free, offline quadrat surveys for coastal habitats: seagrass, rocky shores and saltmarsh, with CSV and Darwin Core export.">
 <script src="jszip.min.js"></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#17242C">
@@ -247,6 +247,7 @@ select:focus { border-color: var(--ink); outline: none; }
 .home-hero { text-align: center; padding: 18px 0 8px; }
 .home-logo { width: 96px; height: 96px; display: block; margin: 0 auto 14px; }
 .home-title { font-family: "Nunito", "Varela Round", "Segoe UI", system-ui, sans-serif; font-weight: 800; font-size: 2.4rem; line-height: 1.05; margin: 0; letter-spacing: -.01em; }
+.home-byline { color: var(--muted); font-size: .88rem; font-style: italic; margin: 6px auto 0; }
 .home-tagline { color: var(--muted); font-size: 1.05rem; margin: 8px auto 0; max-width: 32ch; text-wrap: balance; }
 .continue-card { background: var(--green); color: var(--green-ink); border-radius: var(--radius-l); padding: 14px 16px; margin: 22px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .continue-card small { display: block; opacity: .85; font-size: .9rem; }
@@ -260,7 +261,8 @@ select:focus { border-color: var(--ink); outline: none; }
 .habitat-card p { margin: 0 0 12px; color: var(--muted); font-size: .95rem; }
 @media (max-width: 360px) { .habitat-card { grid-template-columns: 1fr; } .habitat-art { max-width: 180px; margin: 0 auto; } }
 .home-soon { text-align: center; color: var(--muted); font-size: .92rem; margin: 18px 0 0; }
-.home-foot { text-align: center; color: var(--muted); font-size: .85rem; margin: 26px 0 0; }
+.home-foot a { color: var(--ink); font-weight: 700; }
+.home-foot { text-wrap: balance; text-align: center; color: var(--muted); font-size: .85rem; margin: 26px 0 0; }
 .cond { margin-top: 10px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; }
 .cond-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 10px; font-variant-numeric: tabular-nums; }
 .cond-grid dt { color: var(--muted); }
@@ -298,6 +300,24 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 .info-panel dt { font-weight: 700; }
 .info-panel dd { margin: 0 0 8px; color: var(--muted); }
 .info-panel dd:last-child { margin-bottom: 0; }
+.rk-group { margin: 0 0 12px; }
+.rk-group h3 { font-size: .9rem; color: var(--muted); margin: 0 0 6px; font-weight: 700; }
+.rk-rows { margin: 4px 0 8px; border-top: 1px solid var(--line); }
+.rrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.rrow-name { font-weight: 700; min-width: 0; flex: 1 1 140px; }
+.rrow-name em { font-weight: 700; }
+.rrow-ctrl { display: flex; align-items: center; gap: 8px; }
+.rrow-ctrl input { width: 74px; min-height: 44px; text-align: center; font-variant-numeric: tabular-nums; padding: 6px; }
+.rrow-ctrl .unit { color: var(--muted); }
+.step { width: 44px; height: 44px; border-radius: var(--radius-s); border: 2px solid var(--ink); background: transparent; font-size: 1.4rem; font-weight: 700; line-height: 1; cursor: pointer; }
+.layer { display: inline-flex; border: 2px solid var(--line); border-radius: 999px; overflow: hidden; }
+.layer button { border: 0; background: var(--surface); padding: 8px 10px; min-height: 40px; font-size: .85rem; cursor: pointer; }
+.layer button[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 700; }
+.rk-empty { color: var(--muted); font-size: .92rem; margin: 6px 0 10px; }
+.domin { font-size: .8rem; color: var(--muted); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+.few { flex-basis: 100%; display: flex; gap: 6px; align-items: center; font-size: .85rem; color: var(--muted); }
+.few .layer button { min-height: 34px; padding: 4px 10px; }
+.rk-other { display: grid; gap: 8px; margin-top: 8px; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -330,7 +350,8 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   <div class="home-hero">
     <svg class="home-logo" viewBox="-4 -4 108 108" aria-hidden="true"><g fill="var(--green)"><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/></g><g stroke="var(--ink)" stroke-width="1.6"><path d="M20 0V100M40 0V100M60 0V100M80 0V100M0 20H100M0 40H100M0 60H100M0 80H100"/></g><rect x="0" y="0" width="100" height="100" fill="none" stroke="var(--ink)" stroke-width="5"/></svg>
     <h1 class="home-title" id="home-title">QuadratNotes</h1>
-    <p class="home-tagline">Simple, offline quadrat surveys for coastal habitats</p>
+    <p class="home-tagline">Free, offline quadrat surveys for coastal habitats</p>
+    <p class="home-byline">Built by a marine biologist for coastal surveys</p>
   </div>
 
   <div class="continue-card hidden" id="continue-card">
@@ -363,14 +384,71 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
         <button class="btn btn-primary btn-small" type="button" id="btn-start-seagrass">Start a survey</button>
       </div>
     </article>
+    <article class="habitat-card">
+      <svg class="habitat-art" viewBox="0 0 160 120" aria-hidden="true">
+        <path d="M2 112 Q8 80 30 74 Q50 60 74 66 Q96 54 120 64 Q146 66 158 112 Z" fill="var(--line)"/>
+        <g fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round">
+          <path d="M34 76 Q30 52 18 34"/><path d="M31 62 Q40 48 46 30"/><path d="M24 48 Q14 40 10 26"/>
+        </g>
+        <g fill="var(--green)"><ellipse cx="17" cy="36" rx="4" ry="6"/><ellipse cx="45" cy="34" rx="4" ry="6"/><ellipse cx="11" cy="29" rx="3.5" ry="5"/></g>
+        <path d="M70 66 Q74 44 86 42 Q98 44 102 66 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+        <g stroke="var(--muted)" stroke-width="2" fill="none"><path d="M86 44 L80 64 M86 44 L86 65 M86 44 L93 64"/></g>
+        <g fill="var(--surface)" stroke="var(--muted)" stroke-width="2.5">
+          <circle cx="116" cy="74" r="6"/><circle cx="131" cy="80" r="5"/><circle cx="121" cy="88" r="5"/><circle cx="138" cy="94" r="4.5"/><circle cx="108" cy="90" r="4"/>
+        </g>
+        <g fill="var(--muted)"><circle cx="116" cy="74" r="1.8"/><circle cx="131" cy="80" r="1.6"/><circle cx="121" cy="88" r="1.6"/><circle cx="138" cy="94" r="1.4"/><circle cx="108" cy="90" r="1.3"/></g>
+      </svg>
+      <div>
+        <h2>Rocky shore</h2>
+        <p>Seaweed and barnacle cover in layers, and counts of limpets, topshells and more.</p>
+        <button class="btn btn-primary btn-small" type="button" id="btn-start-rocky">Start a survey</button>
+      </div>
+    </article>
+    <article class="habitat-card">
+      <svg class="habitat-art" viewBox="0 0 160 120" aria-hidden="true">
+        <path d="M0 96 Q40 90 70 95 Q78 104 92 104 Q104 104 110 95 Q136 90 160 96 V120 H0 Z" fill="var(--line)"/>
+        <path d="M74 98 Q92 112 106 98" fill="none" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+        <g fill="none" stroke="var(--green)" stroke-width="4" stroke-linecap="round">
+          <path d="M20 96 Q18 72 10 56"/><path d="M22 96 Q24 70 30 52"/><path d="M26 96 Q32 76 42 64"/>
+          <path d="M120 94 Q118 70 112 54"/><path d="M124 94 Q128 68 136 50"/><path d="M128 94 Q138 78 148 70"/>
+        </g>
+        <g fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M56 95 V80 M56 86 L50 78 M56 84 L62 76 M50 78 V72 M62 76 V70"/>
+        </g>
+        <g stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"><path d="M88 94 V66 M88 76 L80 66 M88 72 L96 62"/></g>
+        <g fill="var(--muted)"><circle cx="80" cy="64" r="3"/><circle cx="96" cy="60" r="3"/><circle cx="88" cy="63" r="3"/><circle cx="84" cy="58" r="2.5"/><circle cx="93" cy="55" r="2.5"/></g>
+      </svg>
+      <div>
+        <h2>Saltmarsh</h2>
+        <p>Plant cover with Domin classes, bare ground, vegetation height and grazing.</p>
+        <button class="btn btn-primary btn-small" type="button" id="btn-start-saltmarsh">Start a survey</button>
+      </div>
+    </article>
+    <article class="habitat-card" id="card-mudflat">
+      <svg class="habitat-art" viewBox="0 0 160 120" aria-hidden="true">
+        <path d="M0 78 Q40 72 80 77 Q120 82 160 76 V120 H0 Z" fill="var(--line)"/>
+        <path d="M0 98 Q30 94 60 97" fill="none" stroke="var(--surface)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+        <g fill="none" stroke="var(--muted)" stroke-width="3.2" stroke-linecap="round">
+          <path d="M22 84 q6 -6 12 0 q-6 5 -12 0 q2 -5 7 -3 q4 2 1 4"/>
+          <path d="M96 92 q6 -6 12 0 q-6 5 -12 0 q2 -5 7 -3 q4 2 1 4"/>
+        </g>
+        <g fill="var(--ink)"><circle cx="58" cy="88" r="2.2"/><circle cx="64" cy="90" r="2.2"/><circle cx="130" cy="86" r="2.2"/><circle cx="136" cy="88" r="2.2"/><circle cx="78" cy="104" r="2"/></g>
+        <g fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round"><path d="M110 70 l-6 -12 M110 70 l0 -14 M110 70 l6 -12 M110 70 l0 6"/></g>
+        <g fill="var(--green)" opacity=".55"><ellipse cx="140" cy="102" rx="14" ry="4"/><ellipse cx="30" cy="108" rx="10" ry="3"/></g>
+      </svg>
+      <div>
+        <h2>Mudflat</h2>
+        <p>Lugworm casts, siphon holes and burrows, surface mats and sediment.</p>
+        <button class="btn btn-primary btn-small" type="button" id="btn-start-mudflat">Start a survey</button>
+      </div>
+    </article>
   </div>
-  <p class="home-soon">Rocky shore and mudflat surveys are on the way.</p>
   <p class="home-soon"><button class="linkish" type="button" id="btn-all-surveys">See all your surveys</button></p>
-  <p class="home-foot">Free to use. Your data stays on this phone until you export it.</p>
+  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a></p>
   <details class="about-box">
   <summary>About QuadratNotes</summary>
   <div class="about">
-    <p>QuadratNotes <span id="app-version"></span> is a free app for recording seagrass quadrat surveys.</p>
+    <p>QuadratNotes <span id="app-version"></span> is a free app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
     <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
@@ -387,6 +465,15 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   <p class="lead">Each survey is one site visit. Quadrats you record are saved to this phone as you go.</p>
   <form id="survey-form" autocomplete="off">
     <div class="field">
+      <span class="label">Habitat</span>
+      <div class="seg" data-name="habitat">
+        <button type="button" data-value="seagrass" aria-pressed="true">Seagrass</button>
+        <button type="button" data-value="rocky">Rocky shore</button>
+        <button type="button" data-value="saltmarsh">Saltmarsh</button>
+        <button type="button" data-value="mudflat">Mudflat</button>
+      </div>
+    </div>
+    <div class="field">
       <label for="s-site">Site</label>
       <input type="text" id="s-site" required placeholder="e.g. Porthdinllaen meadow">
     </div>
@@ -400,7 +487,14 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
         <input type="text" id="s-surveyor" placeholder="Initials or names">
       </div>
     </div>
-    <div class="field">
+    <div class="field hidden" id="rocky-region-field">
+      <span class="label">Region <span class="hint">sets which species are listed</span></span>
+      <div class="seg" data-name="rkregion">
+        <button type="button" data-value="nea" aria-pressed="true">NE Atlantic (UK, Ireland, Europe)</button>
+        <button type="button" data-value="global">Elsewhere (broad groups)</button>
+      </div>
+    </div>
+    <div class="field" id="region-field">
       <label for="s-region">Region <span class="hint">sets which seagrass species are listed</span></label>
       <select id="s-region"></select>
     </div>
@@ -499,6 +593,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     <div class="field"><label for="f-lon">Longitude</label><input type="number" id="f-lon" step="any" inputmode="decimal" placeholder="-4.5678"></div>
   </div>
 
+  <div id="seagrass-form">
   <div class="frame">
     <div class="label"><span id="cover-title">Seagrass cover</span> <span class="hint" id="cover-size"></span></div>
     <div class="cover-wrap">
@@ -523,8 +618,11 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
       <button class="linkish" type="button" id="btn-other-species">Add a species not listed</button>
     </div>
     <div class="other-species hidden" id="other-wrap">
-      <label for="f-other-species" class="hint">Other species, separated by commas</label>
-      <input type="text" id="f-other-species" autocomplete="off" autocapitalize="sentences">
+      <label for="f-other-species" class="hint">Species name (separate several with commas)</label>
+      <div class="height-add">
+        <input type="text" id="f-other-species" autocomplete="off" autocapitalize="sentences" enterkeyhint="done">
+        <button class="btn btn-primary" type="button" id="btn-other-add">Add</button>
+      </div>
     </div>
   </div>
 
@@ -573,6 +671,216 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
       <button type="button" data-value="Mixed">Mixed</button>
     </div>
   </div>
+  </div><!-- /seagrass-form -->
+
+  <div id="rocky-form" class="hidden">
+    <div class="field">
+      <span class="label label-info">Shore zone
+        <button class="info-btn info-toggle" type="button" aria-expanded="false" aria-controls="zone-info" aria-label="What are the shore zones?">i</button></span>
+      <div class="info-panel hidden" id="zone-info">
+        <dl>
+          <dt>Splash zone</dt><dd>Above most high tides, wetted by spray. Black and orange lichens, small periwinkles.</dd>
+          <dt>Upper shore</dt><dd>Covered only around high water. Channelled and spiral wrack, Chthamalus barnacles.</dd>
+          <dt>Mid shore</dt><dd>Covered and uncovered every tide. Bladder or egg wrack, barnacles, limpets, topshells.</dd>
+          <dt>Lower shore</dt><dd>Uncovered only around low water. Serrated wrack, red seaweed turfs.</dd>
+          <dt>Sublittoral fringe</dt><dd>Exposed only on low spring tides. Kelps and their holdfasts.</dd>
+        </dl>
+      </div>
+      <div class="seg" data-name="zone">
+        <button type="button" data-value="Splash zone">Splash</button>
+        <button type="button" data-value="Upper shore">Upper</button>
+        <button type="button" data-value="Mid shore">Mid</button>
+        <button type="button" data-value="Lower shore">Lower</button>
+        <button type="button" data-value="Sublittoral fringe">Sublittoral fringe</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-hcd">Height above chart datum <span class="hint">m, optional</span></label>
+      <input type="number" id="f-hcd" inputmode="decimal" step="any">
+    </div>
+    <div class="field">
+      <span class="label">Substrate</span>
+      <div class="seg" data-name="substrate">
+        <button type="button" data-value="Bedrock">Bedrock</button>
+        <button type="button" data-value="Boulders">Boulders</button>
+        <button type="button" data-value="Cobbles">Cobbles</button>
+        <button type="button" data-value="Pebbles">Pebbles</button>
+        <button type="button" data-value="Mixed">Mixed</button>
+      </div>
+      <label class="check" style="margin-top:10px"><input type="checkbox" id="f-pool"> Quadrat is in a rock pool</label>
+    </div>
+
+    <div class="field">
+      <span class="label label-info">Species
+        <button class="info-btn info-toggle" type="button" aria-expanded="false" aria-controls="layer-info" aria-label="How are cover and layers recorded?">i</button></span>
+      <div class="info-panel hidden" id="layer-info">
+        <dl>
+          <dt>Canopy</dt><dd>Fronds of larger seaweeds, such as wracks and kelps, lying over the rock. Estimate their cover looking down on the quadrat.</dd>
+          <dt>Understorey</dt><dd>Everything attached to the rock beneath: barnacles, mussels, turfs, crusts and bare rock. Lift or part the canopy to estimate it.</dd>
+          <dt>Totals</dt><dd>Each layer can be up to 100%, so canopy and understorey together can add up to more than 100%.</dd>
+          <dt>Counts</dt><dd>Mobile animals such as limpets and topshells are counted. Use the + and − buttons, or type a number.</dd>
+          <dt>Carrying over</dt><dd>Species you pick stay listed for the next quadrat. Leave them at 0 if they're not there; that records an absence.</dd>
+        </dl>
+      </div>
+      <div id="rk-picker"></div>
+      <div class="species-more">
+        <button class="linkish" type="button" id="btn-rk-more"></button>
+        <button class="linkish" type="button" id="btn-rk-other">Add a species not listed</button>
+      </div>
+      <div class="rk-other hidden" id="rk-other-wrap">
+        <input type="text" id="rk-other-name" autocomplete="off" autocapitalize="sentences" placeholder="Scientific or common name" aria-label="Species name">
+        <div class="seg" data-name="rk-other-kind" data-multi="1">
+          <button type="button" data-value="cover" aria-pressed="true">Record as % cover</button>
+          <button type="button" data-value="count">Record as a count</button>
+        </div>
+        <button class="btn btn-primary" type="button" id="btn-rk-other-add">Add species</button>
+      </div>
+    </div>
+
+    <div class="rk-rows" id="rk-rows"></div>
+    <p class="rk-empty" id="rk-empty">Tap species above to add them to this quadrat.</p>
+
+    <div class="field">
+      <label for="f-bare">Bare rock <span class="hint">% of understorey</span></label>
+      <input type="number" id="f-bare" inputmode="decimal" min="0" max="100" step="any">
+    </div>
+    <p class="taxa-sum" id="rk-sum" aria-live="polite"></p>
+  </div><!-- /rocky-form -->
+
+  <div id="salt-form" class="hidden">
+    <div class="field">
+      <span class="label label-info">Marsh zone
+        <button class="info-btn info-toggle" type="button" aria-expanded="false" aria-controls="smzone-info" aria-label="What are the marsh zones?">i</button></span>
+      <div class="info-panel hidden" id="smzone-info">
+        <dl>
+          <dt>Pioneer</dt><dd>Open mud at the seaward edge with scattered glasswort, cordgrass or seablite.</dd>
+          <dt>Low marsh</dt><dd>Flooded by most tides. Saltmarsh-grass and sea purslane, often along creeks.</dd>
+          <dt>Mid marsh</dt><dd>Flooded by spring tides. Sea lavender, thrift, sea plantain, sea arrowgrass.</dd>
+          <dt>Upper marsh</dt><dd>Flooded only by the highest tides. Red fescue, sea rush, sea couch.</dd>
+          <dt>Transition</dt><dd>Grading into land: brackish reedbed, rushes or grassland.</dd>
+        </dl>
+      </div>
+      <div class="seg" data-name="smzone">
+        <button type="button" data-value="Pioneer">Pioneer</button>
+        <button type="button" data-value="Low marsh">Low</button>
+        <button type="button" data-value="Mid marsh">Mid</button>
+        <button type="button" data-value="Upper marsh">Upper</button>
+        <button type="button" data-value="Transition">Transition</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-smel">Elevation <span class="hint">m, optional; note the datum in survey notes</span></label>
+      <input type="number" id="f-smel" inputmode="decimal" step="any">
+    </div>
+
+    <div class="field">
+      <span class="label label-info">Species <span class="hint">% cover</span>
+        <button class="info-btn info-toggle" type="button" aria-expanded="false" aria-controls="sm-info" aria-label="How is cover recorded?">i</button></span>
+      <div class="info-panel hidden" id="sm-info">
+        <dl>
+          <dt>Cover</dt><dd>Estimate each species' cover looking down on the quadrat. Plants overlap, so species can add up to more than 100%.</dd>
+          <dt>Domin</dt><dd>The matching Domin class (used in NVC surveys) is shown and exported. Below 4% it depends on how many plants there are, so pick few, several or many.</dd>
+          <dt>Carrying over</dt><dd>Species you pick stay listed for the next quadrat. Leave them at 0 if they're not there; that records an absence.</dd>
+        </dl>
+      </div>
+      <div id="sm-picker"></div>
+      <div class="species-more">
+        <button class="linkish" type="button" id="btn-sm-more"></button>
+        <button class="linkish" type="button" id="btn-sm-other">Add a species not listed</button>
+      </div>
+      <div class="rk-other hidden" id="sm-other-wrap">
+        <input type="text" id="sm-other-name" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="Scientific or common name" aria-label="Species name">
+        <button class="btn btn-primary" type="button" id="btn-sm-other-add">Add species</button>
+      </div>
+    </div>
+    <div class="rk-rows" id="sm-rows"></div>
+    <p class="rk-empty" id="sm-empty">Tap species above to add them to this quadrat.</p>
+
+    <div class="row">
+      <div class="field"><label for="f-smbare">Bare ground <span class="hint">%</span></label><input type="number" id="f-smbare" inputmode="decimal" min="0" max="100" step="any"></div>
+      <div class="field"><label for="f-smlitter">Litter / strandline <span class="hint">%</span></label><input type="number" id="f-smlitter" inputmode="decimal" min="0" max="100" step="any"></div>
+    </div>
+    <div class="field">
+      <label for="f-vh">Vegetation height <span class="hint">cm, add each measurement</span></label>
+      <div class="height-add">
+        <input type="number" id="f-vh" inputmode="decimal" min="0" step="any" enterkeyhint="done">
+        <button class="btn" type="button" id="btn-add-vh">Add</button>
+      </div>
+      <div class="heights" id="vh-chips"></div>
+      <div class="density" id="vh-summary" aria-live="polite"></div>
+    </div>
+    <div class="field">
+      <span class="label">Grazing or trampling</span>
+      <div class="seg" data-name="grazing">
+        <button type="button" data-value="None">None</button>
+        <button type="button" data-value="Light">Light</button>
+        <button type="button" data-value="Moderate">Moderate</button>
+        <button type="button" data-value="Heavy">Heavy</button>
+      </div>
+    </div>
+  </div><!-- /salt-form -->
+
+  <div id="mud-form" class="hidden">
+    <div class="field">
+      <span class="label">Position on the flat</span>
+      <div class="seg" data-name="mfzone">
+        <button type="button" data-value="Upper flat">Upper</button>
+        <button type="button" data-value="Mid flat">Mid</button>
+        <button type="button" data-value="Lower flat">Lower</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-mfel">Elevation <span class="hint">m, optional; note the datum in survey notes</span></label>
+      <input type="number" id="f-mfel" inputmode="decimal" step="any">
+    </div>
+    <div class="field">
+      <span class="label">Sediment</span>
+      <div class="seg" data-name="mfsed">
+        <button type="button" data-value="Mud">Mud</button>
+        <button type="button" data-value="Sandy mud">Sandy mud</button>
+        <button type="button" data-value="Muddy sand">Muddy sand</button>
+        <button type="button" data-value="Sand">Sand</button>
+        <button type="button" data-value="Mixed">Mixed with shell or gravel</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="f-sink">Boot sinking <span class="hint">cm</span></label><input type="number" id="f-sink" inputmode="decimal" min="0" step="any"></div>
+      <div class="field"><label for="f-black">Black layer depth <span class="hint">cm</span></label><input type="number" id="f-black" inputmode="decimal" min="0" step="any"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="f-water">Surface water <span class="hint">%</span></label><input type="number" id="f-water" inputmode="decimal" min="0" max="100" step="any"></div>
+      <div class="field"><label for="f-core">Core / sample ID</label><input type="text" id="f-core" autocomplete="off" placeholder="e.g. C12"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="f-ripples"> Ripples on the surface</label>
+
+    <div class="field">
+      <span class="label label-info">Signs, animals and surface cover
+        <button class="info-btn info-toggle" type="button" aria-expanded="false" aria-controls="mf-info" aria-label="How are signs counted?">i</button></span>
+      <div class="info-panel hidden" id="mf-info">
+        <dl>
+          <dt>Signs</dt><dd>Most mudflat animals are buried, so count what they leave at the surface: casts, tubes, siphon holes, burrows and feeding marks. Exports record these as signs, not individuals.</dd>
+          <dt>Sub-samples</dt><dd>For dense, tiny things such as mud snails, count inside a smaller square and choose its size. The app scales the count up to the quadrat and to per m².</dd>
+          <dt>Surface cover</dt><dd>Algal mats, diatom film and patches of mussels or seagrass, as % of the quadrat. These can overlap.</dd>
+          <dt>Carrying over</dt><dd>Anything you pick stays listed for the next quadrat. Leave it at 0 if it's not there; that records an absence.</dd>
+        </dl>
+      </div>
+      <div id="mf-picker"></div>
+      <div class="species-more">
+        <button class="linkish" type="button" id="btn-mf-more"></button>
+        <button class="linkish" type="button" id="btn-mf-other">Add a species not listed</button>
+      </div>
+      <div class="rk-other hidden" id="mf-other-wrap">
+        <input type="text" id="mf-other-name" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="Scientific or common name" aria-label="Species name">
+        <div class="seg" data-name="mf-other-kind" data-multi="1">
+          <button type="button" data-value="count" aria-pressed="true">Record as a count</button>
+          <button type="button" data-value="cover">Record as % cover</button>
+        </div>
+        <button class="btn btn-primary" type="button" id="btn-mf-other-add">Add species</button>
+      </div>
+    </div>
+    <div class="rk-rows" id="mf-rows"></div>
+    <p class="rk-empty" id="mf-empty">Tap signs, animals or surface cover above to add them to this quadrat.</p>
+  </div><!-- /mud-form -->
 
   <div class="field">
     <span class="label">Photos</span>
@@ -605,8 +913,8 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   <h1 id="h-data">This survey</h1>
   <div class="stats">
     <div class="stat"><b id="st-n">0</b><span>quadrats</span></div>
-    <div class="stat"><b id="st-mean">–</b><span>mean cover</span></div>
-    <div class="stat"><b id="st-occ">–</b><span>with seagrass</span></div>
+    <div class="stat"><b id="st-mean">–</b><span id="st-mean-l">mean cover</span></div>
+    <div class="stat"><b id="st-occ">–</b><span id="st-occ-l">with seagrass</span></div>
   </div>
   <ul class="qlist" id="qlist"></ul>
   <div class="empty hidden" id="q-empty">No quadrats yet. Record your first one on the Record tab.</div>
@@ -630,7 +938,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     <button class="btn btn-wide" type="button" id="btn-csv">Download quadrats table (.csv)</button>
     <button class="btn btn-wide" type="button" id="btn-sp-csv">Download species table (.csv)</button>
   </div>
-  <p class="hint" id="export-hint">The quadrats table has one row per quadrat: location, time, conditions, total cover and habitat details. The species table has one row per species per quadrat, with cover, shoots and canopy heights. Join them in R on <code>quadrat_id</code>.</p>
+  <p class="hint" id="export-hint">The quadrats table has one row per quadrat: location, time, conditions and habitat details. The species table has one row per species per quadrat, with cover, layer, counts, shoots and canopy heights as recorded. Join them in R on <code>quadrat_id</code>.</p>
 
   <h2>Share with biodiversity databases?</h2>
   <div class="field">
@@ -699,9 +1007,11 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.8.1",
-  supportUrl: "",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
+  version: "0.12.0",
+  supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "",  // e.g. "hello@quadratnotes.com" (leave empty to hide)
+  // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
+  habitats: ["seagrass", "rocky", "saltmarsh"],
   citeUrl: "https://quadratnotes.com",  // the app's public address
   doi: ""            // e.g. "10.5281/zenodo.1234567" once archived on Zenodo; replaces the address in the citation
 };
@@ -783,8 +1093,9 @@ const APP_CONFIG = {
       if (!b) return;
       const name = seg.dataset.name;
       const wasOn = b.getAttribute("aria-pressed") === "true";
-      if (name === "scope" || name === "qsize" || name === "dwc-precision" || name === "dwc-share") {
+      if (name === "scope" || name === "qsize" || name === "dwc-precision" || name === "dwc-share" || name === "habitat" || name === "rkregion") {
         setSeg(name, b.dataset.value);
+        if (name === "habitat") setSurveyHabitat(b.dataset.value);
         if (name === "dwc-share") $("#dwc-options").classList.toggle("hidden", b.dataset.value !== "yes");
         if (name === "qsize") $("#qsize-custom").classList.toggle("hidden", b.dataset.value !== "custom");
         return;
@@ -886,7 +1197,9 @@ const APP_CONFIG = {
       date: $("#s-date").value || today(),
       surveyor: $("#s-surveyor").value.trim(),
       notes: $("#s-notes").value.trim(),
-      region: $("#s-region").value || "tna",
+      habitat: getSeg("habitat") || "seagrass",
+      rkRegion: (getSeg("habitat") || "seagrass") !== "seagrass" ? (getSeg("rkregion") || "nea") : null,
+      region: (getSeg("habitat") || "seagrass") !== "seagrass" ? "tna" : ($("#s-region").value || "tna"),
       design: getSeg("design"),
       designOther: getSeg("design") === "other" ? $("#s-design-other").value.trim() : "",
       quadratSideCm: side,
@@ -928,7 +1241,7 @@ const APP_CONFIG = {
       const o = document.createElement("option");
       const n = counts[x.id] || 0;
       o.value = x.id;
-      o.textContent = x.site + ", " + x.date + " (" + n + (n === 1 ? " quadrat)" : " quadrats)");
+      o.textContent = x.site + ", " + x.date + " (" + (habitatOf(x) === "rocky" ? "rocky shore, " : "") + n + (n === 1 ? " quadrat)" : " quadrats)");
       if (state.session && state.session.id === x.id) o.selected = true;
       sel.append(o);
     });
@@ -955,7 +1268,7 @@ const APP_CONFIG = {
       name.textContent = s.site;
       const sub = document.createElement("span");
       const n = counts[s.id] || 0;
-      sub.textContent = s.date + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (s.region ? ", " + regionLabel(s.region) : "");
+      sub.textContent = s.date + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (habitatOf(s) === "rocky" ? ", rocky shore, " + RK_REGION_NAME[rkRegionOf(s)] : (s.region ? ", " + regionLabel(s.region) : ""));
       info.append(name, sub);
       li.append(info);
       if (state.session && state.session.id === s.id) {
@@ -1012,6 +1325,7 @@ const APP_CONFIG = {
   })();
 
   state.species = new Set();
+  state.customSg = [];
   state.showAllSpecies = false;
   function renderSpecies() {
     const reg = regionOf(state.session);
@@ -1034,6 +1348,7 @@ const APP_CONFIG = {
       wrap.append(b);
     };
     list.filter(([n, common]) => common || state.showAllSpecies || state.species.has(n)).forEach(([n]) => addChip(n, true));
+    state.customSg.forEach(n => addChip(n, false));
     addChip("None", false);
     const rare = list.filter(([n, common]) => !common && !state.species.has(n)).length;
     const more = $("#btn-more-species");
@@ -1060,6 +1375,20 @@ const APP_CONFIG = {
   });
   $("#btn-more-species").addEventListener("click", () => { state.showAllSpecies = !state.showAllSpecies; renderSpecies(); });
   $("#btn-other-species").addEventListener("click", () => { $("#other-wrap").classList.remove("hidden"); $("#f-other-species").focus(); });
+  function addOtherSeagrass() {
+    const names = $("#f-other-species").value.split(",").map(x => x.trim()).filter(Boolean);
+    if (!names.length) { toast("Type a species name", true); return; }
+    const wasMulti = isMulti();
+    names.forEach(n => { if (!state.customSg.includes(n)) state.customSg.push(n); state.species.add(n); });
+    state.species.delete("None");
+    $("#f-other-species").value = "";
+    $("#other-wrap").classList.add("hidden");
+    renderSpecies();
+    carryBetweenModes(wasMulti);
+    toast(names.length === 1 ? "Added " + names[0] : "Added " + names.length + " species");
+  }
+  $("#btn-other-add").addEventListener("click", addOtherSeagrass);
+  $("#f-other-species").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addOtherSeagrass(); } });
   $("#f-other-species").addEventListener("input", () => {
     if ($("#f-other-species").value.trim() && state.species.has("None")) { state.species.delete("None"); renderSpecies(); }
   });
@@ -1072,10 +1401,11 @@ const APP_CONFIG = {
   function setSpeciesFromRecord(sp) {
     const arr = speciesList(sp);
     const known = new Set(SPECIES[regionOf(state.session)].map(x => x[0]).concat(["None"]));
-    state.species = new Set(arr.filter(x => known.has(x)));
     const others = arr.filter(x => !known.has(x));
-    $("#f-other-species").value = others.join(", ");
-    $("#other-wrap").classList.toggle("hidden", others.length === 0);
+    others.forEach(n => { if (!state.customSg.includes(n)) state.customSg.push(n); });
+    state.species = new Set(arr);
+    $("#f-other-species").value = "";
+    $("#other-wrap").classList.add("hidden");
     renderSpecies();
   }
 
@@ -1558,6 +1888,7 @@ const APP_CONFIG = {
     setSeg("epiphytes", null);
     if (!keepSticky) {
       state.species = new Set();
+      state.customSg = [];
       $("#f-other-species").value = "";
       $("#other-wrap").classList.add("hidden");
       setSeg("sediment", null);
@@ -1565,6 +1896,10 @@ const APP_CONFIG = {
     state.taxa = new Map();
     $("#taxa-cards").dataset.key = "";
     renderSpecies();
+    resetRocky(keepSticky);
+    resetSalt(keepSticky);
+    resetMud(keepSticky);
+    renderHabitatForm();
     $("#f-qnum").value = await nextQuadratNumber();
     $("#editing-bar").classList.add("hidden");
     $("#btn-save").textContent = "Save quadrat";
@@ -1582,6 +1917,24 @@ const APP_CONFIG = {
     if (num($("#f-height").value) !== null) addHeight(false);
     const qn = parseInt($("#f-qnum").value, 10);
     if (!qn || qn < 1) { toast("Add a quadrat number", true); $("#f-qnum").focus(); return; }
+    let specific;
+    if (habitatOf(state.session) === "mudflat") {
+      if ((num($("#f-water").value) ?? 0) > 100) { toast("Surface water can't be more than 100%", true); return; }
+      if (!state.mf.sel.size && !getSeg("mfsed")) { toast("Add at least one sign, animal or cover, or the sediment type", true); return; }
+      specific = mudRecordPart();
+    } else if (habitatOf(state.session) === "saltmarsh") {
+      if ((num($("#f-smbare").value) ?? 0) > 100 || (num($("#f-smlitter").value) ?? 0) > 100) { toast("Bare ground and litter can't be more than 100%", true); return; }
+      if (!state.sm.sel.size && num($("#f-smbare").value) === null) { toast("Add at least one species or the bare ground cover", true); return; }
+      const missing = Array.from(state.sm.sel.entries()).filter(([, t]) => t.value > 0 && t.value < 4 && !t.few).length;
+      if (missing) toast("Saved. For species under 4%, pick few, several or many to complete their Domin class.");
+      specific = saltRecordPart();
+    } else if (habitatOf(state.session) === "rocky") {
+      const sums = rockySums();
+      if (sums.canopy > 100) { toast("Canopy adds up to more than 100%. Check the values.", true); return; }
+      if (sums.under > 100) { toast("Understorey and bare rock add up to more than 100%. Check the values.", true); return; }
+      if (!state.rk.sel.size && num($("#f-bare").value) === null) { toast("Add at least one species or the bare rock cover", true); return; }
+      specific = rockyRecordPart();
+    } else {
     if (state.cover === null) { toast("Set seagrass cover (tap None if there's none)", true); return; }
     if ((num($("#f-algae").value) ?? 0) > 100) { toast("Algae cover can't be more than 100%", true); return; }
     const mNames = measuredSpecies();
@@ -1595,6 +1948,19 @@ const APP_CONFIG = {
       : mNames.length === 1 ? [{ name: mNames[0], cover: state.cover, shoots: num($("#f-shoots").value), heights: state.heights.slice() }] : [];
     const shootVals = taxa.map(t => t.shoots).filter(v => v !== null && v !== undefined);
     const allHeights = taxa.reduce((a, t) => a.concat(t.heights), []);
+    specific = {
+      habitat: "seagrass",
+      cover: state.cover,
+      species: currentSpecies(),
+      taxa,
+      shoots: multi ? (shootVals.length ? shootVals.reduce((a, b) => a + b, 0) : null) : num($("#f-shoots").value),
+      heights: multi ? allHeights : state.heights.slice(),
+      height: (multi ? allHeights : state.heights).length ? Number(((multi ? allHeights : state.heights).reduce((a, b) => a + b, 0) / (multi ? allHeights : state.heights).length).toFixed(1)) : null,
+      epiphytes: getSeg("epiphytes"),
+      algae: num($("#f-algae").value),
+      sediment: getSeg("sediment")
+    };
+    }
     const existing = state.editingId ? await get("quadrats", state.editingId) : null;
     const id = state.editingId || uid();
 
@@ -1612,15 +1978,7 @@ const APP_CONFIG = {
       updatedAt: new Date().toISOString(),
       lat, lon,
       acc: (state.gpsMode === "live" && state.live && lat !== null) ? Math.round(state.live.acc) : (state.gpsMode === "saved" && existing ? existing.acc : null),
-      cover: state.cover,
-      species: currentSpecies(),
-      taxa,
-      shoots: multi ? (shootVals.length ? shootVals.reduce((a, b) => a + b, 0) : null) : num($("#f-shoots").value),
-      heights: multi ? allHeights : state.heights.slice(),
-      height: (multi ? allHeights : state.heights).length ? Number(((multi ? allHeights : state.heights).reduce((a, b) => a + b, 0) / (multi ? allHeights : state.heights).length).toFixed(1)) : null,
-      epiphytes: getSeg("epiphytes"),
-      algae: num($("#f-algae").value),
-      sediment: getSeg("sediment"),
+      ...specific,
       notes: $("#f-notes").value.trim(),
       photoIds: state.photos.map(p => p.id),
       transect: designOf() === "transect" ? ($("#f-transect").value.trim() || null) : null,
@@ -1629,7 +1987,8 @@ const APP_CONFIG = {
     };
     await put("quadrats", record);
     const wasEditing = !!existing;
-    toast((wasEditing ? "Changes saved to quadrat " : "Quadrat " + qn + " saved") + (wasEditing ? qn : ""));
+    if (!$("#toast").classList.contains("show") || !$("#toast").textContent.startsWith("Saved. For species"))
+      toast((wasEditing ? "Changes saved to quadrat " : "Quadrat " + qn + " saved") + (wasEditing ? qn : ""));
     await resetForm(true);
     window.scrollTo(0, 0);
     if (wasEditing) show("data");
@@ -1647,6 +2006,11 @@ const APP_CONFIG = {
     $("#f-lon").value = q.lon != null ? q.lon : "";
     state.gpsMode = "saved";
     renderGps();
+    renderHabitatForm();
+    if (habitatOf(state.session) === "mudflat") loadMud(q);
+    else if (habitatOf(state.session) === "saltmarsh") loadSalt(q);
+    else if (habitatOf(state.session) === "rocky") loadRocky(q);
+    else {
     setCover(q.cover, true);
     $("#f-cover").value = q.cover;
     state.taxa = new Map();
@@ -1662,6 +2026,7 @@ const APP_CONFIG = {
     $("#taxa-cards").dataset.key = "";
     setSpeciesFromRecord(q.species); setSeg("epiphytes", q.epiphytes); setSeg("sediment", q.sediment);
     $("#f-algae").value = q.algae ?? "";
+    }
     renderDesignFields();
     $("#f-transect").value = q.transect || "";
     $("#f-dist").value = q.distance ?? "";
@@ -1697,7 +2062,14 @@ const APP_CONFIG = {
     $("#h-data").textContent = state.session.site;
     const qs = (await byIndex("quadrats", "sessionId", state.session.id)).sort((a, b) => a.quadrat - b.quadrat);
     $("#st-n").textContent = qs.length;
-    if (qs.length) {
+    const rocky = habitatOf(state.session) !== "seagrass";
+    $("#st-mean-l").textContent = rocky ? "taxa recorded" : "mean cover";
+    $("#st-occ-l").textContent = rocky ? "taxa per quadrat" : "with seagrass";
+    if (rocky) {
+      const present = qs.map(q => (q.taxa || []).filter(isPresent).map(t => t.name));
+      $("#st-mean").textContent = qs.length ? new Set(present.flat()).size : "–";
+      $("#st-occ").textContent = qs.length ? (present.reduce((a, p) => a + p.length, 0) / qs.length).toFixed(1) : "–";
+    } else if (qs.length) {
       const mean = qs.reduce((s, q) => s + (q.cover || 0), 0) / qs.length;
       const occ = qs.filter(q => q.cover > 0).length / qs.length * 100;
       $("#st-mean").textContent = mean.toFixed(1) + "%";
@@ -1717,13 +2089,28 @@ const APP_CONFIG = {
       const mid = document.createElement("span");
       const meta = document.createElement("span"); meta.className = "meta";
       const bits = [];
-      const spText = speciesText(q.species);
+      const spText = rocky ? "" : speciesText(q.species);
+      if (rocky && q.zone) bits.push(q.zone);
       if (spText) bits.push(spText);
       if (q.transect || q.distance != null) bits.unshift((q.transect || "Transect") + (q.distance != null ? " at " + q.distance + " m" : ""));
       if (q.plot) bits.unshift("Plot " + q.plot);
       if (q.sediment) bits.push(q.sediment);
       if (q.photoIds && q.photoIds.length) bits.push(q.photoIds.length + (q.photoIds.length === 1 ? " photo" : " photos"));
       meta.textContent = bits.join(", ") || new Date(q.recordedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+      if (rocky) {
+        const np = (q.taxa || []).filter(isPresent).length;
+        const pct = document.createElement("span"); pct.className = "pct"; pct.textContent = np;
+        pct.setAttribute("aria-label", np + " taxa");
+        if (q.bare != null) bits.push(q.bare + (q.habitat === "saltmarsh" ? "% bare ground" : "% bare rock"));
+        if (q.grazing && q.grazing !== "None") bits.push(q.grazing.toLowerCase() + " grazing");
+        if (q.coreId) bits.push("core " + q.coreId);
+        meta.textContent = bits.join(", ") || new Date(q.recordedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+        mid.append(meta);
+        b.append(qn, mid, pct);
+        b.addEventListener("click", () => editQuadrat(q.id));
+        li.append(b); ul.append(li);
+        return;
+      }
       const bar = document.createElement("div"); bar.className = "bar";
       const fill = document.createElement("i"); fill.style.width = (q.cover || 0) + "%";
       bar.append(fill);
@@ -1737,12 +2124,17 @@ const APP_CONFIG = {
   }
 
   /* ---------- Export ---------- */
-  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design",
+  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "habitat", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design",
     "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state",
     "quadrat", "transect", "distance_from_start_m", "plot_id", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
-    "algae_cover_pct", "sediment", "photo_files", "notes"];
-  const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "quadrat", "species", "species_cover_pct", "shoot_count", "shoot_density_m2",
-    "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
+    "algae_cover_pct", "sediment", "zone", "height_above_cd_m", "elevation_m", "substrate", "rock_pool", "bare_rock_pct", "canopy_total_pct", "understorey_total_pct",
+    "bare_ground_pct", "litter_pct", "vegetation_height_mean_cm", "vegetation_height_n", "vegetation_heights_cm", "grazing",
+    "boot_sink_cm", "black_layer_depth_cm", "surface_water_pct", "ripples", "core_id",
+    "photo_files", "notes"];
+  const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "habitat", "quadrat", "species", "evidence", "layer", "species_cover_pct", "domin",
+    "count", "subsample_area_m2", "count_per_quadrat", "count_density_m2", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
+  const COND_COLS = ["conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state"];
+  const r1 = v => Number(v.toFixed(1));
   // Readable survey codes, e.g. "porthdinllaen-2026-10-14". Older surveys without a stored code get one by creation order.
   function codeBase(site, date) { return slug(site).slice(0, 30) + "-" + date; }
   function codeMap(sessions) {
@@ -1789,15 +2181,41 @@ const APP_CONFIG = {
         const area = s.quadratAreaM2 || null;
         const code = codes.get(s.id), qid = quadratId(code, q.quadrat);
         const tx = taxaOf(q);
-        rows.push([code, qid, s.site, s.surveyor, s.date, s.region ? regionLabel(s.region) : null, s.quadratSideCm || null, area, designLabel(s),
-          ...condCells(s.conditions), q.quadrat, q.transect ?? null, q.distance ?? null, q.plot ?? null, q.recordedAt, q.lat, q.lon, q.acc, q.cover,
-          tx.length, q.epiphytes, q.algae, q.sediment, names.join(";"), q.notes]);
-        if (!tx.length) spRows.push([code, qid, s.site, s.date, q.quadrat, "None", 0, null, null, null, null, ""]);
+        const hab = habitatOf(s), rk = hab === "rocky", sm = hab === "saltmarsh", mf = hab === "mudflat", sg = hab === "seagrass";
+        const vh = q.vegHeights || [];
+        const cond = condCells(s.conditions);
+        const qrow = { survey_id: code, quadrat_id: qid, site: s.site, surveyor: s.surveyor, survey_date: s.date, habitat: HABITAT_NAME[hab],
+          region: sg ? (s.region ? regionLabel(s.region) : null) : RK_REGION_NAME[rkRegionOf(s)], quadrat_side_cm: s.quadratSideCm || null, quadrat_area_m2: area,
+          sampling_design: designLabel(s), quadrat: q.quadrat, transect: q.transect, distance_from_start_m: q.distance, plot_id: q.plot, recorded_at: q.recordedAt,
+          latitude: q.lat, longitude: q.lon, gps_accuracy_m: q.acc, seagrass_cover_pct: sg ? q.cover : null, n_species: sg ? tx.length : tx.filter(isPresent).length,
+          epiphytes: sg ? q.epiphytes : null, algae_cover_pct: sg ? q.algae : null, sediment: (sg || mf) ? q.sediment : null,
+          zone: sg ? null : q.zone, height_above_cd_m: rk ? q.heightCD : null, elevation_m: (sm || mf) ? q.elevation : null, substrate: rk ? q.substrate : null,
+          rock_pool: rk ? (q.rockPool ? "yes" : "no") : null, bare_rock_pct: rk ? q.bare : null, canopy_total_pct: rk ? q.canopyTotal : null, understorey_total_pct: rk ? q.underTotal : null,
+          bare_ground_pct: sm ? q.bare : null, litter_pct: sm ? q.litter : null, vegetation_height_mean_cm: sm ? q.vegHeight : null,
+          vegetation_height_n: sm ? (vh.length || null) : null, vegetation_heights_cm: sm ? vh.join(";") : null, grazing: sm ? q.grazing : null,
+          boot_sink_cm: mf ? q.sink : null, black_layer_depth_cm: mf ? q.blackLayer : null, surface_water_pct: mf ? q.water : null,
+          ripples: mf ? (q.ripples ? "yes" : "no") : null, core_id: mf ? q.coreId : null, photo_files: names.join(";"), notes: q.notes };
+        COND_COLS.forEach((c, i) => { qrow[c] = cond[i]; });
+        rows.push(COLS.map(c => qrow[c] ?? null));
+        const baseRow = { survey_id: code, quadrat_id: qid, site: s.site, survey_date: s.date, habitat: HABITAT_NAME[hab], quadrat: q.quadrat };
+        const spush = o => { const r = Object.assign({}, baseRow, o); spRows.push(SP_COLS.map(c => r[c] ?? null)); };
+        if (!tx.length) spush({ species: "None", species_cover_pct: 0 });
         tx.forEach(t => {
+          if (sm) return spush({ species: t.name, species_cover_pct: t.cover, domin: t.domin ?? (t.cover > 0 && t.cover < 4 ? "1-3" : null) });
+          if (rk) return spush({ species: t.name, layer: t.kind === "cover" ? (t.layer === "canopy" ? "canopy" : "understorey") : null,
+            species_cover_pct: t.kind === "cover" ? t.cover : null, count: t.kind === "count" ? t.count : null,
+            count_density_m2: (t.kind === "count" && area && t.count != null) ? r1(t.count / area) : null });
+          if (mf) {
+            if (t.kind === "cover") return spush({ species: t.name, species_cover_pct: t.cover });
+            const sa = t.subArea || area;
+            return spush({ species: t.name, evidence: t.evidence || null, count: t.count, subsample_area_m2: t.subArea || null,
+              count_per_quadrat: (sa && area && t.count != null) ? r1(t.count * area / sa) : null,
+              count_density_m2: (sa && t.count != null) ? r1(t.count / sa) : null });
+          }
           const th = t.heights || [];
-          spRows.push([code, qid, s.site, s.date, q.quadrat, t.name, t.cover ?? null, t.shoots ?? null,
-            (area && t.shoots != null) ? Number((t.shoots / area).toFixed(1)) : null,
-            th.length ? Number((th.reduce((a, b) => a + b, 0) / th.length).toFixed(1)) : null, th.length || null, th.join(";")]);
+          spush({ species: t.name, species_cover_pct: t.cover ?? null, shoot_count: t.shoots ?? null,
+            shoot_density_m2: (area && t.shoots != null) ? r1(t.shoots / area) : null,
+            canopy_height_mean_cm: th.length ? r1(th.reduce((x, y) => x + y, 0) / th.length) : null, canopy_height_n: th.length || null, canopy_heights_cm: th.join(";") });
         });
       }
     }
@@ -1849,7 +2267,7 @@ const APP_CONFIG = {
 
   const EVENT_COLS = ["eventID", "parentEventID", "eventDate", "samplingProtocol", "sampleSizeValue", "sampleSizeUnit", "habitat", "locality",
     "decimalLatitude", "decimalLongitude", "geodeticDatum", "coordinateUncertaintyInMeters", "dataGeneralizations", "eventRemarks"];
-  const OCC_COLS = ["eventID", "occurrenceID", "basisOfRecord", "scientificName", "scientificNameID", "kingdom", "occurrenceStatus", "recordedBy"];
+  const OCC_COLS = ["eventID", "occurrenceID", "basisOfRecord", "scientificName", "scientificNameID", "kingdom", "occurrenceStatus", "recordedBy", "occurrenceRemarks"];
   const MOF_COLS = ["eventID", "occurrenceID", "measurementType", "measurementValue", "measurementUnit", "measurementRemarks"];
 
   async function buildDwc(scope) {
@@ -1871,7 +2289,7 @@ const APP_CONFIG = {
     }
     if (!perSession.length) return null;
     perSession.forEach(({ s, qs }) => {
-      if (!qs.some(q => taxaOf(q).length)) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => allNames.add(x[0]));
+      if (habitatOf(s) !== "rocky" && !qs.some(q => taxaOf(q).length)) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => allNames.add(x[0]));
     });
     const ids = {};
     let lookedUp = 0;
@@ -1882,8 +2300,10 @@ const APP_CONFIG = {
     for (const { s, qs } of perSession) {
       const code = codes.get(s.id);
       const side = s.quadratSideCm, area = s.quadratAreaM2;
-      const protocol = "Seagrass quadrat survey" + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + (s.design ? ", " + designSentence(s) : "") + ", recorded with the QuadratNotes app";
-      events.push({ eventID: code, eventDate: s.date, samplingProtocol: protocol, habitat: "Seagrass meadow", locality: s.site,
+      const isR = habitatOf(s) === "rocky", isS = habitatOf(s) === "saltmarsh", isM = habitatOf(s) === "mudflat", multi = isR || isS || isM;
+      const habName = isR ? "Rocky shore" : isS ? "Saltmarsh" : isM ? "Intertidal mudflat" : "Seagrass meadow";
+      const protocol = HABITAT_NAME[habitatOf(s)] + " quadrat survey" + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + (s.design ? ", " + designSentence(s) : "") + ", recorded with the QuadratNotes app";
+      events.push({ eventID: code, eventDate: s.date, samplingProtocol: protocol, habitat: habName, locality: s.site,
         eventRemarks: s.notes || "" });
       dates.push(s.date);
       const c = s.conditions;
@@ -1900,9 +2320,9 @@ const APP_CONFIG = {
         add("tide state", c.tideState, "", src);
       }
       const present = new Set();
-      qs.forEach(q => taxaOf(q).forEach(t => present.add(t.name)));
+      qs.forEach(q => taxaOf(q).filter(t => !multi || isPresent(t)).forEach(t => present.add(t.name)));
       // A survey that found no seagrass at all still says something: record absences of the region's main species.
-      if (!present.size) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => { present.add(x[0]); allNames.add(x[0]); });
+      if (!multi && !present.size) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => { present.add(x[0]); allNames.add(x[0]); });
       for (const q of qs) {
         const qid = quadratId(code, q.quadrat);
         let lat = q.lat, lon = q.lon, unc = q.acc ?? null, gen = "";
@@ -1914,14 +2334,40 @@ const APP_CONFIG = {
         if (lat != null) lats.push(lat);
         if (lon != null) lons.push(lon);
         events.push({ eventID: qid, parentEventID: code, eventDate: q.recordedAt, samplingProtocol: protocol,
-          sampleSizeValue: area ?? "", sampleSizeUnit: area ? "square metre" : "", habitat: "Seagrass meadow" + (q.sediment ? "; sediment: " + q.sediment : ""),
+          sampleSizeValue: area ?? "", sampleSizeUnit: area ? "square metre" : "", habitat: isM ? ["Intertidal mudflat", q.zone, q.sediment].filter(Boolean).join("; ") : isS ? ["Saltmarsh", q.zone].filter(Boolean).join("; ") : isR ? ["Rocky shore", q.zone, q.substrate, q.rockPool ? "rock pool" : null].filter(Boolean).join("; ") : "Seagrass meadow" + (q.sediment ? "; sediment: " + q.sediment : ""),
           locality: s.site, decimalLatitude: lat ?? "", decimalLongitude: lon ?? "", geodeticDatum: lat != null ? "WGS84" : "",
           coordinateUncertaintyInMeters: unc ?? "", dataGeneralizations: gen, eventRemarks: q.notes || "" });
         const ev = (type, value, unit) => { if (value !== null && value !== undefined && value !== "") mof.push({ eventID: qid, measurementType: type, measurementValue: value, measurementUnit: unit || "" }); };
+        if (isM) {
+          ev("position on mudflat", q.zone, "");
+          ev("elevation", q.elevation, "m");
+          ev("sediment type", q.sediment, "");
+          ev("boot sinking depth", q.sink, "cm");
+          ev("depth of black anoxic layer", q.blackLayer, "cm");
+          ev("surface water cover", q.water, "%");
+          ev("surface ripples", q.ripples ? "yes" : null, "");
+          ev("sediment core or sample ID", q.coreId, "");
+        } else if (isS) {
+          ev("saltmarsh zone", q.zone, "");
+          ev("elevation", q.elevation, "m", );
+          ev("bare ground cover", q.bare, "%");
+          ev("litter and strandline cover", q.litter, "%");
+          (q.vegHeights || []).forEach(h => ev("vegetation height", h, "cm"));
+          ev("grazing or trampling intensity", q.grazing, "");
+        } else if (isR) {
+          ev("shore zone", q.zone, "");
+          ev("height above chart datum", q.heightCD, "m");
+          ev("substrate type", q.substrate, "");
+          ev("rock pool", q.rockPool ? "yes" : null, "");
+          ev("bare rock cover", q.bare, "%");
+          ev("total canopy cover", q.canopyTotal, "%");
+          ev("total understorey cover", q.underTotal, "%");
+        } else {
         ev("seagrass cover (all species)", q.cover, "%");
         ev("macroalgae cover", q.algae, "%");
         ev("epiphyte load on seagrass leaves", q.epiphytes, "");
         ev("sediment type", q.sediment, "");
+        }
         ev("transect", q.transect, "");
         ev("distance from start of transect", q.distance, "m");
         ev("fixed plot", q.plot, "");
@@ -1929,10 +2375,37 @@ const APP_CONFIG = {
         const here = new Set(tx.map(t => t.name));
         tx.forEach(t => {
           const oid = qid + "-" + slug(t.name);
+          const pres = !multi || isPresent(t);
           occ.push({ eventID: qid, occurrenceID: oid, basisOfRecord: "HumanObservation", scientificName: t.name,
-            scientificNameID: ids[t.name] ? "urn:lsid:marinespecies.org:taxname:" + ids[t.name] : "", kingdom: "Plantae",
-            occurrenceStatus: "present", recordedBy: withNames ? (s.surveyor || "") : "" });
+            scientificNameID: ids[t.name] ? "urn:lsid:marinespecies.org:taxname:" + ids[t.name] : "", kingdom: kingdomOf(t.name, s),
+            occurrenceStatus: pres ? "present" : "absent", recordedBy: withNames ? (s.surveyor || "") : "",
+            occurrenceRemarks: (isM && t.evidence) ? "Recorded from surface " + t.evidence + ", not individuals" : "" });
           const om = (type, value, unit, remark) => { if (value !== null && value !== undefined && value !== "") mof.push({ eventID: qid, occurrenceID: oid, measurementType: type, measurementValue: value, measurementUnit: unit || "", measurementRemarks: remark || "" }); };
+          if (isM) {
+            if (!pres) return;
+            if (t.kind === "cover") { om("percent cover", t.cover, "%"); return; }
+            const what = t.evidence || "individuals", sa = t.subArea || area;
+            om(t.evidence ? "count of " + t.evidence : "abundance", t.count, what + (t.subArea ? " per " + t.subArea + " square metre sub-sample" : " per quadrat"),
+              t.evidence ? "Surface signs, not individuals" : "");
+            if (sa) om(t.evidence ? t.evidence + " density" : "density", r1(t.count / sa), what + " per square metre", t.subArea ? "Scaled from sub-sample" : "Calculated from count and quadrat area");
+            return;
+          }
+          if (isS) {
+            if (!pres) return;
+            om("percent cover", t.cover, "%");
+            const dv = t.domin ?? null;
+            om("Domin cover class", dv, "", dv === null ? "" : t.cover < 4 ? "Derived from percent cover and number of plants" : "Derived from percent cover");
+            return;
+          }
+          if (isR) {
+            if (!pres) return;
+            if (t.kind === "cover") om("percent cover", t.cover, "%", t.layer === "canopy" ? "Canopy layer" : "Understorey layer");
+            else {
+              om("abundance", t.count, "individuals per quadrat");
+              if (area) om("density", Number((t.count / area).toFixed(1)), "individuals per square metre", "Calculated from count and quadrat area");
+            }
+            return;
+          }
           om("percent cover", t.cover ?? (tx.length === 1 ? q.cover : null), "%");
           om("shoot count", t.shoots, "shoots per quadrat");
           if (area && t.shoots != null) om("shoot density", Number((t.shoots / area).toFixed(1)), "shoots per square metre", "Calculated from shoot count and quadrat area");
@@ -1941,7 +2414,7 @@ const APP_CONFIG = {
         present.forEach(name => {
           if (here.has(name)) return;
           occ.push({ eventID: qid, occurrenceID: qid + "-" + slug(name), basisOfRecord: "HumanObservation", scientificName: name,
-            scientificNameID: ids[name] ? "urn:lsid:marinespecies.org:taxname:" + ids[name] : "", kingdom: "Plantae",
+            scientificNameID: ids[name] ? "urn:lsid:marinespecies.org:taxname:" + ids[name] : "", kingdom: kingdomOf(name, s),
             occurrenceStatus: "absent", recordedBy: withNames ? (s.surveyor || "") : "" });
         });
       }
@@ -1961,7 +2434,9 @@ const APP_CONFIG = {
 
     const sites = Array.from(new Set(perSession.map(p => p.s.site)));
     const d0 = dates.slice().sort()[0], d1 = dates.slice().sort().slice(-1)[0];
-    const title = "Seagrass quadrat surveys: " + sites.join(", ") + " (" + (d0 === d1 ? d0 : d0 + " to " + d1) + ")";
+    const habs = new Set(perSession.map(p => habitatOf(p.s)));
+    const habWord = habs.size > 1 ? "Coastal" : HABITAT_NAME[Array.from(habs)[0]];
+    const title = habWord + " quadrat surveys: " + sites.join(", ") + " (" + (d0 === d1 ? d0 : d0 + " to " + d1) + ")";
     const party = creator ? (() => { const p = creator.split(/\s+/); const sur = p.pop(); return "<individualName>" + (p.length ? "<givenName>" + xmlEsc(p.join(" ")) + "</givenName>" : "") + "<surName>" + xmlEsc(sur) + "</surName></individualName>"; })()
       : "<organizationName>QuadratNotes user</organizationName>";
     const bbox = lats.length ? "<boundingCoordinates><westBoundingCoordinate>" + Math.min(...lons) + "</westBoundingCoordinate><eastBoundingCoordinate>" + Math.max(...lons) +
@@ -1973,13 +2448,18 @@ const APP_CONFIG = {
       '<dataset>\n<title xml:lang="en">' + xmlEsc(title) + '</title>\n' +
       '<creator>' + party + '</creator>\n<metadataProvider>' + party + '</metadataProvider>\n' +
       '<pubDate>' + today() + '</pubDate>\n<language>en</language>\n' +
-      '<abstract><para>' + xmlEsc("Quadrat-based seagrass survey data from " + sites.join(", ") + ": " + nQ + " quadrats with seagrass cover, species present and absent, shoot counts and canopy heights where measured, sediment type and survey conditions. Recorded in the field with the QuadratNotes app.") + '</para></abstract>\n' +
+      '<abstract><para>' + xmlEsc("Quadrat-based " + habWord.toLowerCase() + " survey data from " + sites.join(", ") + ": " + nQ + " quadrats with species present and absent" +
+        (habs.has("seagrass") ? "; seagrass cover, shoot counts and canopy heights where measured, and sediment type" : "") +
+        (habs.has("rocky") ? "; percent cover of seaweeds and attached animals in canopy and understorey layers, counts of mobile animals, shore zone and substrate" : "") +
+        (habs.has("mudflat") ? "; counts of surface signs (casts, tubes, siphon holes, burrows) and small animals, surface cover of algal mats and diatom film, sediment type and softness" : "") +
+        (habs.has("saltmarsh") ? "; percent cover and Domin class of saltmarsh plants, marsh zone, bare ground, litter, vegetation height and grazing" : "") +
+        "; and survey conditions. Recorded in the field with the QuadratNotes app.") + '</para></abstract>\n' +
       '<intellectualRights><para>This work is licensed under a <ulink url="' + lic.url + '"><citetitle>' + xmlEsc(lic.name) + '</citetitle></ulink>.</para></intellectualRights>\n' +
       '<coverage><geographicCoverage><geographicDescription>' + xmlEsc(sites.join("; ")) + '</geographicDescription>' + bbox + '</geographicCoverage>' +
       '<temporalCoverage><rangeOfDates><beginDate><calendarDate>' + d0 + '</calendarDate></beginDate><endDate><calendarDate>' + d1 + '</calendarDate></endDate></rangeOfDates></temporalCoverage></coverage>\n' +
       '<contact>' + party + '</contact>\n' +
-      '<methods><methodStep><description><para>' + xmlEsc("Each survey is a parent event; each quadrat is a child event with its own position and time. Seagrass cover was estimated per quadrat, and per species where more than one species was present. Absences are recorded for species found elsewhere in the same survey; where a survey found no seagrass at all, absences are recorded for the main seagrass species of the region. Weather and modelled tide values were looked up from Open-Meteo at the start of the survey.") + '</para></description></methodStep>' +
-      '<sampling><studyExtent><description><para>' + xmlEsc(sites.join("; ")) + '</para></description></studyExtent><samplingDescription><para>' + xmlEsc("Quadrat surveys of intertidal and shallow subtidal seagrass.") + '</para></samplingDescription></sampling></methods>\n' +
+      '<methods><methodStep><description><para>' + xmlEsc("Each survey is a parent event; each quadrat is a child event with its own position and time. In seagrass surveys, cover was estimated per quadrat, and per species where more than one species was present; absences are recorded for species found elsewhere in the same survey, and where a survey found no seagrass at all, for the main seagrass species of the region. In rocky shore surveys, seaweeds and attached animals were recorded as percent cover in a canopy layer and an understorey layer (each up to 100%, understorey including bare rock), and mobile animals were counted; species listed but recorded as zero are absences. In saltmarsh surveys, the percent cover of each plant species was estimated (species can overlap, so totals can exceed 100%) and converted to the Domin scale; species listed but recorded as zero are absences. In mudflat surveys, buried animals were recorded from surface signs (casts, tubes, siphon holes, burrows, feeding marks), counted per quadrat or in a stated sub-sample and scaled to density; these are counts of signs, not individuals. Surface cover was estimated as percent of the quadrat; items listed but recorded as zero are absences. Weather and modelled tide values were looked up from Open-Meteo at the start of the survey.") + '</para></description></methodStep>' +
+      '<sampling><studyExtent><description><para>' + xmlEsc(sites.join("; ")) + '</para></description></studyExtent><samplingDescription><para>' + xmlEsc(habWord === "Seagrass" ? "Quadrat surveys of intertidal and shallow subtidal seagrass." : habWord === "Rocky shore" ? "Quadrat surveys of intertidal rocky shores." : habWord === "Saltmarsh" ? "Quadrat surveys of saltmarsh vegetation." : habWord === "Mudflat" ? "Quadrat surveys of intertidal mudflats." : "Quadrat surveys of intertidal and shallow subtidal coastal habitats.") + '</para></samplingDescription></sampling></methods>\n' +
       '</dataset>\n</eml:eml>\n';
 
     const base = scope === "all" ? "all-surveys_" + today() : (state.session ? slug(state.session.site) + "_" + state.session.date : "survey");
@@ -2304,6 +2784,575 @@ const APP_CONFIG = {
   }
   $("#f-transect").addEventListener("change", () => { if (!state.editingId) suggestDistance(); });
 
+  /* ---------- Habitats ---------- */
+  const habitatOf = sess => (sess && sess.habitat) || "seagrass";
+  const HABITAT_NAME = { seagrass: "Seagrass", rocky: "Rocky shore", saltmarsh: "Saltmarsh", mudflat: "Mudflat" };
+  function setSurveyHabitat(h) {
+    setSeg("habitat", h);
+    $("#region-field").classList.toggle("hidden", h !== "seagrass");
+    $("#rocky-region-field").classList.toggle("hidden", h === "seagrass");
+    $("#h-survey").textContent = "Start a " + HABITAT_NAME[h].toLowerCase() + " survey";
+    $("#s-site").placeholder = h === "rocky" ? "e.g. Wembury reef" : h === "saltmarsh" ? "e.g. Tamar saltmarsh" : h === "mudflat" ? "e.g. Erme estuary flats" : "e.g. Porthdinllaen meadow";
+  }
+  // Hide habitats that are switched off. Surveys already recorded in them still open, show and export.
+  ["mudflat"].forEach(h => {
+    if (APP_CONFIG.habitats.includes(h)) return;
+    const card = $("#card-" + h); if (card) card.classList.add("hidden");
+    const opt = $('.seg[data-name="habitat"] button[data-value="' + h + '"]'); if (opt) opt.classList.add("hidden");
+  });
+  setSurveyHabitat("seagrass");
+  function renderHabitatForm() {
+    const h = habitatOf(state.session);
+    $("#seagrass-form").classList.toggle("hidden", h !== "seagrass");
+    $("#rocky-form").classList.toggle("hidden", h !== "rocky");
+    $("#salt-form").classList.toggle("hidden", h !== "saltmarsh");
+    $("#mud-form").classList.toggle("hidden", h !== "mudflat");
+    $('label[for="f-notes"] .hint').textContent = h === "mudflat" ? "birds feeding, shellfish, debris" : h === "rocky" ? "other species, rock pool details, damage" : h === "saltmarsh" ? "creeks, pans, erosion, damage" : "fauna, burrows, damage";
+  }
+  // Generic expanding info panels
+  $$(".info-toggle").forEach(b => b.addEventListener("click", () => {
+    const open = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", String(open));
+    $("#" + b.getAttribute("aria-controls")).classList.toggle("hidden", !open);
+  }));
+
+  /* ---------- Rocky shore ---------- */
+  // [scientific name, display label (null = italic short name), cover|count, default layer, kingdom, shown by default, group]
+  const ROCKY = [
+    ["Pelvetia canaliculata", null, "cover", "canopy", "Chromista", 1, "weed"],
+    ["Fucus spiralis", null, "cover", "canopy", "Chromista", 1, "weed"],
+    ["Fucus vesiculosus", null, "cover", "canopy", "Chromista", 1, "weed"],
+    ["Ascophyllum nodosum", null, "cover", "canopy", "Chromista", 1, "weed"],
+    ["Fucus serratus", null, "cover", "canopy", "Chromista", 1, "weed"],
+    ["Laminaria digitata", null, "cover", "canopy", "Chromista", 0, "weed"],
+    ["Himanthalia elongata", null, "cover", "canopy", "Chromista", 0, "weed"],
+    ["Rhodophyta", "Red algal turf", "cover", "under", "Plantae", 1, "weed"],
+    ["Corallinales", "Encrusting corallines", "cover", "under", "Plantae", 1, "weed"],
+    ["Ulva", "Green algae (Ulva)", "cover", "under", "Plantae", 1, "weed"],
+    ["Corallina officinalis", null, "cover", "under", "Plantae", 0, "weed"],
+    ["Osmundea pinnatifida", null, "cover", "under", "Plantae", 0, "weed"],
+    ["Mastocarpus stellatus", null, "cover", "under", "Plantae", 0, "weed"],
+    ["Chondrus crispus", null, "cover", "under", "Plantae", 0, "weed"],
+    ["Hydropunctaria maura", "Black lichen (H. maura)", "cover", "under", "Fungi", 0, "weed"],
+    ["Lichina pygmaea", null, "cover", "under", "Fungi", 0, "weed"],
+    ["Balanomorpha", "Barnacles (unidentified)", "cover", "under", "Animalia", 1, "attached"],
+    ["Semibalanus balanoides", null, "cover", "under", "Animalia", 0, "attached"],
+    ["Chthamalus montagui", null, "cover", "under", "Animalia", 0, "attached"],
+    ["Chthamalus stellatus", null, "cover", "under", "Animalia", 0, "attached"],
+    ["Austrominius modestus", null, "cover", "under", "Animalia", 0, "attached"],
+    ["Mytilus edulis", null, "cover", "under", "Animalia", 1, "attached"],
+    ["Sabellaria alveolata", null, "cover", "under", "Animalia", 0, "attached"],
+    ["Patella", "Limpets (unidentified)", "count", null, "Animalia", 1, "mobile"],
+    ["Patella vulgata", null, "count", null, "Animalia", 1, "mobile"],
+    ["Patella depressa", null, "count", null, "Animalia", 0, "mobile"],
+    ["Patella ulyssiponensis", null, "count", null, "Animalia", 0, "mobile"],
+    ["Steromphala umbilicalis", null, "count", null, "Animalia", 1, "mobile"],
+    ["Phorcus lineatus", null, "count", null, "Animalia", 1, "mobile"],
+    ["Steromphala cineraria", null, "count", null, "Animalia", 0, "mobile"],
+    ["Littorina littorea", null, "count", null, "Animalia", 1, "mobile"],
+    ["Littorina saxatilis", "L. saxatilis agg.", "count", null, "Animalia", 0, "mobile"],
+    ["Littorina obtusata", "L. obtusata agg.", "count", null, "Animalia", 0, "mobile"],
+    ["Melarhaphe neritoides", null, "count", null, "Animalia", 0, "mobile"],
+    ["Nucella lapillus", null, "count", null, "Animalia", 1, "mobile"],
+    ["Actinia equina", null, "count", null, "Animalia", 1, "mobile"],
+    ["Carcinus maenas", null, "count", null, "Animalia", 0, "mobile"]
+  ];
+  // Broad groups for shores outside the NE Atlantic; they work on most temperate and tropical rocky shores.
+  const ROCKY_GLOBAL = [
+    ["Phaeophyceae", "Brown canopy algae", "cover", "canopy", "Chromista", 1, "weed"],
+    ["Rhodophyta", "Red algal turf", "cover", "under", "Plantae", 1, "weed"],
+    ["Corallinales", "Encrusting corallines", "cover", "under", "Plantae", 1, "weed"],
+    ["Chlorophyta", "Green algae", "cover", "under", "Plantae", 1, "weed"],
+    ["Balanomorpha", "Barnacles", "cover", "under", "Animalia", 1, "attached"],
+    ["Mytilidae", "Mussels", "cover", "under", "Animalia", 1, "attached"],
+    ["Ostreidae", "Oysters", "cover", "under", "Animalia", 0, "attached"],
+    ["Polychaeta", "Tube worms", "cover", "under", "Animalia", 0, "attached"],
+    ["Porifera", "Sponges", "cover", "under", "Animalia", 0, "attached"],
+    ["Ascidiacea", "Sea squirts", "cover", "under", "Animalia", 0, "attached"],
+    ["Patellogastropoda", "Limpets", "count", null, "Animalia", 1, "mobile"],
+    ["Trochidae", "Topshells", "count", null, "Animalia", 1, "mobile"],
+    ["Littorinidae", "Periwinkles", "count", null, "Animalia", 1, "mobile"],
+    ["Muricidae", "Predatory whelks", "count", null, "Animalia", 1, "mobile"],
+    ["Actiniaria", "Anemones", "count", null, "Animalia", 1, "mobile"],
+    ["Brachyura", "Crabs", "count", null, "Animalia", 1, "mobile"],
+    ["Polyplacophora", "Chitons", "count", null, "Animalia", 0, "mobile"],
+    ["Echinoidea", "Sea urchins", "count", null, "Animalia", 0, "mobile"],
+    ["Asteroidea", "Starfish", "count", null, "Animalia", 0, "mobile"]
+  ];
+  const RK_REGION_NAME = { nea: "NE Atlantic", global: "Elsewhere (broad groups)" };
+  const rkRegionOf = sess => (sess && sess.rkRegion) || "nea";
+  const rkList = () => rkRegionOf(state.session) === "global" ? ROCKY_GLOBAL : ROCKY;
+  const RK_GROUPS = [["weed", "Seaweeds and lichens (% cover)"], ["attached", "Barnacles, mussels and worms (% cover)"], ["mobile", "Mobile animals (counts)"], ["custom", "Your additions"]];
+  state.rk = { sel: new Map(), more: false, custom: [] };
+  function rkDef(name) {
+    const r = rkList().find(x => x[0] === name) || ROCKY.concat(ROCKY_GLOBAL).find(x => x[0] === name);
+    if (r) return { name: r[0], label: r[1], kind: r[2], layer: r[3] || null, kingdom: r[4], core: !!r[5], group: r[6] };
+    const c = state.rk.custom.find(x => x.name === name);
+    return c ? { name: c.name, label: null, kind: c.kind, layer: c.kind === "cover" ? "under" : null, kingdom: "", core: true, group: "custom" } : null;
+  }
+  const kingdomOf = (name, sess) => habitatOf(sess) === "rocky" ? ((rkDef(name) || {}).kingdom || "") : habitatOf(sess) === "mudflat" ? ((mfDef(name) || {}).kingdom || "") : "Plantae";
+  function rkNameEl(name) {
+    const d = rkDef(name);
+    const span = document.createElement("span");
+    if (d && d.label) span.textContent = d.label;
+    else if (d && d.group === "custom") span.textContent = name;
+    else { const em = document.createElement("em"); em.textContent = shortName(name); span.append(em); span.setAttribute("aria-label", name); }
+    return span;
+  }
+  function renderRockyPicker() {
+    const wrap = $("#rk-picker");
+    wrap.innerHTML = "";
+    let hidden = 0;
+    RK_GROUPS.forEach(([g, title]) => {
+      const items = g === "custom" ? state.rk.custom.map(c => c.name) : rkList().filter(r => r[6] === g).map(r => r[0]);
+      const shown = items.filter(n => { const d = rkDef(n); return d.core || state.rk.more || state.rk.sel.has(n); });
+      hidden += items.length - shown.length;
+      if (!shown.length) return;
+      const box = document.createElement("div"); box.className = "rk-group";
+      const h = document.createElement("h3"); h.textContent = title; box.append(h);
+      const seg = document.createElement("div"); seg.className = "seg"; seg.dataset.multi = "1";
+      shown.forEach(n => {
+        const b = document.createElement("button"); b.type = "button"; b.dataset.value = n;
+        b.setAttribute("aria-pressed", String(state.rk.sel.has(n)));
+        b.append(rkNameEl(n));
+        b.addEventListener("click", () => {
+          if (state.rk.sel.has(n)) state.rk.sel.delete(n);
+          else { const d = rkDef(n); state.rk.sel.set(n, { kind: d.kind, layer: d.layer, value: null }); }
+          renderRockyPicker(); renderRockyRows();
+        });
+        seg.append(b);
+      });
+      box.append(seg);
+      wrap.append(box);
+    });
+    const more = $("#btn-rk-more");
+    if (state.rk.more) { more.textContent = "Show fewer species"; more.classList.remove("hidden"); }
+    else if (hidden) { more.textContent = "Show " + hidden + " more species"; more.classList.remove("hidden"); }
+    else more.classList.add("hidden");
+  }
+  function renderRockyRows() {
+    const wrap = $("#rk-rows");
+    wrap.innerHTML = "";
+    $("#rk-empty").classList.toggle("hidden", state.rk.sel.size > 0);
+    state.rk.sel.forEach((t, name) => {
+      const row = document.createElement("div"); row.className = "rrow";
+      const nm = document.createElement("div"); nm.className = "rrow-name"; nm.append(rkNameEl(name));
+      const ctrl = document.createElement("div"); ctrl.className = "rrow-ctrl";
+      const inp = document.createElement("input");
+      inp.type = "number"; inp.min = "0"; inp.placeholder = "0";
+      inp.value = t.value ?? "";
+      inp.setAttribute("aria-label", (t.kind === "count" ? "Count of " : "Percent cover of ") + name);
+      if (t.kind === "cover") {
+        inp.inputMode = "decimal"; inp.max = "100"; inp.step = "any";
+        const lay = document.createElement("div"); lay.className = "layer"; lay.setAttribute("role", "group"); lay.setAttribute("aria-label", "Layer for " + name);
+        [["canopy", "Canopy"], ["under", "Understorey"]].forEach(([v, l]) => {
+          const b = document.createElement("button"); b.type = "button"; b.textContent = l;
+          b.setAttribute("aria-pressed", String(t.layer === v));
+          b.addEventListener("click", () => { t.layer = v; lay.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); updateRockySum(); });
+          lay.append(b);
+        });
+        const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = "%";
+        inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, v); updateRockySum(); });
+        ctrl.append(lay, inp, unit);
+      } else {
+        inp.inputMode = "numeric"; inp.step = "1";
+        const minus = document.createElement("button"); minus.type = "button"; minus.className = "step"; minus.textContent = "−"; minus.setAttribute("aria-label", "One fewer " + name);
+        const plus = document.createElement("button"); plus.type = "button"; plus.className = "step"; plus.textContent = "+"; plus.setAttribute("aria-label", "One more " + name);
+        const set = v => { t.value = Math.max(0, v); inp.value = t.value; };
+        minus.addEventListener("click", () => set((t.value || 0) - 1));
+        plus.addEventListener("click", () => set((t.value || 0) + 1));
+        inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, Math.round(v)); });
+        ctrl.append(minus, inp, plus);
+      }
+      row.append(nm, ctrl);
+      wrap.append(row);
+    });
+    updateRockySum();
+  }
+  function rockySums() {
+    let canopy = 0, under = num($("#f-bare").value) || 0;
+    state.rk.sel.forEach(t => { if (t.kind === "cover") { if (t.layer === "canopy") canopy += t.value || 0; else under += t.value || 0; } });
+    return { canopy: Math.round(canopy * 10) / 10, under: Math.round(under * 10) / 10 };
+  }
+  function updateRockySum() {
+    const p = $("#rk-sum");
+    const { canopy, under } = rockySums();
+    const hasCover = Array.from(state.rk.sel.values()).some(t => t.kind === "cover") || num($("#f-bare").value) !== null;
+    p.classList.toggle("warn", canopy > 100 || under > 100);
+    if (!hasCover) { p.textContent = ""; return; }
+    let msg = "Canopy " + canopy + "%. Understorey, including bare rock, " + under + "%.";
+    if (canopy > 100) msg = "Canopy adds up to " + canopy + "%, more than the whole quadrat. Check the values.";
+    else if (under > 100) msg = "Understorey and bare rock add up to " + under + "%, more than the whole quadrat. Check the values.";
+    p.textContent = msg;
+  }
+  $("#f-bare").addEventListener("input", updateRockySum);
+  $("#btn-rk-more").addEventListener("click", () => { state.rk.more = !state.rk.more; renderRockyPicker(); });
+  $("#btn-rk-other").addEventListener("click", () => { $("#rk-other-wrap").classList.remove("hidden"); $("#rk-other-name").focus(); });
+  $('.seg[data-name="rk-other-kind"]').addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    setSeg("rk-other-kind", b.dataset.value);
+  });
+  $("#rk-other-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("#btn-rk-other-add").click(); } });
+  $("#btn-rk-other-add").addEventListener("click", () => {
+    const name = $("#rk-other-name").value.trim();
+    if (!name) { toast("Type a species name", true); return; }
+    const kind = getSeg("rk-other-kind") || "cover";
+    if (!rkDef(name)) state.rk.custom.push({ name, kind });
+    const d = rkDef(name);
+    state.rk.sel.set(name, { kind: d.kind, layer: d.layer, value: null });
+    $("#rk-other-name").value = "";
+    $("#rk-other-wrap").classList.add("hidden");
+    renderRockyPicker(); renderRockyRows();
+    toast("Added " + name);
+  });
+  function resetRocky(keepSticky) {
+    if (keepSticky) state.rk.sel.forEach(t => { t.value = null; });
+    else {
+      state.rk.sel = new Map(); state.rk.custom = []; state.rk.more = false;
+      setSeg("zone", null); setSeg("substrate", null);
+    }
+    $("#f-hcd").value = ""; $("#f-bare").value = ""; $("#f-pool").checked = false;
+    $("#rk-other-wrap").classList.add("hidden");
+    renderRockyPicker(); renderRockyRows();
+  }
+  function loadRocky(q) {
+    state.rk.sel = new Map();
+    (q.taxa || []).forEach(t => {
+      if (!rkDef(t.name)) state.rk.custom.push({ name: t.name, kind: t.kind || "cover" });
+      state.rk.sel.set(t.name, { kind: t.kind || "cover", layer: t.layer || (t.kind === "cover" ? "under" : null), value: t.kind === "count" ? (t.count ?? null) : (t.cover ?? null) });
+    });
+    setSeg("zone", q.zone || null); setSeg("substrate", q.substrate || null);
+    $("#f-hcd").value = q.heightCD ?? ""; $("#f-bare").value = q.bare ?? ""; $("#f-pool").checked = !!q.rockPool;
+    renderRockyPicker(); renderRockyRows();
+  }
+  const isPresent = t => (t.kind === "count" ? (t.count || 0) : (t.cover || 0)) > 0;
+  function rockyRecordPart() {
+    const taxa = Array.from(state.rk.sel.entries()).map(([name, t]) => ({ name, kind: t.kind,
+      layer: t.kind === "cover" ? (t.layer || "under") : null,
+      cover: t.kind === "cover" ? (t.value ?? 0) : null,
+      count: t.kind === "count" ? (t.value ?? 0) : null }));
+    const sums = rockySums();
+    return { habitat: "rocky", taxa, species: taxa.filter(isPresent).map(t => t.name), cover: null,
+      zone: getSeg("zone"), heightCD: num($("#f-hcd").value), substrate: getSeg("substrate"), rockPool: $("#f-pool").checked,
+      bare: num($("#f-bare").value), canopyTotal: sums.canopy, underTotal: sums.under };
+  }
+
+  /* ---------- Saltmarsh ---------- */
+  // [scientific name, label, kingdom, shown by default]
+  const SALT = [
+    ["Salicornia", "Glasswort (Salicornia)", 1], ["Spartina anglica", null, 1], ["Puccinellia maritima", null, 1],
+    ["Tripolium pannonicum", null, 1], ["Atriplex portulacoides", null, 1], ["Suaeda maritima", null, 1],
+    ["Limonium vulgare", null, 1], ["Plantago maritima", null, 1], ["Triglochin maritima", null, 1],
+    ["Armeria maritima", null, 1], ["Lysimachia maritima", null, 1], ["Festuca rubra", null, 1],
+    ["Juncus maritimus", null, 1], ["Juncus gerardii", null, 1], ["Elymus athericus", null, 1],
+    ["Sarcocornia perennis", null, 0], ["Spartina maritima", null, 0], ["Spergularia media", null, 0],
+    ["Spergularia marina", null, 0], ["Limonium humile", null, 0], ["Artemisia maritima", null, 0],
+    ["Cochlearia anglica", null, 0], ["Agrostis stolonifera", null, 0], ["Bolboschoenus maritimus", null, 0],
+    ["Phragmites australis", null, 0], ["Ulva", "Green algal mat (Ulva)", 0]
+  ];
+  const SALT_GLOBAL = [
+    ["Salicornioideae", "Glassworts and samphires", 1], ["Spartina", "Cordgrasses (Spartina)", 1], ["Suaeda", "Seablites (Suaeda)", 1],
+    ["Poaceae", "Other grasses", 1], ["Juncaceae", "Rushes", 1], ["Cyperaceae", "Sedges", 1],
+    ["Limonium", "Sea lavenders (Limonium)", 1], ["Plantago", "Plantains (Plantago)", 1], ["Asteraceae", "Daisy family", 1],
+    ["Magnoliopsida", "Other herbs", 1], ["Chlorophyta", "Green algal mat", 0]
+  ];
+  const smList = () => rkRegionOf(state.session) === "global" ? SALT_GLOBAL : SALT;
+  state.sm = { sel: new Map(), more: false, custom: [], heights: [] };
+  const smDef = name => { const r = smList().find(x => x[0] === name) || SALT.concat(SALT_GLOBAL).find(x => x[0] === name); return r ? { name: r[0], label: r[1], core: !!r[2] } : null; };
+  function domin(cover, few) {
+    if (cover === null || cover === undefined || cover <= 0) return null;
+    if (cover >= 91) return 10; if (cover >= 76) return 9; if (cover >= 51) return 8; if (cover >= 34) return 7;
+    if (cover >= 26) return 6; if (cover >= 11) return 5; if (cover >= 4) return 4;
+    return { few: 1, several: 2, many: 3 }[few] ?? null;
+  }
+  function smNameEl(name) {
+    const d = smDef(name), span = document.createElement("span");
+    if (d && d.label) span.textContent = d.label;
+    else if (!d) span.textContent = name;
+    else {
+      const clash = SALT.concat(SALT_GLOBAL).some(r => r[0] !== name && !r[1] && shortName(r[0]) === shortName(name));
+      const em = document.createElement("em"); em.textContent = clash ? name : shortName(name); span.append(em); span.setAttribute("aria-label", name);
+    }
+    return span;
+  }
+  function renderSaltPicker() {
+    const wrap = $("#sm-picker"); wrap.innerHTML = "";
+    const all = smList().map(r => r[0]).concat(state.sm.custom);
+    const shown = all.filter(n => { const d = smDef(n); return !d || d.core || state.sm.more || state.sm.sel.has(n); });
+    const seg = document.createElement("div"); seg.className = "seg"; seg.dataset.multi = "1";
+    shown.forEach(n => {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.value = n;
+      b.setAttribute("aria-pressed", String(state.sm.sel.has(n)));
+      b.append(smNameEl(n));
+      b.addEventListener("click", () => {
+        if (state.sm.sel.has(n)) state.sm.sel.delete(n); else state.sm.sel.set(n, { value: null, few: null });
+        renderSaltPicker(); renderSaltRows();
+      });
+      seg.append(b);
+    });
+    wrap.append(seg);
+    const hidden = all.length - shown.length, more = $("#btn-sm-more");
+    if (state.sm.more) { more.textContent = "Show fewer species"; more.classList.remove("hidden"); }
+    else if (hidden) { more.textContent = "Show " + hidden + " more species"; more.classList.remove("hidden"); }
+    else more.classList.add("hidden");
+  }
+  function renderSaltRows() {
+    const wrap = $("#sm-rows"); wrap.innerHTML = "";
+    $("#sm-empty").classList.toggle("hidden", state.sm.sel.size > 0);
+    state.sm.sel.forEach((t, name) => {
+      const row = document.createElement("div"); row.className = "rrow";
+      const nm = document.createElement("div"); nm.className = "rrow-name"; nm.append(smNameEl(name));
+      const ctrl = document.createElement("div"); ctrl.className = "rrow-ctrl";
+      const inp = document.createElement("input");
+      Object.assign(inp, { type: "number", min: "0", max: "100", step: "any", placeholder: "0", inputMode: "decimal" });
+      inp.value = t.value ?? ""; inp.setAttribute("aria-label", "Percent cover of " + name);
+      const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = "%";
+      const dm = document.createElement("span"); dm.className = "domin";
+      const few = document.createElement("div"); few.className = "few hidden";
+      const fewLab = document.createElement("span"); fewLab.textContent = "Under 4%:";
+      const fewSeg = document.createElement("div"); fewSeg.className = "layer";
+      [["few", "Few"], ["several", "Several"], ["many", "Many"]].forEach(([v, l]) => {
+        const b = document.createElement("button"); b.type = "button"; b.textContent = l;
+        b.setAttribute("aria-pressed", String(t.few === v));
+        b.addEventListener("click", () => { t.few = v; fewSeg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); refresh(); });
+        fewSeg.append(b);
+      });
+      few.append(fewLab, fewSeg);
+      const refresh = () => {
+        const small = t.value > 0 && t.value < 4;
+        few.classList.toggle("hidden", !small);
+        const d = domin(t.value, t.few);
+        dm.textContent = d !== null ? "Domin " + d : small ? "Domin 1–3" : "";
+      };
+      inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, Math.min(100, v)); refresh(); });
+      ctrl.append(inp, unit, dm);
+      row.append(nm, ctrl, few);
+      refresh();
+      wrap.append(row);
+    });
+  }
+  function renderVh() {
+    const chips = $("#vh-chips"); chips.innerHTML = "";
+    state.sm.heights.forEach((h, i) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = h + " cm"; b.setAttribute("aria-label", "Remove " + h + " cm");
+      const x = document.createElement("span"); x.textContent = "×"; x.setAttribute("aria-hidden", "true"); b.append(x);
+      b.addEventListener("click", () => { state.sm.heights.splice(i, 1); renderVh(); });
+      chips.append(b);
+    });
+    const n = state.sm.heights.length;
+    $("#vh-summary").textContent = n ? n + (n === 1 ? " measurement" : " measurements") + ", mean " + (state.sm.heights.reduce((a, b) => a + b, 0) / n).toFixed(1) + " cm" : "";
+  }
+  function addVh() { const v = num($("#f-vh").value); if (v === null || v < 0) return false; state.sm.heights.push(v); $("#f-vh").value = ""; renderVh(); return true; }
+  $("#btn-add-vh").addEventListener("click", () => { addVh(); $("#f-vh").focus(); });
+  $("#f-vh").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addVh(); } });
+  $("#btn-sm-more").addEventListener("click", () => { state.sm.more = !state.sm.more; renderSaltPicker(); });
+  $("#btn-sm-other").addEventListener("click", () => { $("#sm-other-wrap").classList.remove("hidden"); $("#sm-other-name").focus(); });
+  function addSmOther() {
+    const name = $("#sm-other-name").value.trim();
+    if (!name) { toast("Type a species name", true); return; }
+    if (!smDef(name) && !state.sm.custom.includes(name)) state.sm.custom.push(name);
+    if (!state.sm.sel.has(name)) state.sm.sel.set(name, { value: null, few: null });
+    $("#sm-other-name").value = ""; $("#sm-other-wrap").classList.add("hidden");
+    renderSaltPicker(); renderSaltRows(); toast("Added " + name);
+  }
+  $("#btn-sm-other-add").addEventListener("click", addSmOther);
+  $("#sm-other-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addSmOther(); } });
+  function resetSalt(keepSticky) {
+    if (keepSticky) state.sm.sel.forEach(t => { t.value = null; t.few = null; });
+    else { state.sm.sel = new Map(); state.sm.custom = []; state.sm.more = false; setSeg("smzone", null); }
+    state.sm.heights = []; renderVh();
+    ["#f-smel", "#f-smbare", "#f-smlitter", "#f-vh"].forEach(x => { $(x).value = ""; });
+    setSeg("grazing", null);
+    $("#sm-other-wrap").classList.add("hidden");
+    renderSaltPicker(); renderSaltRows();
+  }
+  function loadSalt(q) {
+    state.sm.sel = new Map();
+    (q.taxa || []).forEach(t => {
+      if (!smDef(t.name) && !state.sm.custom.includes(t.name)) state.sm.custom.push(t.name);
+      state.sm.sel.set(t.name, { value: t.cover ?? null, few: t.few || null });
+    });
+    setSeg("smzone", q.zone || null); setSeg("grazing", q.grazing || null);
+    $("#f-smel").value = q.elevation ?? ""; $("#f-smbare").value = q.bare ?? ""; $("#f-smlitter").value = q.litter ?? "";
+    state.sm.heights = (q.vegHeights || []).slice(); renderVh();
+    renderSaltPicker(); renderSaltRows();
+  }
+  function saltRecordPart() {
+    addVh();
+    const taxa = Array.from(state.sm.sel.entries()).map(([name, t]) => {
+      const cover = t.value ?? 0;
+      return { name, kind: "cover", cover, few: cover > 0 && cover < 4 ? t.few : null, domin: domin(cover, t.few) };
+    });
+    const hs = state.sm.heights.slice();
+    return { habitat: "saltmarsh", taxa, species: taxa.filter(isPresent).map(t => t.name), cover: null,
+      zone: getSeg("smzone"), elevation: num($("#f-smel").value), bare: num($("#f-smbare").value), litter: num($("#f-smlitter").value),
+      vegHeights: hs, vegHeight: hs.length ? Number((hs.reduce((a, b) => a + b, 0) / hs.length).toFixed(1)) : null, grazing: getSeg("grazing") };
+  }
+
+  /* ---------- Mudflat ---------- */
+  // [scientific name, label, sign | count | cover, evidence, kingdom, shown by default, sub-sample: 0 none, "offer", or default side in cm, group]
+  const MUD = [
+    ["Arenicola marina", "Lugworm casts", "sign", "casts", "Animalia", 1, 0],
+    ["Lanice conchilega", "Sand mason tubes", "sign", "tubes", "Animalia", 1, 0],
+    ["Cerastoderma edule", "Cockle siphon holes", "sign", "siphon holes", "Animalia", 1, 0],
+    ["Scrobicularia plana", "Scrobicularia feeding marks", "sign", "feeding marks", "Animalia", 1, 0],
+    ["Hediste diversicolor", "Ragworm burrows", "sign", "burrows", "Animalia", 1, "offer"],
+    ["Corophium volutator", "Corophium burrows", "sign", "burrows", "Animalia", 0, "offer"],
+    ["Limecola balthica", "Baltic tellin feeding marks", "sign", "feeding marks", "Animalia", 0, 0],
+    ["Peringia ulvae", "Mud snails (Peringia)", "count", null, "Animalia", 1, 10],
+    ["Carcinus maenas", "Shore crabs", "count", null, "Animalia", 1, 0],
+    ["Littorina littorea", "Periwinkles", "count", null, "Animalia", 0, 0],
+    ["Magallana gigas", "Pacific oysters", "count", null, "Animalia", 0, 0],
+    ["Crangon crangon", "Brown shrimp", "count", null, "Animalia", 0, 0],
+    ["Ulva", "Green algal mats (Ulva)", "cover", null, "Plantae", 1, 0],
+    ["Vaucheria", "Vaucheria mats", "cover", null, "Chromista", 1, 0],
+    ["Bacillariophyceae", "Diatom film", "cover", null, "Chromista", 1, 0],
+    ["Mytilus edulis", "Mussel patches", "cover", null, "Animalia", 0, 0],
+    ["Zostera noltei", "Seagrass (Z. noltei)", "cover", null, "Plantae", 0, 0],
+    ["Spartina anglica", "Cordgrass (Spartina)", "cover", null, "Plantae", 0, 0]
+  ];
+  const MUD_GLOBAL = [
+    ["Arenicolidae", "Lugworm casts", "sign", "casts", "Animalia", 1, 0],
+    ["Polychaeta", "Worm burrows and tubes", "sign", "burrows", "Animalia", 1, "offer"],
+    ["Bivalvia", "Bivalve siphon holes", "sign", "siphon holes", "Animalia", 1, 0],
+    ["Brachyura", "Crab burrows", "sign", "burrows", "Animalia", 1, 0],
+    ["Gastropoda", "Snails", "count", null, "Animalia", 1, "offer"],
+    ["Ostreidae", "Oysters", "count", null, "Animalia", 0, 0],
+    ["Chlorophyta", "Green algal mats", "cover", null, "Plantae", 1, 0],
+    ["Bacillariophyceae", "Diatom film", "cover", null, "Chromista", 1, 0],
+    ["Mytilidae", "Mussel patches", "cover", null, "Animalia", 0, 0]
+  ];
+  const MF_GROUPS = [["sign", "Signs (counts)"], ["count", "Animals (counts)"], ["cover", "Surface cover (%)"], ["custom", "Your additions"]];
+  const mfList = () => rkRegionOf(state.session) === "global" ? MUD_GLOBAL : MUD;
+  state.mf = { sel: new Map(), more: false, custom: [] };
+  function mfDef(name) {
+    const r = mfList().find(x => x[0] === name) || MUD.concat(MUD_GLOBAL).find(x => x[0] === name);
+    if (r) return { name: r[0], label: r[1], kind: r[2] === "cover" ? "cover" : "count", group: r[2], evidence: r[3], kingdom: r[4], core: !!r[5], sub: r[6] };
+    const c = state.mf.custom.find(x => x.name === name);
+    return c ? { name, label: name, kind: c.kind, group: "custom", evidence: null, kingdom: "", core: true, sub: c.kind === "count" ? "offer" : 0 } : null;
+  }
+  const subOptions = () => [5, 10, 25, 50].filter(c => !state.session || !state.session.quadratSideCm || c < state.session.quadratSideCm);
+  function renderMudPicker() {
+    const wrap = $("#mf-picker"); wrap.innerHTML = "";
+    let hidden = 0;
+    MF_GROUPS.forEach(([g, title]) => {
+      const items = g === "custom" ? state.mf.custom.map(c => c.name) : mfList().filter(r => r[2] === g).map(r => r[0]);
+      const shown = items.filter(n => mfDef(n).core || state.mf.more || state.mf.sel.has(n));
+      hidden += items.length - shown.length;
+      if (!shown.length) return;
+      const box = document.createElement("div"); box.className = "rk-group";
+      const h = document.createElement("h3"); h.textContent = title; box.append(h);
+      const seg = document.createElement("div"); seg.className = "seg"; seg.dataset.multi = "1";
+      shown.forEach(n => {
+        const d = mfDef(n);
+        const b = document.createElement("button"); b.type = "button"; b.dataset.value = n; b.textContent = d.label;
+        b.setAttribute("aria-pressed", String(state.mf.sel.has(n)));
+        b.addEventListener("click", () => {
+          if (state.mf.sel.has(n)) state.mf.sel.delete(n);
+          else state.mf.sel.set(n, { kind: d.kind, value: null, sub: typeof d.sub === "number" && d.sub && subOptions().includes(d.sub) ? d.sub : null });
+          renderMudPicker(); renderMudRows();
+        });
+        seg.append(b);
+      });
+      box.append(seg); wrap.append(box);
+    });
+    const more = $("#btn-mf-more");
+    if (state.mf.more) { more.textContent = "Show fewer"; more.classList.remove("hidden"); }
+    else if (hidden) { more.textContent = "Show " + hidden + " more"; more.classList.remove("hidden"); }
+    else more.classList.add("hidden");
+  }
+  function renderMudRows() {
+    const wrap = $("#mf-rows"); wrap.innerHTML = "";
+    $("#mf-empty").classList.toggle("hidden", state.mf.sel.size > 0);
+    const qArea = state.session && state.session.quadratAreaM2;
+    state.mf.sel.forEach((t, name) => {
+      const d = mfDef(name);
+      const row = document.createElement("div"); row.className = "rrow";
+      const nm = document.createElement("div"); nm.className = "rrow-name"; nm.textContent = d.label;
+      const ctrl = document.createElement("div"); ctrl.className = "rrow-ctrl";
+      const inp = document.createElement("input");
+      Object.assign(inp, { type: "number", min: "0", placeholder: "0" });
+      inp.value = t.value ?? ""; inp.setAttribute("aria-label", d.label);
+      if (t.kind === "cover") {
+        Object.assign(inp, { max: "100", step: "any", inputMode: "decimal" });
+        const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = "%";
+        inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, Math.min(100, v)); });
+        ctrl.append(inp, unit); row.append(nm, ctrl); wrap.append(row);
+        return;
+      }
+      Object.assign(inp, { step: "1", inputMode: "numeric" });
+      const minus = document.createElement("button"); minus.type = "button"; minus.className = "step"; minus.textContent = "−"; minus.setAttribute("aria-label", "One fewer");
+      const plus = document.createElement("button"); plus.type = "button"; plus.className = "step"; plus.textContent = "+"; plus.setAttribute("aria-label", "One more");
+      const line = document.createElement("div"); line.className = "few";
+      const scaled = document.createElement("span");
+      const refresh = () => {
+        const sa = t.sub ? t.sub * t.sub / 10000 : qArea;
+        scaled.textContent = (t.value && sa) ? "≈ " + Math.round(t.value / sa) + " per m²" : "";
+      };
+      const set = v => { t.value = Math.max(0, v); inp.value = t.value; refresh(); };
+      minus.addEventListener("click", () => set((t.value || 0) - 1));
+      plus.addEventListener("click", () => set((t.value || 0) + 1));
+      inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, Math.round(v)); refresh(); });
+      ctrl.append(minus, inp, plus);
+      if (d.sub) {
+        const lab = document.createElement("label"); lab.textContent = "Counted in";
+        const sel = document.createElement("select"); sel.style.width = "auto"; sel.style.minHeight = "36px"; sel.style.padding = "4px 8px";
+        sel.setAttribute("aria-label", "Area counted for " + d.label);
+        const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Whole quadrat"; sel.append(o0);
+        subOptions().forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c + " × " + c + " cm"; sel.append(o); });
+        sel.value = t.sub || "";
+        sel.addEventListener("change", () => { t.sub = sel.value ? Number(sel.value) : null; refresh(); });
+        line.append(lab, sel, scaled);
+      } else line.append(scaled);
+      refresh();
+      row.append(nm, ctrl, line); wrap.append(row);
+    });
+  }
+  $("#btn-mf-more").addEventListener("click", () => { state.mf.more = !state.mf.more; renderMudPicker(); });
+  $("#btn-mf-other").addEventListener("click", () => { $("#mf-other-wrap").classList.remove("hidden"); $("#mf-other-name").focus(); });
+  $('.seg[data-name="mf-other-kind"]').addEventListener("click", e => { const b = e.target.closest("button"); if (b) setSeg("mf-other-kind", b.dataset.value); });
+  function addMfOther() {
+    const name = $("#mf-other-name").value.trim();
+    if (!name) { toast("Type a species name", true); return; }
+    if (!mfDef(name)) state.mf.custom.push({ name, kind: getSeg("mf-other-kind") || "count" });
+    const d = mfDef(name);
+    if (!state.mf.sel.has(name)) state.mf.sel.set(name, { kind: d.kind, value: null, sub: null });
+    $("#mf-other-name").value = ""; $("#mf-other-wrap").classList.add("hidden");
+    renderMudPicker(); renderMudRows(); toast("Added " + name);
+  }
+  $("#btn-mf-other-add").addEventListener("click", addMfOther);
+  $("#mf-other-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addMfOther(); } });
+  function resetMud(keepSticky) {
+    if (keepSticky) state.mf.sel.forEach(t => { t.value = null; });
+    else { state.mf.sel = new Map(); state.mf.custom = []; state.mf.more = false; setSeg("mfzone", null); setSeg("mfsed", null); }
+    ["#f-mfel", "#f-sink", "#f-black", "#f-water", "#f-core"].forEach(x => { $(x).value = ""; });
+    $("#f-ripples").checked = false;
+    $("#mf-other-wrap").classList.add("hidden");
+    renderMudPicker(); renderMudRows();
+  }
+  function loadMud(q) {
+    state.mf.sel = new Map();
+    (q.taxa || []).forEach(t => {
+      if (!mfDef(t.name)) state.mf.custom.push({ name: t.name, kind: t.kind });
+      state.mf.sel.set(t.name, { kind: t.kind, value: t.kind === "cover" ? (t.cover ?? null) : (t.count ?? null), sub: t.subSide || null });
+    });
+    setSeg("mfzone", q.zone || null); setSeg("mfsed", q.sediment || null);
+    $("#f-mfel").value = q.elevation ?? ""; $("#f-sink").value = q.sink ?? ""; $("#f-black").value = q.blackLayer ?? "";
+    $("#f-water").value = q.water ?? ""; $("#f-core").value = q.coreId || ""; $("#f-ripples").checked = !!q.ripples;
+    renderMudPicker(); renderMudRows();
+  }
+  function mudRecordPart() {
+    const taxa = Array.from(state.mf.sel.entries()).map(([name, t]) => {
+      const d = mfDef(name);
+      return t.kind === "cover"
+        ? { name, kind: "cover", cover: t.value ?? 0, count: null }
+        : { name, kind: "count", count: t.value ?? 0, cover: null, evidence: d.evidence || null, subSide: t.sub || null, subArea: t.sub ? Number((t.sub * t.sub / 10000).toFixed(4)) : null };
+    });
+    return { habitat: "mudflat", taxa, species: taxa.filter(isPresent).map(t => t.name), cover: null,
+      zone: getSeg("mfzone"), elevation: num($("#f-mfel").value), sediment: getSeg("mfsed"), sink: num($("#f-sink").value),
+      blackLayer: num($("#f-black").value), water: num($("#f-water").value), ripples: $("#f-ripples").checked, coreId: $("#f-core").value.trim() || null };
+  }
+
   /* ---------- Home ---------- */
   async function renderHome() {
     const card = $("#continue-card");
@@ -2314,7 +3363,10 @@ const APP_CONFIG = {
     card.classList.remove("hidden");
   }
   $("#btn-continue").addEventListener("click", () => show("record"));
-  $("#btn-start-seagrass").addEventListener("click", () => show("survey"));
+  $("#btn-start-seagrass").addEventListener("click", () => { setSurveyHabitat("seagrass"); show("survey"); });
+  $("#btn-start-rocky").addEventListener("click", () => { setSurveyHabitat("rocky"); show("survey"); });
+  $("#btn-start-saltmarsh").addEventListener("click", () => { setSurveyHabitat("saltmarsh"); show("survey"); });
+  $("#btn-start-mudflat").addEventListener("click", () => { setSurveyHabitat("mudflat"); show("survey"); });
   $("#btn-all-surveys").addEventListener("click", () => show("survey"));
 
   /* ---------- Offline support ---------- */
