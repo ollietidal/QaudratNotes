@@ -318,6 +318,19 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 .domin { font-size: .8rem; color: var(--muted); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
 .few { flex-basis: 100%; display: flex; gap: 6px; align-items: center; font-size: .85rem; color: var(--muted); }
 .few .layer button { min-height: 34px; padding: 4px 10px; }
+.gbtn { width: 44px; height: 44px; border-radius: var(--radius-s); border: 2px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none; }
+.gbtn svg { width: 22px; height: 22px; }
+.sheet-back { position: fixed; inset: 0; z-index: 30; background: rgba(10, 16, 20, .45); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: var(--surface); width: 100%; max-width: 480px; border-radius: 18px 18px 0 0; padding: 16px 16px calc(18px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -6px 24px rgba(0,0,0,.2); }
+.sheet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sheet-head h2 { margin: 0; font-size: 1.1rem; }
+.sheet-head .cover-big { font-size: 2.8rem; }
+.sheet .grid { max-width: 300px; margin: 12px auto 8px; }
+.grid button.other:not([aria-pressed="true"]) { background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(86, 96, 91, .32) 6px 8px); }
+.sheet .hint { display: block; text-align: center; margin-bottom: 12px; }
+.sheet-actions { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 8px; }
+.with-grid { display: flex; gap: 8px; }
+.with-grid input { flex: 1; min-width: 0; }
 .rk-other { display: grid; gap: 8px; margin-top: 8px; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
@@ -444,7 +457,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     </article>
   </div>
   <p class="home-soon"><button class="linkish" type="button" id="btn-all-surveys">See all your surveys</button></p>
-  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a></p>
+  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a> · <a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a></p>
   <details class="about-box">
   <summary>About QuadratNotes</summary>
   <div class="about">
@@ -742,7 +755,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 
     <div class="field">
       <label for="f-bare">Bare rock <span class="hint">% of understorey</span></label>
-      <input type="number" id="f-bare" inputmode="decimal" min="0" max="100" step="any">
+      <div class="with-grid"><input type="number" id="f-bare" inputmode="decimal" min="0" max="100" step="any"><button class="gbtn" type="button" id="g-bare" aria-label="Estimate bare rock with the grid"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2V18M12 2V18M2 8H18M2 12H18" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="8" width="4" height="4" fill="currentColor"/></svg></button></div>
     </div>
     <p class="taxa-sum" id="rk-sum" aria-live="polite"></p>
   </div><!-- /rocky-form -->
@@ -797,7 +810,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     <p class="rk-empty" id="sm-empty">Tap species above to add them to this quadrat.</p>
 
     <div class="row">
-      <div class="field"><label for="f-smbare">Bare ground <span class="hint">%</span></label><input type="number" id="f-smbare" inputmode="decimal" min="0" max="100" step="any"></div>
+      <div class="field"><label for="f-smbare">Bare ground <span class="hint">%</span></label><div class="with-grid"><input type="number" id="f-smbare" inputmode="decimal" min="0" max="100" step="any"><button class="gbtn" type="button" id="g-smbare" aria-label="Estimate bare ground with the grid"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2V18M12 2V18M2 8H18M2 12H18" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="8" width="4" height="4" fill="currentColor"/></svg></button></div></div>
       <div class="field"><label for="f-smlitter">Litter / strandline <span class="hint">%</span></label><input type="number" id="f-smlitter" inputmode="decimal" min="0" max="100" step="any"></div>
     </div>
     <div class="field">
@@ -1002,14 +1015,26 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   </button>
 </nav>
 
+<div class="sheet-back hidden" id="grid-sheet">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gs-title">
+    <div class="sheet-head"><h2 id="gs-title">Cover</h2><div class="cover-big" id="gs-read" aria-live="polite">0<small>%</small></div></div>
+    <div class="grid" id="gs-grid" role="group" aria-label="Quadrat grid, 25 squares, each 4 percent"></div>
+    <span class="hint" id="gs-hint">Tap the squares it covers. Each square is 4%.</span>
+    <div class="sheet-actions">
+      <button class="btn" type="button" id="gs-clear">Clear</button>
+      <button class="btn" type="button" id="gs-cancel">Cancel</button>
+      <button class="btn btn-primary" type="button" id="gs-done">Done</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.12.0",
+  version: "0.14.0",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
-  contactEmail: "",  // e.g. "hello@quadratnotes.com" (leave empty to hide)
+  contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
   habitats: ["seagrass", "rocky", "saltmarsh"],
   citeUrl: "https://quadratnotes.com",  // the app's public address
@@ -1530,6 +1555,7 @@ const APP_CONFIG = {
     b.setAttribute("aria-label", "Square " + (i + 1));
     b.addEventListener("click", () => {
       if (state.cells.has(i)) state.cells.delete(i); else state.cells.add(i);
+      state.cellsTapped = true;
       setCover(state.cells.size * 4, false);
     });
     grid.append(b);
@@ -1542,7 +1568,7 @@ const APP_CONFIG = {
       state.cover = null;
       $("#cover-big").textContent = "–";
       if (!fromInput) $("#f-cover").value = "";
-      state.cells.clear(); paintGrid();
+      state.cells.clear(); state.cellsTapped = false; paintGrid();
       return;
     }
     value = Math.max(0, Math.min(100, Math.round(value)));
@@ -1552,6 +1578,7 @@ const APP_CONFIG = {
     if (fromInput) {
       const n = Math.round(value / 4);
       state.cells = new Set(Array.from({ length: n }, (_, i) => i));
+      state.cellsTapped = false;
     }
     paintGrid();
     if (state.taxa) updateTaxaSum();
@@ -1951,6 +1978,7 @@ const APP_CONFIG = {
     specific = {
       habitat: "seagrass",
       cover: state.cover,
+      coverCells: state.cellsTapped ? [...state.cells].sort((a, b) => a - b) : null,
       species: currentSpecies(),
       taxa,
       shoots: multi ? (shootVals.length ? shootVals.reduce((a, b) => a + b, 0) : null) : num($("#f-shoots").value),
@@ -2012,6 +2040,7 @@ const APP_CONFIG = {
     else if (habitatOf(state.session) === "rocky") loadRocky(q);
     else {
     setCover(q.cover, true);
+    if (Array.isArray(q.coverCells)) { state.cells = new Set(q.coverCells); state.cellsTapped = true; paintGrid(); }
     $("#f-cover").value = q.cover;
     state.taxa = new Map();
     if (Array.isArray(q.taxa) && q.taxa.length >= 2) {
@@ -2129,10 +2158,12 @@ const APP_CONFIG = {
     "quadrat", "transect", "distance_from_start_m", "plot_id", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
     "algae_cover_pct", "sediment", "zone", "height_above_cd_m", "elevation_m", "substrate", "rock_pool", "bare_rock_pct", "canopy_total_pct", "understorey_total_pct",
     "bare_ground_pct", "litter_pct", "vegetation_height_mean_cm", "vegetation_height_n", "vegetation_heights_cm", "grazing",
-    "boot_sink_cm", "black_layer_depth_cm", "surface_water_pct", "ripples", "core_id",
+    "boot_sink_cm", "black_layer_depth_cm", "surface_water_pct", "ripples", "core_id", "cover_grid_squares", "bare_grid_squares",
     "photo_files", "notes"];
   const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "habitat", "quadrat", "species", "evidence", "layer", "species_cover_pct", "domin",
-    "count", "subsample_area_m2", "count_per_quadrat", "count_density_m2", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm"];
+    "count", "subsample_area_m2", "count_per_quadrat", "count_density_m2", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm", "grid_squares", "grid_squares_n"];
+  // Grid squares numbered 1–25, row by row from the top-left of the on-screen grid.
+  const sqText = cells => Array.isArray(cells) ? cells.map(i => i + 1).join(";") : null;
   const COND_COLS = ["conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state"];
   const r1 = v => Number(v.toFixed(1));
   // Readable survey codes, e.g. "wilcove-2026-10-14". Older surveys without a stored code get one by creation order.
@@ -2194,15 +2225,17 @@ const APP_CONFIG = {
           bare_ground_pct: sm ? q.bare : null, litter_pct: sm ? q.litter : null, vegetation_height_mean_cm: sm ? q.vegHeight : null,
           vegetation_height_n: sm ? (vh.length || null) : null, vegetation_heights_cm: sm ? vh.join(";") : null, grazing: sm ? q.grazing : null,
           boot_sink_cm: mf ? q.sink : null, black_layer_depth_cm: mf ? q.blackLayer : null, surface_water_pct: mf ? q.water : null,
-          ripples: mf ? (q.ripples ? "yes" : "no") : null, core_id: mf ? q.coreId : null, photo_files: names.join(";"), notes: q.notes };
+          ripples: mf ? (q.ripples ? "yes" : "no") : null, core_id: mf ? q.coreId : null,
+          cover_grid_squares: sg ? sqText(q.coverCells) : null, bare_grid_squares: (rk || sm) ? sqText(q.bareCells) : null, photo_files: names.join(";"), notes: q.notes };
         COND_COLS.forEach((c, i) => { qrow[c] = cond[i]; });
         rows.push(COLS.map(c => qrow[c] ?? null));
         const baseRow = { survey_id: code, quadrat_id: qid, site: s.site, survey_date: s.date, habitat: HABITAT_NAME[hab], quadrat: q.quadrat };
         const spush = o => { const r = Object.assign({}, baseRow, o); spRows.push(SP_COLS.map(c => r[c] ?? null)); };
+        const gridOf = t => Array.isArray(t.cells) ? { grid_squares: sqText(t.cells), grid_squares_n: t.cells.length } : {};
         if (!tx.length) spush({ species: "None", species_cover_pct: 0 });
         tx.forEach(t => {
-          if (sm) return spush({ species: t.name, species_cover_pct: t.cover, domin: t.domin ?? (t.cover > 0 && t.cover < 4 ? "1-3" : null) });
-          if (rk) return spush({ species: t.name, layer: t.kind === "cover" ? (t.layer === "canopy" ? "canopy" : "understorey") : null,
+          if (sm) return spush({ ...gridOf(t), species: t.name, species_cover_pct: t.cover, domin: t.domin ?? (t.cover > 0 && t.cover < 4 ? "1-3" : null) });
+          if (rk) return spush({ ...gridOf(t), species: t.name, layer: t.kind === "cover" ? (t.layer === "canopy" ? "canopy" : "understorey") : null,
             species_cover_pct: t.kind === "cover" ? t.cover : null, count: t.kind === "count" ? t.count : null,
             count_density_m2: (t.kind === "count" && area && t.count != null) ? r1(t.count / area) : null });
           if (mf) {
@@ -2213,7 +2246,8 @@ const APP_CONFIG = {
               count_density_m2: (sa && t.count != null) ? r1(t.count / sa) : null });
           }
           const th = t.heights || [];
-          spush({ species: t.name, species_cover_pct: t.cover ?? null, shoot_count: t.shoots ?? null,
+          const sgGrid = (tx.length === 1 && Array.isArray(q.coverCells)) ? { grid_squares: sqText(q.coverCells), grid_squares_n: q.coverCells.length } : {};
+          spush({ ...sgGrid, species: t.name, species_cover_pct: t.cover ?? null, shoot_count: t.shoots ?? null,
             shoot_density_m2: (area && t.shoots != null) ? r1(t.shoots / area) : null,
             canopy_height_mean_cm: th.length ? r1(th.reduce((x, y) => x + y, 0) / th.length) : null, canopy_height_n: th.length || null, canopy_heights_cm: th.join(";") });
         });
@@ -2952,8 +2986,13 @@ const APP_CONFIG = {
           lay.append(b);
         });
         const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = "%";
-        inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, v); updateRockySum(); });
-        ctrl.append(lay, inp, unit);
+        inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, v); t.cells = null; updateRockySum(); });
+        const d0 = rkDef(name);
+        const g = gridButton(name, () => openGrid({
+          title: (d0 && d0.label) || name, value: t.value, cells: t.cells, others: rockyOthers(name, t.layer || "under"),
+          onDone: (v, cells) => { t.value = v; t.cells = cells; renderRockyRows(); }
+        }));
+        ctrl.append(lay, g, inp, unit);
       } else {
         inp.inputMode = "numeric"; inp.step = "1";
         const minus = document.createElement("button"); minus.type = "button"; minus.className = "step"; minus.textContent = "−"; minus.setAttribute("aria-label", "One fewer " + name);
@@ -3006,7 +3045,8 @@ const APP_CONFIG = {
     toast("Added " + name);
   });
   function resetRocky(keepSticky) {
-    if (keepSticky) state.rk.sel.forEach(t => { t.value = null; });
+    state.rk.bareCells = null;
+    if (keepSticky) state.rk.sel.forEach(t => { t.value = null; t.cells = null; });
     else {
       state.rk.sel = new Map(); state.rk.custom = []; state.rk.more = false;
       setSeg("zone", null); setSeg("substrate", null);
@@ -3019,23 +3059,94 @@ const APP_CONFIG = {
     state.rk.sel = new Map();
     (q.taxa || []).forEach(t => {
       if (!rkDef(t.name)) state.rk.custom.push({ name: t.name, kind: t.kind || "cover" });
-      state.rk.sel.set(t.name, { kind: t.kind || "cover", layer: t.layer || (t.kind === "cover" ? "under" : null), value: t.kind === "count" ? (t.count ?? null) : (t.cover ?? null) });
+      state.rk.sel.set(t.name, { kind: t.kind || "cover", layer: t.layer || (t.kind === "cover" ? "under" : null), value: t.kind === "count" ? (t.count ?? null) : (t.cover ?? null), cells: t.cells || null });
     });
     setSeg("zone", q.zone || null); setSeg("substrate", q.substrate || null);
+    state.rk.bareCells = q.bareCells || null;
     $("#f-hcd").value = q.heightCD ?? ""; $("#f-bare").value = q.bare ?? ""; $("#f-pool").checked = !!q.rockPool;
     renderRockyPicker(); renderRockyRows();
   }
   const isPresent = t => (t.kind === "count" ? (t.count || 0) : (t.cover || 0)) > 0;
   function rockyRecordPart() {
     const taxa = Array.from(state.rk.sel.entries()).map(([name, t]) => ({ name, kind: t.kind,
+      cells: t.kind === "cover" && t.cells ? t.cells.slice().sort((a, b) => a - b) : null,
       layer: t.kind === "cover" ? (t.layer || "under") : null,
       cover: t.kind === "cover" ? (t.value ?? 0) : null,
       count: t.kind === "count" ? (t.value ?? 0) : null }));
     const sums = rockySums();
     return { habitat: "rocky", taxa, species: taxa.filter(isPresent).map(t => t.name), cover: null,
       zone: getSeg("zone"), heightCD: num($("#f-hcd").value), substrate: getSeg("substrate"), rockPool: $("#f-pool").checked,
-      bare: num($("#f-bare").value), canopyTotal: sums.canopy, underTotal: sums.under };
+      bare: num($("#f-bare").value), bareCells: state.rk.bareCells ? state.rk.bareCells.slice().sort((a, b) => a - b) : null, canopyTotal: sums.canopy, underTotal: sums.under };
   }
+
+  /* ---------- Grid estimator sheet (rocky shore and saltmarsh) ---------- */
+  const GRID_ICON = `<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2V18M12 2V18M2 8H18M2 12H18" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="8" width="4" height="4" fill="currentColor"/></svg>`;
+  let gridCtx = null;
+  (function buildSheetGrid() {
+    const g = $("#gs-grid");
+    for (let i = 0; i < 25; i++) {
+      const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", "Square " + (i + 1));
+      b.addEventListener("click", () => { if (!gridCtx) return; if (gridCtx.cells.has(i)) gridCtx.cells.delete(i); else gridCtx.cells.add(i); paintSheet(); });
+      g.append(b);
+    }
+  })();
+  function paintSheet() {
+    $$("#gs-grid button").forEach((b, i) => {
+      b.setAttribute("aria-pressed", String(gridCtx.cells.has(i)));
+      b.classList.toggle("other", gridCtx.others.has(i));
+    });
+    $("#gs-read").innerHTML = (gridCtx.cells.size * 4) + "<small>%</small>";
+  }
+  // ctx: { title, value, cells (array or null), others (Set), onDone(value, cellsArray) }
+  function openGrid(ctx) {
+    const others = ctx.others || new Set();
+    let cells = new Set(ctx.cells && ctx.cells.length ? ctx.cells : []);
+    if (!cells.size && ctx.value) {
+      const n = Math.min(25, Math.round(ctx.value / 4));
+      const order = [...Array(25).keys()].filter(i => !others.has(i)).concat([...others]);
+      order.slice(0, n).forEach(i => cells.add(i));
+    }
+    gridCtx = { ...ctx, others, cells };
+    $("#gs-title").textContent = ctx.title;
+    $("#gs-hint").textContent = "Tap the squares it covers. Each square is 4%." + (others.size ? " Shaded squares are already taken in this layer." : "");
+    paintSheet();
+    $("#grid-sheet").classList.remove("hidden");
+    $("#gs-done").focus();
+  }
+  function closeGrid() { $("#grid-sheet").classList.add("hidden"); gridCtx = null; }
+  $("#gs-clear").addEventListener("click", () => { if (gridCtx) { gridCtx.cells.clear(); paintSheet(); } });
+  $("#gs-cancel").addEventListener("click", closeGrid);
+  $("#grid-sheet").addEventListener("click", e => { if (e.target.id === "grid-sheet") closeGrid(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && gridCtx) closeGrid(); });
+  $("#gs-done").addEventListener("click", () => {
+    if (!gridCtx) return;
+    const ctx = gridCtx; closeGrid();
+    ctx.onDone(ctx.cells.size * 4, [...ctx.cells]);
+  });
+  function gridButton(label, open) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "gbtn";
+    b.setAttribute("aria-label", "Estimate " + label + " with the grid"); b.innerHTML = GRID_ICON;
+    b.addEventListener("click", open);
+    return b;
+  }
+  const cellsOf = list => { const set = new Set(); list.forEach(c => (c || []).forEach(i => set.add(i))); return set; };
+  // Rocky shore: shade squares used by other species in the same layer (bare rock counts as understorey)
+  function rockyOthers(exceptName, layer) {
+    const lists = [];
+    state.rk.sel.forEach((t, n) => { if (n !== exceptName && t.kind === "cover" && t.layer === layer) lists.push(t.cells); });
+    if (layer === "under" && exceptName !== "__bare") lists.push(state.rk.bareCells);
+    return cellsOf(lists);
+  }
+  $("#g-bare").addEventListener("click", () => openGrid({
+    title: "Bare rock", value: num($("#f-bare").value), cells: state.rk.bareCells, others: rockyOthers("__bare", "under"),
+    onDone: (v, cells) => { state.rk.bareCells = cells; $("#f-bare").value = v; updateRockySum(); }
+  }));
+  $("#f-bare").addEventListener("input", () => { state.rk.bareCells = null; });
+  $("#g-smbare").addEventListener("click", () => openGrid({
+    title: "Bare ground", value: num($("#f-smbare").value), cells: state.sm.bareCells,
+    onDone: (v, cells) => { state.sm.bareCells = cells; $("#f-smbare").value = v; }
+  }));
+  $("#f-smbare").addEventListener("input", () => { state.sm.bareCells = null; });
 
   /* ---------- Saltmarsh ---------- */
   // [scientific name, label, kingdom, shown by default]
@@ -3124,8 +3235,13 @@ const APP_CONFIG = {
         const d = domin(t.value, t.few);
         dm.textContent = d !== null ? "Domin " + d : small ? "Domin 1–3" : "";
       };
-      inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, Math.min(100, v)); refresh(); });
-      ctrl.append(inp, unit, dm);
+      inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, Math.min(100, v)); t.cells = null; refresh(); });
+      const d0 = smDef(name);
+      const g = gridButton(name, () => openGrid({
+        title: (d0 && d0.label) || name, value: t.value, cells: t.cells,
+        onDone: (v, cells) => { t.value = v; t.cells = cells; renderSaltRows(); }
+      }));
+      ctrl.append(g, inp, unit, dm);
       row.append(nm, ctrl, few);
       refresh();
       wrap.append(row);
@@ -3158,7 +3274,8 @@ const APP_CONFIG = {
   $("#btn-sm-other-add").addEventListener("click", addSmOther);
   $("#sm-other-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addSmOther(); } });
   function resetSalt(keepSticky) {
-    if (keepSticky) state.sm.sel.forEach(t => { t.value = null; t.few = null; });
+    state.sm.bareCells = null;
+    if (keepSticky) state.sm.sel.forEach(t => { t.value = null; t.few = null; t.cells = null; });
     else { state.sm.sel = new Map(); state.sm.custom = []; state.sm.more = false; setSeg("smzone", null); }
     state.sm.heights = []; renderVh();
     ["#f-smel", "#f-smbare", "#f-smlitter", "#f-vh"].forEach(x => { $(x).value = ""; });
@@ -3170,9 +3287,10 @@ const APP_CONFIG = {
     state.sm.sel = new Map();
     (q.taxa || []).forEach(t => {
       if (!smDef(t.name) && !state.sm.custom.includes(t.name)) state.sm.custom.push(t.name);
-      state.sm.sel.set(t.name, { value: t.cover ?? null, few: t.few || null });
+      state.sm.sel.set(t.name, { value: t.cover ?? null, few: t.few || null, cells: t.cells || null });
     });
     setSeg("smzone", q.zone || null); setSeg("grazing", q.grazing || null);
+    state.sm.bareCells = q.bareCells || null;
     $("#f-smel").value = q.elevation ?? ""; $("#f-smbare").value = q.bare ?? ""; $("#f-smlitter").value = q.litter ?? "";
     state.sm.heights = (q.vegHeights || []).slice(); renderVh();
     renderSaltPicker(); renderSaltRows();
@@ -3181,11 +3299,11 @@ const APP_CONFIG = {
     addVh();
     const taxa = Array.from(state.sm.sel.entries()).map(([name, t]) => {
       const cover = t.value ?? 0;
-      return { name, kind: "cover", cover, few: cover > 0 && cover < 4 ? t.few : null, domin: domin(cover, t.few) };
+      return { name, kind: "cover", cover, few: cover > 0 && cover < 4 ? t.few : null, domin: domin(cover, t.few), cells: t.cells ? t.cells.slice().sort((a, b) => a - b) : null };
     });
     const hs = state.sm.heights.slice();
     return { habitat: "saltmarsh", taxa, species: taxa.filter(isPresent).map(t => t.name), cover: null,
-      zone: getSeg("smzone"), elevation: num($("#f-smel").value), bare: num($("#f-smbare").value), litter: num($("#f-smlitter").value),
+      zone: getSeg("smzone"), elevation: num($("#f-smel").value), bare: num($("#f-smbare").value), bareCells: state.sm.bareCells ? state.sm.bareCells.slice().sort((a, b) => a - b) : null, litter: num($("#f-smlitter").value),
       vegHeights: hs, vegHeight: hs.length ? Number((hs.reduce((a, b) => a + b, 0) / hs.length).toFixed(1)) : null, grazing: getSeg("grazing") };
   }
 
