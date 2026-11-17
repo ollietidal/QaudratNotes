@@ -288,6 +288,9 @@ details.about-box .about { padding-bottom: 8px; }
 input[type=date] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; text-align: left; }
 .warn-text { color: var(--tape); font-weight: 700; font-size: .9rem; margin-top: 6px; }
 .share-note { font-size: .92rem; margin: 0 0 14px; }
+.more-formats { margin-top: 22px; }
+details.about-box, details.about-box * { box-sizing: border-box; }
+.dwc-summary { font-size: .85rem; margin: 8px 0 2px; }
 .share-note a { color: var(--ink); font-weight: 700; }
 .switcher { margin-bottom: 10px; }
 .switcher .linkish { margin-top: 8px; display: inline-block; }
@@ -953,15 +956,16 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
   </div>
   <p class="hint" id="export-hint">The quadrats table has one row per quadrat: location, time, conditions and habitat details. The species table has one row per species per quadrat, with cover, layer, counts, shoots and canopy heights as recorded. Join them in R on <code>quadrat_id</code>.</p>
 
-  <h2>Share with biodiversity databases?</h2>
-  <div class="field">
-    <div class="seg" data-name="dwc-share">
-      <button type="button" data-value="no" aria-pressed="true">No</button>
-      <button type="button" data-value="yes">Yes</button>
-    </div>
-  </div>
+  <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
+
+  <details class="about-box more-formats">
+  <summary>More formats</summary>
+  <div class="about">
+  <p class="hint share-note">For sharing with biodiversity databases such as OBIS and GBIF. This downloads a Darwin Core file to your phone; nothing is uploaded. Send it on yourself, for example to <a href="https://www.eurobis.org/" target="_blank" rel="noopener">EurOBIS</a>, and check it first with <a href="https://www.gbif.org/tools/data-validator" target="_blank" rel="noopener">GBIF's data validator</a> if you like.</p>
+  <button class="btn btn-wide" type="button" id="btn-dwc">Download for OBIS / GBIF (.zip)</button>
+  <p class="hint dwc-summary" id="dwc-summary"></p>
+  <button class="linkish" type="button" id="btn-dwc-opts" aria-expanded="false" aria-controls="dwc-options">Options</button>
   <div class="hidden" id="dwc-options">
-  <p class="hint share-note">This downloads a Darwin Core file to your phone. Nothing is uploaded. You send it on yourself, for example to an OBIS data node such as <a href="https://www.eurobis.org/" target="_blank" rel="noopener">EurOBIS</a>. You can check the file first with <a href="https://www.gbif.org/tools/data-validator" target="_blank" rel="noopener">GBIF's free data validator</a>.</p>
   <div class="field">
     <label for="dwc-licence">Licence for your data</label>
     <select id="dwc-licence">
@@ -971,8 +975,8 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     </select>
   </div>
   <div class="field">
-    <label for="dwc-creator">Name to credit for the dataset <span class="hint">optional</span></label>
-    <input type="text" id="dwc-creator" autocomplete="name">
+    <label for="dwc-creator">Name to credit for the dataset</label>
+    <input type="text" id="dwc-creator" autocomplete="name" placeholder="Uses the surveyor if left blank">
   </div>
   <div class="field">
     <span class="label">Location precision</span>
@@ -983,10 +987,9 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
     </div>
   </div>
   <label class="check"><input type="checkbox" id="dwc-names"> Include surveyor names in the records</label>
-  <button class="btn btn-wide" type="button" id="btn-dwc">Download Darwin Core archive (.zip)</button>
   </div>
-
-  <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
+  </div>
+  </details>
 
   <h2>Storage</h2>
   <p class="hint" id="storage-line">Checking storage…</p>
@@ -1032,13 +1035,13 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.14.0",
+  version: "0.15.0",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
   habitats: ["seagrass", "rocky", "saltmarsh"],
   citeUrl: "https://quadratnotes.com",  // the app's public address
-  doi: ""            // e.g. "10.5281/zenodo.1234567" once archived on Zenodo; replaces the address in the citation
+  doi: "10.5281/zenodo.24295028"  // Zenodo concept DOI (all versions)
 };
 /* ================================================== */
 (function () {
@@ -1118,10 +1121,10 @@ const APP_CONFIG = {
       if (!b) return;
       const name = seg.dataset.name;
       const wasOn = b.getAttribute("aria-pressed") === "true";
-      if (name === "scope" || name === "qsize" || name === "dwc-precision" || name === "dwc-share" || name === "habitat" || name === "rkregion") {
+      if (name === "scope" || name === "qsize" || name === "dwc-precision"  || name === "habitat" || name === "rkregion") {
         setSeg(name, b.dataset.value);
         if (name === "habitat") setSurveyHabitat(b.dataset.value);
-        if (name === "dwc-share") $("#dwc-options").classList.toggle("hidden", b.dataset.value !== "yes");
+        if (name === "dwc-precision") renderDwcSummary();
         if (name === "qsize") $("#qsize-custom").classList.toggle("hidden", b.dataset.value !== "custom");
         return;
       }
@@ -2311,7 +2314,7 @@ const APP_CONFIG = {
     const licKey = $("#dwc-licence").value, lic = LICENCES[licKey];
     const prec = getSeg("dwc-precision") || "exact";
     const withNames = $("#dwc-names").checked;
-    const creator = $("#dwc-creator").value.trim();
+    const creator = $("#dwc-creator").value.trim() || (chosen.find(x => x.surveyor) || {}).surveyor || "";
     const events = [], occ = [], mof = [];
     const allNames = new Set();
     const perSession = [];
@@ -2518,11 +2521,26 @@ const APP_CONFIG = {
     } catch (e) {
       toast("Couldn't build the archive", true);
     } finally {
-      btn.disabled = false; btn.textContent = "Download Darwin Core archive (.zip)";
+      btn.disabled = false; btn.textContent = "Download for OBIS / GBIF (.zip)";
     }
   });
   get("meta", "dwcCreator").then(r => { if (r && r.value) $("#dwc-creator").value = r.value; }).catch(() => {});
 
+  const LIC_SHORT = { "CC0": "CC0", "CC-BY": "CC BY 4.0", "CC-BY-NC": "CC BY-NC 4.0" };
+  function renderDwcSummary() {
+    const p = getSeg("dwc-precision") || "exact";
+    $("#dwc-summary").textContent = "Licence " + LIC_SHORT[$("#dwc-licence").value] + ", " +
+      (p === "exact" ? "exact locations" : p === "0.01" ? "locations to about 1 km" : "locations to about 10 km") + ", " +
+      ($("#dwc-names").checked ? "surveyor names included" : "no surveyor names") + ".";
+  }
+  $("#btn-dwc-opts").addEventListener("click", () => {
+    const b = $("#btn-dwc-opts"), open = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", String(open)); b.textContent = open ? "Hide options" : "Options";
+    $("#dwc-options").classList.toggle("hidden", !open);
+  });
+  $("#dwc-licence").addEventListener("change", renderDwcSummary);
+  $("#dwc-names").addEventListener("change", renderDwcSummary);
+  renderDwcSummary();
   function afterExport() {
     if (APP_CONFIG.supportUrl) $("#support-line").classList.remove("hidden");
   }

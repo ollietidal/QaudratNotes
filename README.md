@@ -1,5 +1,7 @@
 # QuadratNotes
 
+[![DOI](https://zenodo.org/badge/1414708264.svg)](https://doi.org/10.5281/zenodo.24295028)
+
 A free, offline-first seagrass quadrat survey recorder. Data stays on the
 device and is exported as CSV (plus photos in a zip), ready for R.
 
@@ -16,6 +18,9 @@ The site appears at `https://<your-username>.github.io/<repository-name>/`.
 Replace `index.html` and commit; phones get the new version next time they open it with signal.
 If you change `jszip.min.js`, fonts or icons, also bump the version in `sw.js` (e.g. `v2` to `v3`).
 
+## How to cite
+Thomas, O. R. (2026). QuadratNotes [Computer software]. https://doi.org/10.5281/zenodo.24295028
+
 ## Licence
 Copyright (c) 2026 Oliver R Thomas. Released under the MIT License (see `LICENSE.txt`).
 
@@ -26,4 +31,4 @@ without permission. If you fork the project, please use a different name and ico
 
 ## Third-party code and fonts
 - `jszip.min.js`: JSZip 3.10.1 (https://stuk.github.io/jszip/), dual-licensed MIT or GPLv3.
-- Atkinson Hyperlegible, Barlow Condensed and Nunito fonts: SIL Open Font License 1.1 (see `fonts/`).
+- Atkinson Hyperlegible and Barlow Condensed fonts: SIL Open Font License 1.1 (see `fonts/`).

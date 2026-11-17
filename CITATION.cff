@@ -8,10 +8,15 @@ authors:
     given-names: Oliver R
     # orcid: "https://orcid.org/0000-0000-0000-0000"
 version: 0.15.0
+doi: 10.5281/zenodo.24295028
 date-released: 2026-11-16
 url: "https://quadratnotes.com"
 repository-code: "https://github.com/ollietidal/quadratnotes"
 license: MIT
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.24295028
+    description: Concept DOI for all versions of QuadratNotes
 keywords:
   - seagrass
   - quadrat survey
