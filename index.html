@@ -33,6 +33,8 @@
   --green-ink: #FFFBE6;
   --green-soft: #CFE3C6;
   --tape: #D9481F;
+  --green2: #7FAF8F; --green3: #1E4D38; --sand: #D6C98A; --sand2: #C2B26F; --rock: #B8B09A; --rock2: #9C9580; --rock3: #D2CBB5;
+  --sea: #B9D8D2; --sea2: #7FB3AB; --lilac: #9C88C9; --wrack: #7B6A2C; --wrack2: #54471A;
   --focus: #1B5FA8;
   --radius-s: 6px;
   --radius-l: 14px;
@@ -48,12 +50,14 @@
     --paper: #10181B; --surface: #18242A; --ink: #F2EBC4; --muted: #A3AB9F;
     --line: #2E3D43; --green: #6FBF8E; --green-ink: #0E1A14; --green-soft: #23402F;
     --tape: #FF7A4D; --focus: #8CC4FF; color-scheme: dark;
+    --sand: #3E4636; --sand2: #59614A; --green2: #3E7A59; --green3: #4E9C70; --rock: #4A5352; --rock2: #343C3B; --rock3: #646F6D; --sea: #24454B; --sea2: #4F8A8F; --lilac: #B6A6E0; --wrack: #A8924F; --wrack2: #7D6B33;
   }
 }
 :root[data-theme="dark"] {
   --paper: #10181B; --surface: #18242A; --ink: #F2EBC4; --muted: #A3AB9F;
   --line: #2E3D43; --green: #6FBF8E; --green-ink: #0E1A14; --green-soft: #23402F;
   --tape: #FF7A4D; --focus: #8CC4FF; color-scheme: dark;
+    --sand: #3E4636; --sand2: #59614A; --green2: #3E7A59; --green3: #4E9C70; --rock: #4A5352; --rock2: #343C3B; --rock3: #646F6D; --sea: #24454B; --sea2: #4F8A8F; --lilac: #B6A6E0; --wrack: #A8924F; --wrack2: #7D6B33;
 }
 *, *::before, *::after { box-sizing: inherit; }
 html { scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--paper); }
@@ -267,6 +271,7 @@ select:focus { border-color: var(--ink); outline: none; }
 .habitats { display: grid; gap: 14px; margin-top: 22px; }
 .habitat-card { background: var(--surface); border: 2px solid var(--ink); border-radius: var(--radius-l); padding: 16px; display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
 .habitat-art { width: 100%; height: auto; display: block; }
+.habitat-art.round { width: 104px; margin: 0 auto; }
 .habitat-card h2 { margin: 0 0 4px; font-size: 1.25rem; }
 .habitat-card p { margin: 0 0 12px; color: var(--muted); font-size: .95rem; }
 @media (max-width: 360px) { .habitat-card { grid-template-columns: 1fr; } .habitat-art { max-width: 180px; margin: 0 auto; } }
@@ -423,18 +428,19 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 
   <div class="habitats">
     <article class="habitat-card">
-      <svg class="habitat-art" viewBox="0 0 160 120" aria-hidden="true">
-        <path d="M0 92 Q20 87 40 92 T80 92 T120 92 T160 92 V120 H0 Z" fill="var(--line)"/>
-        <g fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round">
-          <path d="M40 95 Q37 66 26 34"/><path d="M40 95 Q43 62 52 28"/><path d="M40 95 Q40 72 38 50"/>
-          <path d="M80 95 Q76 58 66 16"/><path d="M80 95 Q85 54 97 14"/><path d="M80 95 Q80 62 81 26"/><path d="M80 95 Q72 74 60 56"/>
-          <path d="M120 95 Q117 70 108 44"/><path d="M120 95 Q124 66 133 38"/><path d="M120 95 Q121 76 120 58"/>
-        </g>
-        <g stroke="var(--muted)" stroke-width="3" stroke-linecap="round" fill="none">
-          <path d="M16 97 H146"/>
-          <path d="M40 98 l-4 12 M40 98 l3 11 M80 98 l-5 13 M80 98 l2 12 M80 98 l7 10 M120 98 l-3 12 M120 98 l4 11"/>
-        </g>
-        <g fill="var(--muted)"><circle cx="40" cy="97" r="3"/><circle cx="80" cy="97" r="3"/><circle cx="120" cy="97" r="3"/></g>
+      <svg class="habitat-art round" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><clipPath id="hab-cca"><circle cx="60" cy="60" r="54"/></clipPath></defs>
+  <g clip-path="url(#hab-cca)">
+    <rect width="120" height="120" fill="var(--sea)"/>
+    <rect width="120" height="26" fill="var(--surface)"/>
+    <path d="M0 26 q10 -4 20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="var(--sea)"/>
+    <g fill="none" stroke="var(--surface)" stroke-width="2" opacity=".8"><path d="M30 34 L18 82 M60 34 L56 90 M92 34 L104 84"/></g>
+    <path d="M0 92 Q30 86 60 91 T120 90 V120 H0 Z" fill="var(--sand)"/>
+    <g fill="none" stroke="var(--green2)" stroke-width="4" stroke-linecap="round"><path d="M42 93 Q40 74 34 58"/><path d="M78 93 Q82 72 88 58"/></g>
+    <g fill="none" stroke="var(--green)" stroke-width="4.5" stroke-linecap="round"><path d="M26 93 Q24 74 16 54"/><path d="M26 93 Q30 70 34 50"/><path d="M60 93 Q56 64 48 34"/><path d="M60 93 Q65 62 72 36"/><path d="M60 93 Q61 72 59 50"/><path d="M96 93 Q94 74 88 56"/><path d="M96 93 Q100 72 106 54"/></g>
+    <g fill="none" stroke="var(--surface)" stroke-width="1.6"><circle cx="80" cy="46" r="2.4"/><circle cx="84" cy="38" r="1.6"/></g>
+  </g>
+  <circle cx="60" cy="60" r="54" fill="none" stroke="var(--ink)" stroke-width="4"/>
       </svg>
       <div>
         <h2>Seagrass</h2>
@@ -443,18 +449,20 @@ details.about-box, details.about-box * { box-sizing: border-box; }
       </div>
     </article>
     <article class="habitat-card">
-      <svg class="habitat-art" viewBox="0 0 160 120" aria-hidden="true">
-        <path d="M2 112 Q8 80 30 74 Q50 60 74 66 Q96 54 120 64 Q146 66 158 112 Z" fill="var(--line)"/>
-        <g fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round">
-          <path d="M34 76 Q30 52 18 34"/><path d="M31 62 Q40 48 46 30"/><path d="M24 48 Q14 40 10 26"/>
-        </g>
-        <g fill="var(--green)"><ellipse cx="17" cy="36" rx="4" ry="6"/><ellipse cx="45" cy="34" rx="4" ry="6"/><ellipse cx="11" cy="29" rx="3.5" ry="5"/></g>
-        <path d="M70 66 Q74 44 86 42 Q98 44 102 66 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
-        <g stroke="var(--muted)" stroke-width="2" fill="none"><path d="M86 44 L80 64 M86 44 L86 65 M86 44 L93 64"/></g>
-        <g fill="var(--surface)" stroke="var(--muted)" stroke-width="2.5">
-          <circle cx="116" cy="74" r="6"/><circle cx="131" cy="80" r="5"/><circle cx="121" cy="88" r="5"/><circle cx="138" cy="94" r="4.5"/><circle cx="108" cy="90" r="4"/>
-        </g>
-        <g fill="var(--muted)"><circle cx="116" cy="74" r="1.8"/><circle cx="131" cy="80" r="1.6"/><circle cx="121" cy="88" r="1.6"/><circle cx="138" cy="94" r="1.4"/><circle cx="108" cy="90" r="1.3"/></g>
+      <svg class="habitat-art round" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><clipPath id="hab-ccb"><circle cx="60" cy="60" r="54"/></clipPath></defs>
+  <g clip-path="url(#hab-ccb)">
+    <rect width="120" height="120" fill="var(--surface)"/>
+    <rect y="54" width="120" height="66" fill="var(--sea)"/>
+    <g fill="none" stroke="var(--sea2)" stroke-width="2" stroke-linecap="round"><path d="M76 62 q5 -3 10 0 t10 0"/></g>
+    <path d="M-4 120 Q0 84 22 78 Q40 64 62 70 Q84 58 104 68 Q122 72 126 120 Z" fill="var(--rock)"/>
+    <path d="M22 78 Q40 64 62 70 Q84 58 104 68" fill="none" stroke="var(--rock3)" stroke-width="3.5" stroke-linecap="round"/>
+    <g transform="translate(9 4)"><g fill="none" stroke="var(--wrack)" stroke-width="4.4" stroke-linecap="round"><path d="M30 78 Q28 62 20 50"/><path d="M20 50 Q16 42 16 32"/><path d="M20 50 Q26 42 30 34"/><path d="M29 64 Q38 56 40 44"/></g><g fill="var(--wrack2)"><ellipse cx="14" cy="40" rx="2.4" ry="3.4"/><ellipse cx="25" cy="42" rx="2.4" ry="3.4"/><ellipse cx="38" cy="50" rx="2.4" ry="3.4"/></g></g>
+    <path d="M58 70 Q61 54 70 52 Q79 54 82 69 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.6" stroke-linejoin="round"/>
+    <g stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round"><path d="M70 54 L63 68 M70 54 L70 69 M70 54 L77 68"/></g>
+    <g stroke="var(--muted)" stroke-width="1.8" fill="var(--surface)" stroke-linejoin="round"><path d="M88 82 L90.5 75 L96.5 75 L99 82 Z"/><path d="M98 92 L100.5 86 L105.5 86 L108 92 Z"/><path d="M84 94 L86.5 88 L91.5 88 L94 94 Z"/></g>
+  </g>
+  <circle cx="60" cy="60" r="54" fill="none" stroke="var(--ink)" stroke-width="4"/>
       </svg>
       <div>
         <h2>Rocky shore</h2>
@@ -463,18 +471,18 @@ details.about-box, details.about-box * { box-sizing: border-box; }
       </div>
     </article>
     <article class="habitat-card">
-      <svg class="habitat-art" viewBox="0 0 160 120" aria-hidden="true">
-        <path d="M0 96 Q40 90 70 95 Q78 104 92 104 Q104 104 110 95 Q136 90 160 96 V120 H0 Z" fill="var(--line)"/>
-        <path d="M74 98 Q92 112 106 98" fill="none" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
-        <g fill="none" stroke="var(--green)" stroke-width="4" stroke-linecap="round">
-          <path d="M20 96 Q18 72 10 56"/><path d="M22 96 Q24 70 30 52"/><path d="M26 96 Q32 76 42 64"/>
-          <path d="M120 94 Q118 70 112 54"/><path d="M124 94 Q128 68 136 50"/><path d="M128 94 Q138 78 148 70"/>
-        </g>
-        <g fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M56 95 V80 M56 86 L50 78 M56 84 L62 76 M50 78 V72 M62 76 V70"/>
-        </g>
-        <g stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"><path d="M88 94 V66 M88 76 L80 66 M88 72 L96 62"/></g>
-        <g fill="var(--muted)"><circle cx="80" cy="64" r="3"/><circle cx="96" cy="60" r="3"/><circle cx="88" cy="63" r="3"/><circle cx="84" cy="58" r="2.5"/><circle cx="93" cy="55" r="2.5"/></g>
+      <svg class="habitat-art round" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><clipPath id="hab-ccc"><circle cx="60" cy="60" r="54"/></clipPath></defs>
+  <g clip-path="url(#hab-ccc)">
+    <rect width="120" height="120" fill="var(--surface)"/>
+    <path d="M0 58 Q30 54 60 57 T120 56 V120 H0 Z" fill="var(--green2)"/>
+    <path d="M0 72 Q30 68 60 71 T120 70 V120 H0 Z" fill="var(--sand)"/>
+    <path d="M57 57 Q50 64 62 70 Q76 78 54 90 Q36 102 50 122 L82 122 Q70 104 84 94 Q104 80 76 70 Q64 64 63 57 Z" fill="var(--sea)"/>
+    <g fill="none" stroke="var(--green)" stroke-width="3.4" stroke-linecap="round"><path d="M14 100 Q12 84 6 72"/><path d="M16 100 Q18 82 24 70"/><path d="M20 100 Q26 88 34 80"/></g>
+    <g fill="var(--green)"><rect x="97.3" y="99.6" width="5.4" height="4.4" rx="2.2"/><rect x="97.3" y="93.9" width="5.4" height="4.4" rx="2.2"/><rect x="97.3" y="88.2" width="5.4" height="4.4" rx="2.2"/><rect x="97.3" y="82.5" width="5.4" height="4.4" rx="2.2"/><rect x="91.6" y="86" width="4.8" height="4" rx="2.2"/><rect x="91.6" y="80.7" width="4.8" height="4" rx="2.2"/><rect x="91.6" y="75.4" width="4.8" height="4" rx="2.2"/><rect x="103.6" y="82" width="4.8" height="4" rx="2.2"/><rect x="103.6" y="76.7" width="4.8" height="4" rx="2.2"/><rect x="103.6" y="71.4" width="4.8" height="4" rx="2.2"/></g><g fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round"><path d="M100 94 L94 90 M100 90 L106 86"/></g>
+    <g fill="var(--lilac)"><circle cx="30" cy="66" r="2.6"/><circle cx="36" cy="63" r="2.6"/><circle cx="92" cy="64" r="2.6"/></g>
+  </g>
+  <circle cx="60" cy="60" r="54" fill="none" stroke="var(--ink)" stroke-width="4"/>
       </svg>
       <div>
         <h2>Saltmarsh</h2>
@@ -1191,7 +1199,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.1",
+  version: "0.17.2",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
