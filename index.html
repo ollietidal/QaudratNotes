@@ -1199,7 +1199,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.2",
+  version: "0.17.3",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
@@ -1623,7 +1623,7 @@ const APP_CONFIG = {
   const measuredSpecies = () => currentSpecies().filter(x => x !== "None");
   const isMulti = () => measuredSpecies().length >= 2;
   function taxonData(name) {
-    if (!state.taxa.has(name)) state.taxa.set(name, { cover: null, shoots: null, heights: [] });
+    if (!state.taxa.has(name)) state.taxa.set(name, { cover: null, shoots: null, heights: [], cells: null });
     return state.taxa.get(name);
   }
   function taxaCoverSum() {
@@ -1691,7 +1691,7 @@ const APP_CONFIG = {
       const h = document.createElement("h3"); h.textContent = name; card.append(h);
       const id = "tx" + idx;
       card.insertAdjacentHTML("beforeend",
-        '<div class="row"><div class="field"><label for="' + id + 'c">Cover <span class="hint">% of quadrat</span></label><input type="number" id="' + id + 'c" inputmode="decimal" min="0" max="100" step="any"></div>' +
+        '<div class="row"><div class="field"><label for="' + id + 'c">Cover <span class="hint">% of quadrat</span></label><div class="with-grid"><input type="number" id="' + id + 'c" inputmode="decimal" min="0" max="100" step="any"></div></div>' +
         '<div class="field"><label for="' + id + 's">Shoot count</label><input type="number" id="' + id + 's" inputmode="numeric" min="0"><div class="density"></div></div></div>' +
         '<div class="field"><label for="' + id + 'h">Canopy height <span class="hint">cm</span></label><div class="height-add"><input type="number" id="' + id + 'h" inputmode="decimal" min="0" step="any" enterkeyhint="done" data-taxon="1"><button class="btn" type="button">Add</button></div><div class="heights"></div><div class="density"></div></div>');
       const cIn = card.querySelector("#" + id + "c"), sIn = card.querySelector("#" + id + "s"), hIn = card.querySelector("#" + id + "h");
@@ -1699,7 +1699,22 @@ const APP_CONFIG = {
       const dens = card.querySelectorAll(".density")[0], chips = card.querySelector(".heights"), hSum = card.querySelectorAll(".density")[1];
       const showDensity = () => { dens.textContent = (t.shoots !== null && area) ? "About " + Math.round(t.shoots / area) + " shoots per m²" : ""; };
       cIn.value = t.cover ?? ""; sIn.value = t.shoots ?? "";
-      cIn.addEventListener("input", () => { const v = num(cIn.value); t.cover = v === null ? null : Math.max(0, Math.min(100, v)); updateTaxaSum(); });
+      cIn.addEventListener("input", () => { const v = num(cIn.value); t.cover = v === null ? null : Math.max(0, Math.min(100, v)); t.cells = null; updateTaxaSum(); });
+      // Grid for this species, like rocky shore and saltmarsh: squares used by the other species are shaded.
+      cIn.parentElement.append(gridButton(name + " cover", () => openGrid({
+        title: name, value: t.cover, cells: t.cells, othersNote: "Shaded squares are used by the other species.",
+        others: cellsOf(measuredSpecies().filter(n => n !== name).map(n => taxonData(n).cells)),
+        onDone: (v, cells) => {
+          t.cover = v; t.cells = cells; cIn.value = v;
+          // Keep the total grid in step: it covers at least every square a species was tapped in.
+          if (state.cover === null || state.cellsTapped) {
+            cells.forEach(i => state.cells.add(i));
+            state.cellsTapped = true;
+            setCover(state.cells.size * 4, false);
+          }
+          updateTaxaSum();
+        }
+      })));
       sIn.addEventListener("input", () => { t.shoots = num(sIn.value); showDensity(); });
       const add = () => { if (addTaxonHeight(name, hIn)) { renderTaxonHeights(name, chips, hSum); hIn.focus(); } };
       card.querySelector(".height-add .btn").addEventListener("click", add);
@@ -2161,7 +2176,7 @@ const APP_CONFIG = {
       if (taxaCoverSum() > 100) { toast("Species cover adds up to more than 100%. Check the values.", true); return; }
     }
     const taxa = multi
-      ? mNames.map(n => { const t = taxonData(n); return { name: n, cover: t.cover, shoots: t.shoots, heights: t.heights.slice() }; })
+      ? mNames.map(n => { const t = taxonData(n); return { name: n, cover: t.cover, shoots: t.shoots, heights: t.heights.slice(), cells: Array.isArray(t.cells) ? t.cells.slice().sort((a, b) => a - b) : null }; })
       : mNames.length === 1 ? [{ name: mNames[0], cover: state.cover, shoots: num($("#f-shoots").value), heights: state.heights.slice() }] : [];
     const shootVals = taxa.map(t => t.shoots).filter(v => v !== null && v !== undefined);
     const allHeights = taxa.reduce((a, t) => a.concat(t.heights), []);
@@ -2240,7 +2255,7 @@ const APP_CONFIG = {
     $("#f-cover").value = q.cover;
     state.taxa = new Map();
     if (Array.isArray(q.taxa) && q.taxa.length >= 2) {
-      q.taxa.forEach(t => state.taxa.set(t.name, { cover: t.cover ?? null, shoots: t.shoots ?? null, heights: (t.heights || []).slice() }));
+      q.taxa.forEach(t => state.taxa.set(t.name, { cover: t.cover ?? null, shoots: t.shoots ?? null, heights: (t.heights || []).slice(), cells: Array.isArray(t.cells) ? t.cells.slice() : null }));
     }
     const multiRec = Array.isArray(q.taxa) && q.taxa.length >= 2;
     $("#f-shoots").value = multiRec ? "" : (q.shoots ?? "");
@@ -2459,7 +2474,7 @@ const APP_CONFIG = {
               count_density_m2: (sa && t.count != null) ? r1(t.count / sa) : null });
           }
           const th = t.heights || [];
-          const sgGrid = (tx.length === 1 && Array.isArray(q.coverCells)) ? { grid_squares: sqText(q.coverCells), grid_squares_n: q.coverCells.length } : {};
+          const sgGrid = (tx.length === 1 && Array.isArray(q.coverCells)) ? { grid_squares: sqText(q.coverCells), grid_squares_n: q.coverCells.length } : gridOf(t);
           spush({ ...sgGrid, species: t.name, species_cover_pct: t.cover ?? null, shoot_count: t.shoots ?? null,
             shoot_density_m2: (area && t.shoots != null) ? r1(t.shoots / area) : null,
             canopy_height_mean_cm: th.length ? r1(th.reduce((x, y) => x + y, 0) / th.length) : null, canopy_height_n: th.length || null, canopy_heights_cm: th.join(";") });
@@ -4024,7 +4039,7 @@ const APP_CONFIG = {
     }
     gridCtx = { ...ctx, others, cells };
     $("#gs-title").textContent = ctx.title;
-    $("#gs-hint").textContent = "Tap the squares it covers. Each square is 4%." + (others.size ? " Shaded squares are already taken in this layer." : "");
+    $("#gs-hint").textContent = "Tap the squares it covers. Each square is 4%." + (others.size ? " " + (ctx.othersNote || "Shaded squares are already taken in this layer.") : "");
     paintSheet();
     $("#grid-sheet").classList.remove("hidden");
     $("#gs-done").focus();
