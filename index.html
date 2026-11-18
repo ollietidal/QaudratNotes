@@ -203,6 +203,10 @@ textarea { min-height: 88px; resize: vertical; }
 .surveys strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .surveys span { color: var(--muted); font-size: .9rem; }
 .tag { font-size: .8rem; font-weight: 700; color: var(--green); }
+.survey-btns { display: flex; gap: 8px; align-items: center; flex: none; }
+.linkish.danger { color: var(--tape); }
+.del-empty { margin: -6px 0 14px; }
+.del-survey { margin: 26px 0 8px; text-align: center; }
 
 .backup-nudge { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
   border: 2px solid var(--tape); border-radius: var(--radius-l); background: var(--surface); padding: 10px 12px; margin: 0 0 16px; }
@@ -685,6 +689,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </span>
   </div>
 
+  <p class="del-empty hidden" id="del-empty-wrap"><button class="linkish danger" type="button" id="btn-del-empty">Started this survey by mistake? Delete it</button></p>
   <div class="quadrat-head">
     <div class="qnum">
       <label for="f-qnum">Quadrat</label>
@@ -1066,6 +1071,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   </div>
   <ul class="qlist" id="qlist"></ul>
   <div class="empty hidden" id="q-empty">No quadrats yet. Record your first one on the Record tab.</div>
+  <div class="del-survey hidden" id="del-survey-wrap"><button class="btn btn-small btn-danger" type="button" id="btn-del-survey">Delete this survey</button></div>
 </section>
 
 <!-- EXPORT -->
@@ -1185,7 +1191,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.0",
+  version: "0.17.1",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
@@ -1456,16 +1462,24 @@ const APP_CONFIG = {
       sub.textContent = s.date + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (habitatOf(s) === "rocky" ? ", rocky shore, " + RK_REGION_NAME[rkRegionOf(s)] : (s.region ? ", " + regionLabel(s.region) : ""));
       info.append(name, sub);
       li.append(info);
+      const btns = document.createElement("span");
+      btns.className = "survey-btns";
       if (state.session && state.session.id === s.id) {
         const tag = document.createElement("span");
         tag.className = "tag"; tag.textContent = "Open now";
-        li.append(tag);
+        btns.append(tag);
       } else {
         const btn = document.createElement("button");
         btn.className = "btn btn-small"; btn.type = "button"; btn.textContent = "Open";
         btn.addEventListener("click", () => openSession(s));
-        li.append(btn);
+        btns.append(btn);
       }
+      const delBtn = document.createElement("button");
+      delBtn.className = "btn btn-small btn-danger"; delBtn.type = "button"; delBtn.textContent = "Delete";
+      delBtn.setAttribute("aria-label", "Delete survey " + s.site + ", " + s.date);
+      armButton(delBtn, n ? "Delete " + n + (n === 1 ? " quadrat?" : " quadrats?") : "Sure?", async () => { await deleteSurvey(s.id); renderSurveyList(); });
+      btns.append(delBtn);
+      li.append(btns);
       ul.append(li);
     });
   }
@@ -2094,6 +2108,7 @@ const APP_CONFIG = {
     resetMud(keepSticky);
     renderHabitatForm();
     $("#f-qnum").value = await nextQuadratNumber();
+    $("#del-empty-wrap").classList.toggle("hidden", !state.session || Number($("#f-qnum").value) !== 1);
     $("#editing-bar").classList.add("hidden");
     $("#btn-save").textContent = "Save quadrat";
     renderNav();
@@ -2262,6 +2277,7 @@ const APP_CONFIG = {
     renderBackupStatus();
     await renderSwitcher();
     const hasSession = !!state.session;
+    $("#del-survey-wrap").classList.toggle("hidden", !hasSession);
     $("#h-data").classList.toggle("hidden", !hasSession);
     $(".stats").classList.toggle("hidden", !hasSession);
     if (!hasSession) { $("#qlist").innerHTML = ""; $("#q-empty").textContent = "Choose a survey above, or start a new one."; $("#q-empty").classList.remove("hidden"); return; }
@@ -2741,6 +2757,34 @@ const APP_CONFIG = {
   function afterExport() {
     if (APP_CONFIG.supportUrl) $("#support-line").classList.remove("hidden");
   }
+
+  /* ---------- Deleting a survey ---------- */
+  async function deleteSurvey(id) {
+    const qs = await byIndex("quadrats", "sessionId", id);
+    for (const q of qs) {
+      for (const ph of await byIndex("photos", "quadratId", q.id)) await del("photos", ph.id);
+      await del("quadrats", q.id);
+    }
+    await del("sessions", id);
+    if (state.session && state.session.id === id) {
+      state.session = null; state.navTarget = null; state.editingId = null;
+      await del("meta", "active");
+      renderHeader();
+    }
+    toast(qs.length ? "Survey and its " + qs.length + (qs.length === 1 ? " quadrat" : " quadrats") + " deleted" : "Survey deleted");
+  }
+  $("#btn-del-empty").addEventListener("click", async () => {
+    if (!state.session) return;
+    const n = (await byIndex("quadrats", "sessionId", state.session.id)).length;
+    if (n) { toast("This survey has quadrats now. Delete it from the Data tab instead.", true); return; }
+    await deleteSurvey(state.session.id);
+    show("survey");
+  });
+  armButton($("#btn-del-survey"), "Tap again to delete this survey", async () => {
+    if (!state.session) return;
+    await deleteSurvey(state.session.id);
+    show("survey");
+  });
 
   /* ---------- Backup and restore ---------- */
   const BACKUP_FORMAT = 1;
