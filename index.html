@@ -289,6 +289,8 @@ input[type=date] { -webkit-appearance: none; appearance: none; display: block; m
 .warn-text { color: var(--tape); font-weight: 700; font-size: .9rem; margin-top: 6px; }
 .share-note { font-size: .92rem; margin: 0 0 14px; }
 .more-formats { margin-top: 22px; }
+.mf-head { font-size: 1rem; margin: 6px 0 6px; }
+.map-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
 details.about-box, details.about-box * { box-sizing: border-box; }
 .dwc-summary { font-size: .85rem; margin: 8px 0 2px; }
 .share-note a { color: var(--ink); font-weight: 700; }
@@ -335,6 +337,37 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 .with-grid { display: flex; gap: 8px; }
 .with-grid input { flex: 1; min-width: 0; }
 .rk-other { display: grid; gap: 8px; margin-top: 8px; }
+.plan-map { height: 58vh; min-height: 300px; max-height: 620px; border: 2px solid var(--ink); border-radius: var(--radius-l); overflow: hidden;
+  background: var(--surface); margin: 12px 0 8px; position: relative; z-index: 0; isolation: isolate; }
+.plan-map.nomap { display: grid; place-items: center; padding: 20px; text-align: center; color: var(--muted); }
+.plan-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 10px; }
+.plan-area { font-weight: 700; margin: 4px 0 14px; }
+.plan-gps { margin: 0; color: var(--muted); }
+.plan-gps-row, .plan-check-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin: 0 0 6px; }
+.plan-check-row .check { margin-bottom: 8px; align-items: flex-start; }
+.plan-check-row .check input { flex: none; margin-top: 1px; }
+.plan-gps-row .info-btn, .plan-check-row .info-btn { flex: none; position: relative; }
+#view-plan.viewing .plan-edit { display: none !important; }
+#view-plan:not(.viewing) .plan-view { display: none !important; }
+.pt-mark { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--tape); color: #fff;
+  font: 700 14px/1 var(--num); border: 2px solid #fff; box-shadow: 0 0 0 1.5px #17242C; }
+.pt-mark.done { background: #2D6A4F; }
+.pt-mark.skipped { background: #8A8F8C; text-decoration: line-through; }
+.pt-mark.target { box-shadow: 0 0 0 3px #17242C; transform: scale(1.25); }
+.nav-card { border: 2px solid var(--ink); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
+.nav-card.arrived { border-color: var(--green); background: var(--green-soft); }
+.nav-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.nav-body { display: flex; align-items: center; gap: 16px; }
+.nav-dial { width: 92px; height: 92px; flex: none; color: var(--ink); }
+.nav-dial .needle { fill: var(--tape); }
+.nav-dial .here { fill: var(--green); display: none; }
+.nav-card.arrived .nav-dial .needle, .nav-card.finished .nav-dial .needle { display: none; }
+.nav-card.arrived .nav-dial .here, .nav-card.finished .nav-dial .here { display: inline; }
+.nav-dist { font: 700 2.4rem/1 var(--num); }
+.nav-sub { margin-top: 4px; }
+.nav-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.nav-btns select { width: auto; flex: 1 1 150px; }
+.nav-skip { margin-top: 12px; }
 .loc-card { border: 2px solid var(--tape); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .loc-card.ask { border-color: var(--green); }
 .loc-card b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
@@ -552,6 +585,21 @@ details.about-box, details.about-box * { box-sizing: border-box; }
         <label for="s-design-other">Describe how quadrats were placed</label>
         <input type="text" id="s-design-other" autocomplete="off" placeholder="e.g. stratified by shore height">
       </div>
+      <div class="hidden" id="plan-check-wrap" style="margin-top:12px">
+        <div class="plan-check-row">
+          <label class="check"><input type="checkbox" id="s-plan"> <span>Pick random points on a map <span class="hint">draw the survey area and the app picks the points, then guides you to each one</span></span></label>
+          <button class="info-btn" type="button" data-info="plan-info-setup" aria-expanded="false" aria-controls="plan-info-setup" aria-label="When does this need signal?">i</button>
+        </div>
+        <div class="info-panel hidden" id="plan-info-setup">
+        <dl>
+          <dt>Needs signal</dt><dd>The map background, and drawing the area by tapping on the map.</dd>
+          <dt>Works without signal</dt><dd>Walking the boundary with GPS, picking the points, the guidance arrow and recording quadrats.</dd>
+          <dt>Tip</dt><dd>Draw the area before you lose signal, at home or in the car park. On site without signal the map background may be blank, but the outline, points and arrow all still work.</dd>
+          <dt>GPS accuracy</dt><dd>Phone GPS is usually accurate to 3–10&nbsp;m (the screen shows the current figure), so treat each point as where to drop the quadrat, not an exact spot. It's worse under cliffs and in the first minute or so. You count as at a point when you're within the current accuracy (2–10&nbsp;m), and a quadrat saved within 25&nbsp;m is linked to it with the actual distance recorded.</dd>
+          <dt>External GPS receivers</dt><dd>A Bluetooth GNSS, DGPS or RTK receiver set up as the phone or tablet's location source is used automatically, and its accuracy is recorded down to the centimetre.</dd>
+        </dl>
+        </div>
+      </div>
     </div>
     <div class="field">
       <span class="label">Conditions <span class="hint">optional, needs signal</span></span>
@@ -575,6 +623,53 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   </div>
 </section>
 
+<!-- RANDOM POINTS -->
+<section id="view-plan" class="hidden" aria-labelledby="h-plan">
+  <h1 id="h-plan">Random points</h1>
+  <p class="lead plan-edit">Mark the corners of the area you want to survey, choose how many points, and the app places them at random.</p>
+  <p class="lead plan-view" id="plan-view-sum"></p>
+  <div class="field plan-edit">
+    <div class="seg" data-name="planmode">
+      <button type="button" data-value="map" aria-pressed="true">Tap on the map</button>
+      <button type="button" data-value="walk">Walk the boundary</button>
+    </div>
+  </div>
+  <div class="plan-gps-row"><p class="plan-gps" id="plan-gps"></p>
+    <button class="info-btn" type="button" data-info="plan-info" aria-expanded="false" aria-controls="plan-info" aria-label="When does this need signal?">i</button></div>
+  <div class="info-panel hidden" id="plan-info">
+        <dl>
+          <dt>Needs signal</dt><dd>The map background, and drawing the area by tapping on the map.</dd>
+          <dt>Works without signal</dt><dd>Walking the boundary with GPS, picking the points, the guidance arrow and recording quadrats.</dd>
+          <dt>Tip</dt><dd>Draw the area before you lose signal, at home or in the car park. On site without signal the map background may be blank, but the outline, points and arrow all still work.</dd>
+          <dt>GPS accuracy</dt><dd>Phone GPS is usually accurate to 3–10&nbsp;m (the screen shows the current figure), so treat each point as where to drop the quadrat, not an exact spot. It's worse under cliffs and in the first minute or so. You count as at a point when you're within the current accuracy (2–10&nbsp;m), and a quadrat saved within 25&nbsp;m is linked to it with the actual distance recorded.</dd>
+          <dt>External GPS receivers</dt><dd>A Bluetooth GNSS, DGPS or RTK receiver set up as the phone or tablet's location source is used automatically, and its accuracy is recorded down to the centimetre.</dd>
+        </dl>
+  </div>
+  <button class="btn btn-small hidden" type="button" id="btn-plan-allow">Allow location</button>
+  <div id="plan-map" class="plan-map" role="application" aria-label="Map of the survey area"></div>
+  <p class="hint" id="plan-maphint"></p>
+  <div class="plan-edit">
+    <button class="btn btn-primary btn-wide hidden" type="button" id="btn-plan-corner">Add corner here</button>
+    <div class="plan-tools">
+      <button class="btn btn-small" type="button" id="btn-plan-undo">Undo corner</button>
+      <button class="btn btn-small" type="button" id="btn-plan-clear">Clear</button>
+    </div>
+    <p class="plan-area" id="plan-area" aria-live="polite"></p>
+    <div class="row">
+      <div class="field"><label for="plan-n">Number of points</label><input type="number" id="plan-n" inputmode="numeric" min="1" max="200" value="10"></div>
+      <div class="field"><label for="plan-gap">Minimum gap <span class="hint">m, optional</span></label><input type="number" id="plan-gap" inputmode="decimal" min="0" step="any" placeholder="none"></div>
+    </div>
+    <button class="btn btn-wide" type="button" id="btn-plan-go">Pick random points</button>
+    <div class="hidden" id="plan-result">
+      <p id="plan-result-text" aria-live="polite"></p>
+      <div class="plan-tools"><button class="btn btn-small" type="button" id="btn-plan-again">Pick again</button></div>
+    </div>
+    <button class="btn btn-primary btn-wide hidden" type="button" id="btn-plan-use">Use these points</button>
+    <p><button class="linkish" type="button" id="btn-plan-skip">Skip this and just record quadrats</button></p>
+  </div>
+  <button class="btn btn-primary btn-wide plan-view" type="button" id="btn-plan-back">Back to recording</button>
+</section>
+
 <!-- RECORD -->
 <section id="view-record" class="hidden" aria-label="Record a quadrat">
   <div class="editing-bar hidden" id="editing-bar">
@@ -592,6 +687,34 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </div>
     <button class="btn btn-small hidden" type="button" id="btn-gps">Use live GPS</button>
   </div>
+  <div class="nav-card hidden" id="nav-card" aria-live="polite">
+    <div class="nav-top"><b id="nav-title">Go to point 1</b><span class="hint" id="nav-left"></span></div>
+    <div class="nav-body">
+      <svg class="nav-dial" viewBox="0 0 100 100" aria-hidden="true">
+        <g id="nav-dial"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="3"/><text x="50" y="19" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">N</text></g>
+        <g id="nav-needle"><path class="needle" d="M50 24 L65 66 L50 57 L35 66 Z"/></g>
+        <circle class="here" cx="50" cy="50" r="14"/>
+      </svg>
+      <div><div class="nav-dist" id="nav-dist">–</div><div class="hint nav-sub" id="nav-sub"></div></div>
+    </div>
+    <div class="nav-btns" id="nav-btns">
+      <button class="btn btn-small" type="button" id="btn-nav-map">Map</button>
+      <button class="btn btn-small" type="button" id="btn-nav-compass">Use compass</button>
+      <button class="btn btn-small" type="button" id="btn-nav-skip">Skip point</button>
+      <select id="nav-pick" aria-label="Go to a different point"></select>
+    </div>
+    <div class="nav-skip hidden" id="nav-skip">
+      <span class="label" id="nav-skip-q">Why skip this point?</span>
+      <div class="seg" data-name="skipwhy">
+        <button type="button" data-value="submerged">Underwater</button>
+        <button type="button" data-value="unsafe">Unsafe</button>
+        <button type="button" data-value="unreachable">Can't reach</button>
+        <button type="button" data-value="other">Other</button>
+      </div>
+      <div class="nav-btns"><button class="btn btn-small btn-primary" type="button" id="btn-skip-ok">Skip point</button><button class="btn btn-small" type="button" id="btn-skip-cancel">Cancel</button></div>
+    </div>
+  </div>
+  <p class="hidden" id="plan-later-wrap"><button class="linkish" type="button" id="btn-plan-later">Pick random points on a map</button></p>
   <p class="gps" id="gps-line"><span class="gps-dot" id="gps-dot"></span><span id="gps-text" class="gps-text">No location yet</span></p>
   <div class="loc-card hidden" id="loc-card" role="region" aria-labelledby="loc-title">
     <b id="loc-title"></b>
@@ -961,6 +1084,13 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   <details class="about-box more-formats">
   <summary>More formats</summary>
   <div class="about">
+  <h3 class="mf-head">Map files</h3>
+  <p class="hint share-note">One point per quadrat with its details and species, plus the survey area and random points if you used them. GeoJSON opens in QGIS, ArcGIS and R; KML opens in Google Earth and Google My Maps.</p>
+  <div class="map-btns">
+    <button class="btn" type="button" id="btn-geojson">GeoJSON</button>
+    <button class="btn" type="button" id="btn-kml">KML</button>
+  </div>
+  <h3 class="mf-head">For OBIS / GBIF</h3>
   <p class="hint share-note">For sharing with biodiversity databases such as OBIS and GBIF. This downloads a Darwin Core file to your phone; nothing is uploaded. Send it on yourself, for example to <a href="https://www.eurobis.org/" target="_blank" rel="noopener">EurOBIS</a>, and check it first with <a href="https://www.gbif.org/tools/data-validator" target="_blank" rel="noopener">GBIF's data validator</a> if you like.</p>
   <button class="btn btn-wide" type="button" id="btn-dwc">Download for OBIS / GBIF (.zip)</button>
   <p class="hint dwc-summary" id="dwc-summary"></p>
@@ -1035,7 +1165,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.15.0",
+  version: "0.16.0",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
@@ -1053,6 +1183,8 @@ const APP_CONFIG = {
   const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const slug = s => (s || "survey").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "survey";
   const pad = n => String(n).padStart(2, "0");
+  // GPS accuracy: centimetres below 1 m and tenths below 10 m, so external DGPS/RTK receivers aren't rounded to 0.
+  const accR = a => a == null ? null : a < 1 ? Math.round(a * 100) / 100 : a < 10 ? Math.round(a * 10) / 10 : Math.round(a);
   const sizeLabel = s => { const c = s.quadratSideCm; return (c >= 100 && c % 100 === 0) ? (c / 100) + " × " + (c / 100) + " m" : c + " × " + c + " cm"; };
 
   /* ---------- Storage (IndexedDB, on device) ---------- */
@@ -1121,11 +1253,12 @@ const APP_CONFIG = {
       if (!b) return;
       const name = seg.dataset.name;
       const wasOn = b.getAttribute("aria-pressed") === "true";
-      if (name === "scope" || name === "qsize" || name === "dwc-precision"  || name === "habitat" || name === "rkregion") {
+      if (name === "scope" || name === "qsize" || name === "dwc-precision"  || name === "habitat" || name === "rkregion" || name === "planmode") {
         setSeg(name, b.dataset.value);
         if (name === "habitat") setSurveyHabitat(b.dataset.value);
         if (name === "dwc-precision") renderDwcSummary();
         if (name === "qsize") $("#qsize-custom").classList.toggle("hidden", b.dataset.value !== "custom");
+        if (name === "planmode") renderPlanPanel();
         return;
       }
       setSeg(name, wasOn ? null : b.dataset.value);
@@ -1170,7 +1303,7 @@ const APP_CONFIG = {
 
   /* ---------- Views ---------- */
   function show(view) {
-    ["home", "survey", "record", "data", "export"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== view));
+    ["home", "survey", "record", "plan", "data", "export"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== view));
     $$(".tabs button").forEach(b => {
       if (b.dataset.tab === view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     });
@@ -1179,7 +1312,8 @@ const APP_CONFIG = {
     if (view === "survey") renderSurveyList();
     if (view === "home") renderHome();
     $(".top").classList.toggle("hidden", view === "home");
-    if (view === "record") startGps(); else stopGps();
+    if (view === "record" || view === "plan") startGps(); else stopGps();
+    if (view === "record") renderNav();
     window.scrollTo(0, 0);
   }
   $$(".tabs button").forEach(b => b.addEventListener("click", () => {
@@ -1237,17 +1371,20 @@ const APP_CONFIG = {
     };
     await put("sessions", session);
     await put("meta", { key: "lastRegion", value: session.region });
-    await put("meta", { key: "lastDesign", value: session.design || "", other: session.designOther || "" });
+    const wantPlan = session.design === "random" && $("#s-plan").checked;
+    await put("meta", { key: "lastDesign", value: session.design || "", other: session.designOther || "", plan: wantPlan });
     await openSession(session);
+    if (wantPlan) openPlan(false);
     $("#s-site").value = ""; $("#s-notes").value = ""; $("#s-side").value = "";
     setSeg("qsize", "0.25"); $("#qsize-custom").classList.add("hidden");
     state.conditions = null;
     $("#cond-card").classList.add("hidden");
-    toast("Survey started");
+    toast(wantPlan ? "Survey started. Now mark the survey area" : "Survey started");
   });
 
   async function openSession(session, stayOn) {
     state.session = session;
+    state.navTarget = null;
     await put("meta", { key: "active", value: session.id });
     renderHeader();
     await resetForm(false);
@@ -1708,10 +1845,11 @@ const APP_CONFIG = {
   }
 
   function fillCoords(lat, lon) {
-    $("#f-lat").value = lat.toFixed(6);
-    $("#f-lon").value = lon.toFixed(6);
+    $("#f-lat").value = lat.toFixed(7);
+    $("#f-lon").value = lon.toFixed(7);
   }
   function renderGps() {
+    renderPlanGps();
     const btn = $("#btn-gps");
     $("#gps-line").classList.toggle("blocked", state.gpsBlocked);
     if (state.gpsBlocked) {
@@ -1742,15 +1880,20 @@ const APP_CONFIG = {
     if (!L) { setGpsText(state.gpsWaitMsg || "Finding location…", "wait"); return; }
     const age = Math.max(0, Math.round((Date.now() - L.t) / 1000));
     const weak = L.acc > 15;
-    setGpsText(L.lat.toFixed(5) + ", " + L.lon.toFixed(5) + " ±" + Math.round(L.acc) + " m, " + (age < 3 ? "live" : "updated " + age + " s ago") + (weak ? ". Weak fix, give it a moment" : ""), weak ? "wait" : "ok");
+    setGpsText(L.lat.toFixed(5) + ", " + L.lon.toFixed(5) + " ±" + accR(L.acc) + " m, " + (age < 3 ? "live" : "updated " + age + " s ago") + (weak ? ". Weak fix, give it a moment" : ""), weak ? "wait" : "ok");
   }
   function onGpsFix(pos) {
-    state.live = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy, t: Date.now() };
+    const c = pos.coords;
+    // Height as the device reports it. Its reference level varies by device (often the WGS84 ellipsoid on Android), so it is exported raw.
+    state.live = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, t: Date.now(),
+      alt: typeof c.altitude === "number" && isFinite(c.altitude) ? c.altitude : null,
+      altAcc: typeof c.altitudeAccuracy === "number" && isFinite(c.altitudeAccuracy) ? c.altitudeAccuracy : null };
     state.gpsWaitMsg = "";
     state.gpsBlocked = false;
     state.gpsNeedsAsk = false;
     if (state.gpsMode === "live") fillCoords(state.live.lat, state.live.lon);
     renderGps();
+    planOnFix();
   }
   function onGpsError(err) {
     if (err && err.code === 1) {
@@ -1772,7 +1915,7 @@ const APP_CONFIG = {
         permStatus = await navigator.permissions.query({ name: "geolocation" });
         permStatus.onchange = () => {
           if (permStatus.state === "granted") { state.gpsBlocked = false; state.gpsNeedsAsk = false; }
-          if (!$("#view-record").classList.contains("hidden")) startGps();
+          if (gpsView()) startGps();
         };
       }
       return permStatus.state;
@@ -1791,7 +1934,7 @@ const APP_CONFIG = {
   async function startGps() {
     if (!("geolocation" in navigator)) { state.gpsBlocked = true; renderGps(); return; }
     const perm = await gpsPermission();
-    if ($("#view-record").classList.contains("hidden")) return;
+    if (!gpsView()) return;
     if (perm === "denied") state.gpsBlocked = true;
     if (perm === "granted") { state.gpsBlocked = false; state.gpsNeedsAsk = false; }
     if (state.gpsBlocked) { stopGps(); renderGps(); return; }
@@ -1820,7 +1963,7 @@ const APP_CONFIG = {
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stopGps();
-    else if (!$("#view-record").classList.contains("hidden")) startGps();
+    else if (gpsView()) startGps();
   });
   $("#btn-gps").addEventListener("click", () => {
     state.gpsMode = "live";
@@ -1933,6 +2076,7 @@ const APP_CONFIG = {
     $("#f-qnum").value = await nextQuadratNumber();
     $("#editing-bar").classList.add("hidden");
     $("#btn-save").textContent = "Save quadrat";
+    renderNav();
     updateDensity();
     state.heights = [];
     renderHeights();
@@ -2008,7 +2152,9 @@ const APP_CONFIG = {
       recordedAt: existing ? existing.recordedAt : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       lat, lon,
-      acc: (state.gpsMode === "live" && state.live && lat !== null) ? Math.round(state.live.acc) : (state.gpsMode === "saved" && existing ? existing.acc : null),
+      acc: (state.gpsMode === "live" && state.live && lat !== null) ? accR(state.live.acc) : (state.gpsMode === "saved" && existing ? existing.acc : null),
+      alt: (state.gpsMode === "live" && state.live && lat !== null) ? (state.live.alt != null ? Math.round(state.live.alt * 100) / 100 : null) : (state.gpsMode === "saved" && existing ? (existing.alt ?? null) : null),
+      altAcc: (state.gpsMode === "live" && state.live && lat !== null) ? accR(state.live.altAcc) : (state.gpsMode === "saved" && existing ? (existing.altAcc ?? null) : null),
       ...specific,
       notes: $("#f-notes").value.trim(),
       photoIds: state.photos.map(p => p.id),
@@ -2016,9 +2162,13 @@ const APP_CONFIG = {
       distance: designOf() === "transect" ? num($("#f-dist").value) : null,
       plot: designOf() === "fixed" ? ($("#f-plot").value.trim() || null) : null
     };
+    const link = linkPoint(existing, record);
     await put("quadrats", record);
+    if (link && link.t && !link.far) { await put("sessions", state.session); state.navTarget = null; }
     const wasEditing = !!existing;
-    if (!$("#toast").classList.contains("show") || !$("#toast").textContent.startsWith("Saved. For species"))
+    if (link && link.far) toast("Quadrat " + qn + " saved, but not linked to point " + link.t.id + ": you were " + fmtDist(link.far) + " from it", true);
+    else if (link && link.t) toast("Quadrat " + qn + " saved at point " + link.t.id);
+    else if (!$("#toast").classList.contains("show") || !$("#toast").textContent.startsWith("Saved. For species"))
       toast((wasEditing ? "Changes saved to quadrat " : "Quadrat " + qn + " saved") + (wasEditing ? qn : ""));
     await resetForm(true);
     window.scrollTo(0, 0);
@@ -2071,10 +2221,14 @@ const APP_CONFIG = {
     $("#editing-label").textContent = "Editing quadrat " + q.quadrat;
     $("#editing-bar").classList.remove("hidden");
     $("#btn-save").textContent = "Save changes";
+    renderNav();
   }
   $("#btn-cancel-edit").addEventListener("click", async () => { await resetForm(true); show("data"); });
   armButton($("#btn-delete-q"), "Tap again to delete", async () => {
     if (!state.editingId) return;
+    const gone = await get("quadrats", state.editingId);
+    const gp = gone && gone.point != null && planOf() ? planOf().points.find(x => x.id === gone.point && x.quadratId === gone.id) : null;
+    if (gp) { gp.status = "todo"; gp.quadratId = null; await put("sessions", state.session); }
     const photos = await byIndex("photos", "quadratId", state.editingId);
     for (const p of photos) await del("photos", p.id);
     await del("quadrats", state.editingId);
@@ -2156,9 +2310,9 @@ const APP_CONFIG = {
   }
 
   /* ---------- Export ---------- */
-  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "habitat", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design",
+  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "habitat", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design", "survey_area_m2",
     "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state",
-    "quadrat", "transect", "distance_from_start_m", "plot_id", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
+    "quadrat", "transect", "distance_from_start_m", "plot_id", "point_id", "planned_latitude", "planned_longitude", "distance_from_point_m", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "gps_altitude_m", "gps_altitude_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
     "algae_cover_pct", "sediment", "zone", "height_above_cd_m", "elevation_m", "substrate", "rock_pool", "bare_rock_pct", "canopy_total_pct", "understorey_total_pct",
     "bare_ground_pct", "litter_pct", "vegetation_height_mean_cm", "vegetation_height_n", "vegetation_heights_cm", "grazing",
     "boot_sink_cm", "black_layer_depth_cm", "surface_water_pct", "ripples", "core_id", "cover_grid_squares", "bare_grid_squares",
@@ -2200,6 +2354,8 @@ const APP_CONFIG = {
     const chosen = scope === "all" ? sessions : sessions.filter(s => state.session && s.id === state.session.id);
     const rows = [];
     const spRows = [];
+    const mapItems = [];
+    const qidById = new Map(), accById = new Map();
     const photoFiles = [];
     for (const s of chosen.sort((a, b) => a.date.localeCompare(b.date))) {
       const qs = (await byIndex("quadrats", "sessionId", s.id)).sort((a, b) => a.quadrat - b.quadrat);
@@ -2214,14 +2370,17 @@ const APP_CONFIG = {
         });
         const area = s.quadratAreaM2 || null;
         const code = codes.get(s.id), qid = quadratId(code, q.quadrat);
+        qidById.set(q.id, qid);
+        if (q.acc != null) accById.set(q.id, q.acc);
         const tx = taxaOf(q);
         const hab = habitatOf(s), rk = hab === "rocky", sm = hab === "saltmarsh", mf = hab === "mudflat", sg = hab === "seagrass";
         const vh = q.vegHeights || [];
         const cond = condCells(s.conditions);
         const qrow = { survey_id: code, quadrat_id: qid, site: s.site, surveyor: s.surveyor, survey_date: s.date, habitat: HABITAT_NAME[hab],
           region: sg ? (s.region ? regionLabel(s.region) : null) : RK_REGION_NAME[rkRegionOf(s)], quadrat_side_cm: s.quadratSideCm || null, quadrat_area_m2: area,
-          sampling_design: designLabel(s), quadrat: q.quadrat, transect: q.transect, distance_from_start_m: q.distance, plot_id: q.plot, recorded_at: q.recordedAt,
-          latitude: q.lat, longitude: q.lon, gps_accuracy_m: q.acc, seagrass_cover_pct: sg ? q.cover : null, n_species: sg ? tx.length : tx.filter(isPresent).length,
+          sampling_design: designLabel(s), survey_area_m2: s.plan ? s.plan.areaM2 : null, quadrat: q.quadrat, transect: q.transect, distance_from_start_m: q.distance, plot_id: q.plot,
+          point_id: q.point != null ? pointLabel(q.point) : null, planned_latitude: q.plannedLat ?? null, planned_longitude: q.plannedLon ?? null, distance_from_point_m: q.pointOffset ?? null, recorded_at: q.recordedAt,
+          latitude: q.lat, longitude: q.lon, gps_accuracy_m: q.acc, gps_altitude_m: q.alt ?? null, gps_altitude_accuracy_m: q.altAcc ?? null, seagrass_cover_pct: sg ? q.cover : null, n_species: sg ? tx.length : tx.filter(isPresent).length,
           epiphytes: sg ? q.epiphytes : null, algae_cover_pct: sg ? q.algae : null, sediment: (sg || mf) ? q.sediment : null,
           zone: sg ? null : q.zone, height_above_cd_m: rk ? q.heightCD : null, elevation_m: (sm || mf) ? q.elevation : null, substrate: rk ? q.substrate : null,
           rock_pool: rk ? (q.rockPool ? "yes" : "no") : null, bare_rock_pct: rk ? q.bare : null, canopy_total_pct: rk ? q.canopyTotal : null, understorey_total_pct: rk ? q.underTotal : null,
@@ -2232,6 +2391,12 @@ const APP_CONFIG = {
           cover_grid_squares: sg ? sqText(q.coverCells) : null, bare_grid_squares: (rk || sm) ? sqText(q.bareCells) : null, photo_files: names.join(";"), notes: q.notes };
         COND_COLS.forEach((c, i) => { qrow[c] = cond[i]; });
         rows.push(COLS.map(c => qrow[c] ?? null));
+        const spSummary = tx.filter(t => sg || isPresent(t)).map(t => {
+          if (t.kind === "count") return t.name + " " + (t.count ?? 0) + (t.evidence ? " " + t.evidence : "");
+          const c = t.cover ?? (sg && tx.length === 1 ? q.cover : null);
+          return t.name + (c != null ? " " + c + "%" : "") + (rk && t.kind === "cover" ? " (" + (t.layer === "canopy" ? "canopy" : "understorey") + ")" : "");
+        }).join("; ") || (sg ? "No seagrass" : "None recorded");
+        mapItems.push({ props: Object.assign({}, qrow, { species_summary: spSummary }), lat: q.lat, lon: q.lon, code });
         const baseRow = { survey_id: code, quadrat_id: qid, site: s.site, survey_date: s.date, habitat: HABITAT_NAME[hab], quadrat: q.quadrat };
         const spush = o => { const r = Object.assign({}, baseRow, o); spRows.push(SP_COLS.map(c => r[c] ?? null)); };
         const gridOf = t => Array.isArray(t.cells) ? { grid_squares: sqText(t.cells), grid_squares_n: t.cells.length } : {};
@@ -2259,7 +2424,16 @@ const APP_CONFIG = {
     const csv = [COLS.join(",")].concat(rows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
     const base = scope === "all" ? "all-surveys_" + today() : (state.session ? slug(state.session.site) + "_" + state.session.date : "survey");
     const spCsv = [SP_COLS.join(",")].concat(spRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
-    return { csv, spCsv, photoFiles, rows: rows.length, base };
+    const plans = chosen.filter(s => s.plan && Array.isArray(s.plan.points) && s.plan.corners && s.plan.corners.length >= 3)
+      .sort((a, b) => a.date.localeCompare(b.date)).map(s => ({ s, code: codes.get(s.id),
+        points: s.plan.points.map(t => ({ point_id: pointLabel(t.id), lat: t.lat, lon: t.lon, status: t.status === "done" ? "surveyed" : t.status === "skipped" ? "skipped" : "not visited",
+          skip_reason: t.status === "skipped" ? (PLAN_REASONS[t.reason] || t.reason || "") : "", quadrat_id: t.quadratId ? (qidById.get(t.quadratId) || "") : "",
+          quadrat_gps_accuracy_m: t.quadratId && accById.has(t.quadratId) ? accById.get(t.quadratId) : "" })) }));
+    const ptRows = [];
+    plans.forEach(({ s, code, points }) => points.forEach(t => ptRows.push([code, s.site, s.date, t.point_id, t.lat, t.lon, t.status, t.skip_reason, t.quadrat_id, t.quadrat_gps_accuracy_m,
+      s.plan.areaM2, s.plan.n, s.plan.gap || 0, s.plan.seed, PLAN_METHOD[s.plan.method] || s.plan.method, cornerAccText(s.plan), cornerAccMax(s.plan)])));
+    const ptCsv = plans.length ? [PT_COLS.join(",")].concat(ptRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n" : null;
+    return { csv, spCsv, photoFiles, rows: rows.length, base, mapItems, plans, ptCsv };
   }
 
   /* ---------- Darwin Core archive (OBIS event core + occurrence + extended measurement or fact) ---------- */
@@ -2303,7 +2477,7 @@ const APP_CONFIG = {
   }
 
   const EVENT_COLS = ["eventID", "parentEventID", "eventDate", "samplingProtocol", "sampleSizeValue", "sampleSizeUnit", "habitat", "locality",
-    "decimalLatitude", "decimalLongitude", "geodeticDatum", "coordinateUncertaintyInMeters", "dataGeneralizations", "eventRemarks"];
+    "decimalLatitude", "decimalLongitude", "geodeticDatum", "coordinateUncertaintyInMeters", "dataGeneralizations", "eventRemarks", "footprintWKT"];
   const OCC_COLS = ["eventID", "occurrenceID", "basisOfRecord", "scientificName", "scientificNameID", "kingdom", "occurrenceStatus", "recordedBy", "occurrenceRemarks"];
   const MOF_COLS = ["eventID", "occurrenceID", "measurementType", "measurementValue", "measurementUnit", "measurementRemarks"];
 
@@ -2340,8 +2514,10 @@ const APP_CONFIG = {
       const isR = habitatOf(s) === "rocky", isS = habitatOf(s) === "saltmarsh", isM = habitatOf(s) === "mudflat", multi = isR || isS || isM;
       const habName = isR ? "Rocky shore" : isS ? "Saltmarsh" : isM ? "Intertidal mudflat" : "Seagrass meadow";
       const protocol = HABITAT_NAME[habitatOf(s)] + " quadrat survey" + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + (s.design ? ", " + designSentence(s) : "") + ", recorded with the QuadratNotes app";
+      const fp = s.plan && s.plan.corners && s.plan.corners.length >= 3 && prec === "exact"
+        ? "POLYGON ((" + ring(s.plan.corners).map(c => c[0] + " " + c[1]).join(", ") + "))" : "";
       events.push({ eventID: code, eventDate: s.date, samplingProtocol: protocol, habitat: habName, locality: s.site,
-        eventRemarks: s.notes || "" });
+        eventRemarks: s.notes || "", footprintWKT: fp });
       dates.push(s.date);
       const c = s.conditions;
       if (c) {
@@ -2544,6 +2720,90 @@ const APP_CONFIG = {
   function afterExport() {
     if (APP_CONFIG.supportUrl) $("#support-line").classList.remove("hidden");
   }
+  /* ---------- Map files (GeoJSON and KML) ---------- */
+  const MAP_KEYS = ["quadrat_id", "survey_id", "site", "survey_date", "habitat", "quadrat", "zone", "seagrass_cover_pct", "species_summary",
+    "n_species", "transect", "distance_from_start_m", "plot_id", "point_id", "distance_from_point_m", "gps_accuracy_m", "notes"];
+  const LABEL = { quadrat_id: "Quadrat ID", survey_id: "Survey", site: "Site", survey_date: "Date", habitat: "Habitat", quadrat: "Quadrat",
+    zone: "Zone", seagrass_cover_pct: "Seagrass cover %", species_summary: "Species", n_species: "Number of species", transect: "Transect",
+    distance_from_start_m: "Distance from start (m)", plot_id: "Plot", point_id: "Random point", distance_from_point_m: "Distance from point (m)", gps_accuracy_m: "GPS accuracy (m)", notes: "Notes" };
+  const ring = corners => corners.concat([corners[0]]).map(c => [c[1], c[0]]);
+  const areaProps = (s, code) => cleanProps({ feature_type: "survey_area", survey_id: code, site: s.site, survey_date: s.date, habitat: HABITAT_NAME[habitatOf(s)],
+    area_m2: s.plan.areaM2, area_ha: Number((s.plan.areaM2 / 10000).toFixed(4)), points_requested: s.plan.n, points_placed: s.plan.points.length,
+    min_spacing_m: s.plan.gap || 0, random_seed: s.plan.seed, outline_method: PLAN_METHOD[s.plan.method] || s.plan.method,
+    corner_gps_accuracy_m: cornerAccText(s.plan), outline_max_gps_accuracy_m: cornerAccMax(s.plan) });
+  const located = items => items.filter(i => typeof i.lat === "number" && typeof i.lon === "number");
+  const cleanProps = p => { const o = {}; Object.keys(p).forEach(k => { if (p[k] !== null && p[k] !== undefined && p[k] !== "") o[k] = p[k]; }); return o; };
+  function buildGeoJSON(items, plans) {
+    const features = [];
+    (plans || []).forEach(({ s, code, points }) => {
+      features.push({ type: "Feature", geometry: { type: "Polygon", coordinates: [ring(s.plan.corners)] }, properties: areaProps(s, code) });
+      points.forEach(t => features.push({ type: "Feature", geometry: { type: "Point", coordinates: [t.lon, t.lat] },
+        properties: cleanProps({ feature_type: "random_point", survey_id: code, point_id: t.point_id, status: t.status, skip_reason: t.skip_reason, quadrat_id: t.quadrat_id, quadrat_gps_accuracy_m: t.quadrat_gps_accuracy_m }) }));
+    });
+    located(items).forEach(i => features.push({ type: "Feature", geometry: { type: "Point", coordinates: [i.lon, i.lat] },
+      properties: Object.assign({ feature_type: "quadrat" }, cleanProps(i.props)) }));
+    return JSON.stringify({ type: "FeatureCollection", features }, null, 1);
+  }
+  function buildKML(items, title, plans) {
+    const x = xmlEsc;
+    const bySurvey = new Map(), planBy = new Map(), info = new Map();
+    (plans || []).forEach(pl => { planBy.set(pl.code, pl); bySurvey.set(pl.code, []); info.set(pl.code, { site: pl.s.site, date: pl.s.date, habitat: HABITAT_NAME[habitatOf(pl.s)] }); });
+    located(items).forEach(i => {
+      if (!bySurvey.has(i.code)) bySurvey.set(i.code, []);
+      bySurvey.get(i.code).push(i);
+      if (!info.has(i.code)) info.set(i.code, { site: i.props.site, date: i.props.survey_date, habitat: i.props.habitat });
+    });
+    const table = obj => "<description><![CDATA[<table>" + Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== "")
+      .map(([k, v]) => "<tr><th align=\"left\">" + x(k) + "</th><td>" + x(v) + "</td></tr>").join("").replace(/]]>/g, "]] >") + "</table>]]></description>";
+    const folders = Array.from(bySurvey.entries()).map(([code, list]) => {
+      const p0 = info.get(code), pl = planBy.get(code);
+      let planKml = "";
+      if (pl) {
+        const a = pl.s.plan;
+        planKml = "<Placemark><name>Survey area</name><styleUrl>#area</styleUrl>" +
+          table({ "Area": fmtArea(a.areaM2), "Points placed": a.points.length + (a.points.length < a.n ? " of " + a.n + " requested" : ""), "Minimum spacing (m)": a.gap || 0,
+            "Random seed": a.seed, "Outline": PLAN_METHOD[a.method] || a.method,
+            "Corner GPS accuracy (m)": cornerAccText(a), "Worst corner accuracy (m)": cornerAccMax(a) }) +
+          "<Polygon><outerBoundaryIs><LinearRing><coordinates>" + ring(a.corners).map(c => c[0] + "," + c[1] + ",0").join(" ") + "</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>\n" +
+          "<Folder><name>Random points</name>\n" + pl.points.map(t => "<Placemark><name>" + t.point_id + "</name><styleUrl>#" + (t.status === "skipped" ? "skip" : t.status === "surveyed" ? "done" : "todo") + "</styleUrl>" +
+            table({ "Point": t.point_id, "Status": t.status, "Skip reason": t.skip_reason, "Quadrat": t.quadrat_id, "Quadrat GPS accuracy (m)": t.quadrat_gps_accuracy_m }) +
+            "<Point><coordinates>" + t.lon + "," + t.lat + ",0</coordinates></Point></Placemark>").join("\n") + "\n</Folder>\n";
+      }
+      const marks = list.map(i => {
+        const p = i.props;
+        const rowsHtml = MAP_KEYS.filter(k => p[k] !== null && p[k] !== undefined && p[k] !== "" && k !== "quadrat_id" && k !== "survey_id")
+          .map(k => "<tr><th align=\"left\">" + x(LABEL[k]) + "</th><td>" + x(p[k]) + "</td></tr>").join("");
+        const data = Object.entries(cleanProps(p)).map(([k, v]) => '<Data name="' + x(k) + '"><value>' + x(v) + "</value></Data>").join("");
+        return "<Placemark><name>Q" + pad(p.quadrat) + "</name><styleUrl>#q</styleUrl>" +
+          "<description><![CDATA[<table>" + rowsHtml.replace(/]]>/g, "]] >") + "</table>]]></description>" +
+          "<ExtendedData>" + data + "</ExtendedData><Point><coordinates>" + i.lon + "," + i.lat + ",0</coordinates></Point></Placemark>";
+      }).join("\n");
+      return "<Folder><name>" + x(p0.site + ", " + p0.date + " (" + p0.habitat + ")") + "</name>\n" + planKml + marks + "\n</Folder>";
+    }).join("\n");
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>' +
+      "<name>" + x(title) + "</name><description>Exported from QuadratNotes (quadratnotes.com)</description>" +
+      '<Style id="q"><IconStyle><color>ff4f6a2d</color><scale>1.1</scale></IconStyle></Style>' +
+      '<Style id="area"><LineStyle><color>ff4f6a2d</color><width>3</width></LineStyle><PolyStyle><color>334f6a2d</color></PolyStyle></Style>' +
+      '<Style id="todo"><IconStyle><color>ff1f48d9</color><scale>0.8</scale></IconStyle></Style>' +
+      '<Style id="done"><IconStyle><color>ff1f48d9</color><scale>0.6</scale></IconStyle></Style>' +
+      '<Style id="skip"><IconStyle><color>ff8c8f8a</color><scale>0.6</scale></IconStyle></Style>\n' + folders + "\n</Document></kml>\n";
+  }
+  async function exportMap(kind) {
+    const scope = getSeg("scope") || "current";
+    if (scope === "current" && !state.session) { toast("Open a survey first", true); return; }
+    const out = await gather(scope);
+    if (!out.rows && !out.plans.length) { toast("Nothing to export yet", true); return; }
+    const n = located(out.mapItems).length, missing = out.mapItems.length - n;
+    if (!n && !out.plans.length) { toast("None of these quadrats has a location, so there's nothing to map", true); return; }
+    if (kind === "geojson") await saveFile(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans));
+    else await saveFile(out.base + "_map.kml", buildKML(out.mapItems, "QuadratNotes: " + out.base, out.plans));
+    if (missing) toast(missing + (missing === 1 ? " quadrat has" : " quadrats have") + " no location and " + (missing === 1 ? "was" : "were") + " left off the map", true);
+  }
+  $("#btn-geojson").addEventListener("click", () => exportMap("geojson"));
+  $("#btn-kml").addEventListener("click", () => exportMap("kml"));
+
+  const MIME = { ".zip": "application/zip", ".csv": "text/csv", ".geojson": "application/geo+json", ".kml": "application/vnd.google-earth.kml+xml" };
+  const mimeOf = f => MIME[(f.match(/\.[a-z]+$/i) || [""])[0].toLowerCase()] || "application/octet-stream";
   async function saveFile(filename, data) {
     let downloads = null;
     if (window.claude && typeof window.claude.use === "function") {
@@ -2561,11 +2821,11 @@ const APP_CONFIG = {
       }
       return;
     }
-    const blob = data instanceof Blob ? data : new Blob([data], { type: "text/csv" });
+    const blob = data instanceof Blob ? data : new Blob([data], { type: mimeOf(filename) });
     const isPhone = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
     if (isPhone && navigator.canShare && window.File) {
       try {
-        const type = filename.endsWith(".zip") ? "application/zip" : "text/csv";
+        const type = mimeOf(filename);
         const file = new File([blob], filename, { type });
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: filename });
@@ -2606,10 +2866,14 @@ const APP_CONFIG = {
     btn.disabled = true; btn.textContent = "Preparing…";
     try {
       const out = await gather(scope);
-      if (!out.rows) { toast("Nothing to export yet", true); return; }
+      if (!out.rows && !out.plans.length) { toast("Nothing to export yet", true); return; }
       const zip = new JSZip();
       zip.file(out.base + "_quadrats.csv", out.csv);
       zip.file(out.base + "_species.csv", out.spCsv);
+      if (out.ptCsv) {
+        zip.file(out.base + "_random_points.csv", out.ptCsv);
+        zip.file(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans));
+      }
       const folder = zip.folder("photos");
       out.photoFiles.forEach(p => folder.file(p.name, p.blob));
       const blob = await zip.generateAsync({ type: "blob" });
@@ -2800,11 +3064,425 @@ const APP_CONFIG = {
     toast("Added to notes");
   });
 
+  /* ---------- Random points: survey area, random placement and guidance ---------- */
+  const PLAN_REASONS = { submerged: "Underwater", unsafe: "Unsafe", unreachable: "Can't reach", other: "Other" };
+  const PLAN_METHOD = { map: "drawn on map", walk: "walked with GPS", mixed: "drawn on map and walked with GPS" };
+  const PT_COLS = ["survey_id", "site", "survey_date", "point_id", "latitude", "longitude", "status", "skip_reason", "quadrat_id", "quadrat_gps_accuracy_m",
+    "survey_area_m2", "points_requested", "min_spacing_m", "random_seed", "outline_method", "corner_gps_accuracy_m", "outline_max_gps_accuracy_m"];
+  const R_EARTH = 6371008.8, rad = d => d * Math.PI / 180;
+  // Standard haversine distance and initial-bearing formulas on a sphere.
+  function distM(a, b) {
+    const dLat = rad(b[0] - a[0]), dLon = rad(b[1] - a[1]);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLon / 2) ** 2;
+    return 2 * R_EARTH * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  function bearingDeg(a, b) {
+    const y = Math.sin(rad(b[1] - a[1])) * Math.cos(rad(b[0]));
+    const x = Math.cos(rad(a[0])) * Math.sin(rad(b[0])) - Math.sin(rad(a[0])) * Math.cos(rad(b[0])) * Math.cos(rad(b[1] - a[1]));
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+  const COMPASS16 = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  const compassName = d => COMPASS16[Math.round(d / 22.5) % 16];
+  // A flat projection in metres around the area's centre: accurate to well under 1% over a few kilometres.
+  function localProj(corners) {
+    const o = [corners.reduce((t, c) => t + c[0], 0) / corners.length, corners.reduce((t, c) => t + c[1], 0) / corners.length];
+    const k = Math.cos(rad(o[0]));
+    return {
+      fwd: c => [rad(c[1] - o[1]) * R_EARTH * k, rad(c[0] - o[0]) * R_EARTH],
+      inv: q => [o[0] + q[1] / R_EARTH * 180 / Math.PI, o[1] + q[0] / (R_EARTH * k) * 180 / Math.PI]
+    };
+  }
+  function polyAreaM2(corners) {
+    if (!corners || corners.length < 3) return 0;
+    const xy = corners.map(localProj(corners).fwd);
+    let a = 0;
+    for (let i = 0, j = xy.length - 1; i < xy.length; j = i++) a += (xy[j][0] + xy[i][0]) * (xy[j][1] - xy[i][1]);
+    return Math.abs(a / 2);
+  }
+  // Ray-casting test, after W. Randolph Franklin's PNPOLY (Copyright (c) 1970-2003, Wm. Randolph Franklin;
+  // MIT-style licence, https://wrfranklin.org/Research/Short_Notes/pnpoly.html).
+  function inPoly(x, y, xy) {
+    let inside = false;
+    for (let i = 0, j = xy.length - 1; i < xy.length; j = i++) {
+      const xi = xy[i][0], yi = xy[i][1], xj = xy[j][0], yj = xy[j][1];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  // Mulberry32 random number generator by Tommy Ettinger (public domain, CC0); JavaScript form as published by bryc.
+  function mulberry32(a) {
+    return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
+  // Points spread uniformly at random inside the outline (rejection sampling from the bounding box),
+  // optionally kept a minimum distance apart, then numbered in a short walking order from `start`.
+  function randomPoints(corners, n, gap, seed, start) {
+    const P = localProj(corners), xy = corners.map(P.fwd);
+    const xs = xy.map(q => q[0]), ys = xy.map(q => q[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const rnd = mulberry32(seed);
+    const pts = [];
+    let tries = 0;
+    while (pts.length < n && tries < 200000) {
+      tries++;
+      const x = x0 + rnd() * (x1 - x0), y = y0 + rnd() * (y1 - y0);
+      if (!inPoly(x, y, xy)) continue;
+      if (gap > 0 && pts.some(q => Math.hypot(q[0] - x, q[1] - y) < gap)) continue;
+      pts.push([x, y]);
+    }
+    let here = start ? P.fwd(start) : xy[0];
+    const left = pts.slice(), ordered = [];
+    while (left.length) {
+      let bi = 0, bd = Infinity;
+      left.forEach((q, i) => { const d = Math.hypot(q[0] - here[0], q[1] - here[1]); if (d < bd) { bd = d; bi = i; } });
+      here = left.splice(bi, 1)[0];
+      ordered.push(here);
+    }
+    const r7 = v => Number(v.toFixed(7));
+    return ordered.map((q, i) => { const ll = P.inv(q); return { id: i + 1, lat: r7(ll[0]), lon: r7(ll[1]), status: "todo" }; });
+  }
+  const fmtArea = m2 => m2 >= 10000 ? (m2 / 10000).toFixed(m2 >= 100000 ? 1 : 2) + " ha" : Math.round(m2).toLocaleString("en-GB") + " m²";
+  // Accuracy of corners placed by GPS, e.g. "4;6;5;8" (blank for corners tapped on the map).
+  const cornerAccText = a => Array.isArray(a.cornerAcc) && a.cornerAcc.some(v => v != null) ? a.cornerAcc.map(v => v ?? "").join(";") : null;
+  const cornerAccMax = a => Array.isArray(a.cornerAcc) && a.cornerAcc.some(v => v != null) ? Math.max(...a.cornerAcc.filter(v => v != null)) : null;
+  const fmtDist = m => m >= 1000 ? (m / 1000).toFixed(2) + " km" : m < 10 ? m.toFixed(1) + " m" : Math.round(m) + " m";
+  const pointLabel = id => "P" + pad(id);
+  function gpsView() { return !$("#view-record").classList.contains("hidden") || !$("#view-plan").classList.contains("hidden"); }
+  const freshFix = () => state.live && Date.now() - state.live.t < 20000 ? state.live : null;
+
+  // The map library is only loaded when someone opens this feature; the service worker keeps it for offline use.
+  let leafletP = null;
+  function loadLeaflet() {
+    if (window.L && window.L.map) return Promise.resolve();
+    if (!leafletP) leafletP = new Promise((res, rej) => {
+      const css = document.createElement("link"); css.rel = "stylesheet"; css.href = "leaflet/leaflet.css"; document.head.append(css);
+      const sc = document.createElement("script"); sc.src = "leaflet/leaflet.js";
+      sc.onload = () => res();
+      sc.onerror = () => { leafletP = null; sc.remove(); rej(new Error("map library")); };
+      document.head.append(sc);
+    });
+    return leafletP;
+  }
+
+  const plan = { corners: [], cornerAcc: [], modes: new Set(), points: null, seed: null, n: null, gap: 0, map: null, layers: null, viewing: false, centred: false };
+  const planOf = () => state.session && state.session.plan && Array.isArray(state.session.plan.points) ? state.session.plan : null;
+
+  async function openPlan(viewing) {
+    plan.viewing = !!viewing && !!planOf();
+    if (!plan.viewing) { plan.corners = []; plan.cornerAcc = []; plan.modes = new Set(); plan.points = null; plan.seed = null; plan.centred = false; }
+    show("plan");
+    $("#view-plan").classList.toggle("viewing", plan.viewing);
+    $("#h-plan").textContent = plan.viewing ? "Random points map" : "Random points";
+    renderPlanPanel();
+    renderPlanGps();
+    try {
+      await loadLeaflet();
+    } catch (e) {
+      const m = $("#plan-map");
+      if (!plan.map) { m.classList.add("nomap"); m.textContent = "The map needs a connection the first time it's used. Walk the boundary instead: corners and points still work without the map."; }
+      return;
+    }
+    $("#plan-map").classList.remove("nomap");
+    if (!plan.map) {
+      $("#plan-map").textContent = "";
+      plan.map = L.map("plan-map", { zoomControl: true });
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, crossOrigin: true,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(plan.map);
+      plan.layers = L.layerGroup().addTo(plan.map);
+      plan.map.on("click", e => { if (!plan.viewing && (getSeg("planmode") || "map") === "map") addCorner([e.latlng.lat, e.latlng.lng], "map"); });
+      plan.map.setView([54.5, -3.5], 5);
+    }
+    setTimeout(() => { plan.map.invalidateSize(); drawPlan(); fitPlan(); }, 0);
+  }
+  function fitPlan() {
+    if (!plan.map) return;
+    const sp = plan.viewing ? planOf() : null;
+    const pts = (sp ? sp.corners : plan.corners).concat(((sp ? sp.points : plan.points) || []).map(t => [t.lat, t.lon]));
+    const f = freshFix();
+    if (plan.viewing && f && pts.length && distM([f.lat, f.lon], pts[0]) < 500) pts.push([f.lat, f.lon]);
+    if (pts.length >= 2) { plan.map.fitBounds(pts, { padding: [28, 28], maxZoom: 19 }); plan.centred = true; }
+    else if (pts.length === 1) { plan.map.setView(pts[0], 18); plan.centred = true; }
+    else if (state.live) { plan.map.setView([state.live.lat, state.live.lon], 18); plan.centred = true; }
+  }
+  function drawPlan() {
+    if (!plan.map || !window.L) return;
+    const g = plan.layers;
+    g.clearLayers();
+    const sp = plan.viewing ? planOf() : null;
+    const corners = sp ? sp.corners : plan.corners;
+    const pts = sp ? sp.points : plan.points;
+    if (corners.length >= 3) L.polygon(corners, { color: "#2D6A4F", weight: 3, fillOpacity: 0.12, interactive: false }).addTo(g);
+    else if (corners.length === 2) L.polyline(corners, { color: "#2D6A4F", weight: 3, interactive: false }).addTo(g);
+    if (!sp) corners.forEach(c => L.circleMarker(c, { radius: 6, color: "#17242C", weight: 2, fillColor: "#FFFBE6", fillOpacity: 1, interactive: false }).addTo(g));
+    const target = sp ? currentTarget() : null;
+    (pts || []).forEach(t => {
+      const cls = "pt-mark " + (t.status || "todo") + (target && target.id === t.id ? " target" : "");
+      const m = L.marker([t.lat, t.lon], { icon: L.divIcon({ className: "", html: '<span class="' + cls + '">' + t.id + "</span>", iconSize: [26, 26], iconAnchor: [13, 13] }),
+        keyboard: false, interactive: !!sp, title: pointLabel(t.id) }).addTo(g);
+      if (sp) m.on("click", () => {
+        if (t.status === "done") { toast("Point " + t.id + " is already done"); return; }
+        if (t.status === "skipped") { t.status = "todo"; t.reason = null; put("sessions", state.session); }
+        state.navTarget = t.id;
+        show("record");
+        toast("Heading to point " + t.id);
+      });
+    });
+    const f = freshFix();
+    if (f) {
+      L.circle([f.lat, f.lon], { radius: f.acc, color: "#1B5FA8", weight: 1, fillOpacity: 0.08, interactive: false }).addTo(g);
+      L.circleMarker([f.lat, f.lon], { radius: 7, color: "#fff", weight: 2, fillColor: "#1B5FA8", fillOpacity: 1, interactive: false }).addTo(g);
+    }
+  }
+  function addCorner(c, mode, acc) {
+    if (plan.points) { toast("Undo or clear corners to change the area", true); return; }
+    plan.corners.push([Number(c[0].toFixed(7)), Number(c[1].toFixed(7))]);
+    plan.cornerAcc.push(acc != null ? accR(acc) : null);
+    plan.modes.add(mode);
+    drawPlan();
+    renderPlanPanel();
+  }
+  function renderPlanGps() {
+    const el = $("#plan-gps");
+    if (!el) return;
+    const ask = state.gpsNeedsAsk || (state.gpsBlocked && "geolocation" in navigator);
+    $("#btn-plan-allow").classList.toggle("hidden", !ask);
+    el.textContent = state.gpsBlocked ? "Location is blocked, so the map can't show where you are."
+      : state.gpsNeedsAsk ? "Turn on location to see where you are and to walk the boundary."
+      : !state.live ? "Finding your location…"
+      : "You're the blue dot. GPS accurate to ±" + accR(state.live.acc) + " m.";
+  }
+  function renderPlanPanel() {
+    if (plan.viewing) {
+      const sp = planOf();
+      if (!sp) return;
+      const done = sp.points.filter(t => t.status === "done").length, sk = sp.points.filter(t => t.status === "skipped").length;
+      $("#plan-view-sum").textContent = sp.points.length + " random points in " + fmtArea(sp.areaM2) + ": " + done + " done" + (sk ? ", " + sk + " skipped" : "") + ".";
+      $("#plan-maphint").textContent = "Green points are done, grey were skipped. Tap an orange point to go there next.";
+      return;
+    }
+    const mode = getSeg("planmode") || "map";
+    const n = plan.corners.length;
+    $("#btn-plan-corner").classList.toggle("hidden", mode !== "walk" || !!plan.points);
+    $("#plan-maphint").textContent = plan.points ? "Not happy with the area? Undo or clear corners to change it."
+      : mode === "walk" ? "Stand at each corner of the area in turn and tap Add corner here. This works without signal."
+      : "Tap the map at each corner of the area you want to survey, in order around the edge.";
+    $("#plan-area").textContent = n === 0 ? "No corners yet" : n < 3 ? n + (n === 1 ? " corner" : " corners") + ", add at least 3"
+      : n + " corners, area " + fmtArea(polyAreaM2(plan.corners));
+    $("#btn-plan-undo").disabled = !n;
+    $("#btn-plan-clear").disabled = !n;
+    $("#btn-plan-go").disabled = n < 3;
+    $("#btn-plan-go").classList.toggle("hidden", !!plan.points);
+    $("#plan-result").classList.toggle("hidden", !plan.points);
+    $("#btn-plan-use").classList.toggle("hidden", !plan.points);
+    if (plan.points) {
+      const per = plan.points.length ? polyAreaM2(plan.corners) / plan.points.length : 0;
+      $("#plan-result-text").textContent = plan.points.length + " points placed, numbered in walking order. That's about one point per " + fmtArea(per) + ".";
+    }
+  }
+  function planOnFix() {
+    if (!$("#view-plan").classList.contains("hidden")) {
+      if (plan.map && !plan.centred && !plan.viewing && !plan.corners.length) { plan.map.setView([state.live.lat, state.live.lon], 18); plan.centred = true; }
+      drawPlan();
+    }
+    if (!$("#view-record").classList.contains("hidden")) renderNav();
+  }
+  function generatePoints(newSeed) {
+    const n = Math.round(num($("#plan-n").value) || 0), gap = Math.max(0, num($("#plan-gap").value) || 0);
+    if (n < 1 || n > 200) { toast("Choose between 1 and 200 points", true); $("#plan-n").focus(); return; }
+    if (plan.corners.length < 3) { toast("Add at least 3 corners first", true); return; }
+    if (newSeed || plan.seed == null) plan.seed = Math.floor(Math.random() * 900000) + 100000;
+    const f = freshFix();
+    const start = f && distM([f.lat, f.lon], plan.corners[0]) < 5000 ? [f.lat, f.lon] : null;
+    const pts = randomPoints(plan.corners, n, gap, plan.seed, start);
+    if (!pts.length) { toast("No points fit. Check the area or use a smaller gap.", true); return; }
+    plan.points = pts; plan.n = n; plan.gap = gap;
+    if (pts.length < n) toast("Only " + pts.length + " points fit " + gap + " m apart. Try a smaller gap or fewer points.", true);
+    drawPlan(); renderPlanPanel(); fitPlan();
+  }
+  $$("[data-info]").forEach(b => b.addEventListener("click", () => {
+    const open = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", String(open));
+    $("#" + b.dataset.info).classList.toggle("hidden", !open);
+  }));
+  $("#btn-plan-go").addEventListener("click", () => generatePoints(true));
+  $("#btn-plan-again").addEventListener("click", () => generatePoints(true));
+  $("#btn-plan-undo").addEventListener("click", () => { plan.corners.pop(); plan.cornerAcc.pop(); plan.points = null; if (!plan.corners.length) plan.modes = new Set(); drawPlan(); renderPlanPanel(); });
+  $("#btn-plan-clear").addEventListener("click", () => { plan.corners = []; plan.cornerAcc = []; plan.modes = new Set(); plan.points = null; drawPlan(); renderPlanPanel(); });
+  $("#btn-plan-allow").addEventListener("click", () => $("#btn-allow-loc").click());
+  $("#btn-plan-corner").addEventListener("click", () => {
+    if (state.gpsNeedsAsk || state.gpsBlocked) { $("#btn-allow-loc").click(); toast("Allow location, then add the corner", true); return; }
+    const f = freshFix();
+    if (!f) { toast("Waiting for a GPS fix. Try again in a moment.", true); return; }
+    addCorner([f.lat, f.lon], "walk", f.acc);
+    if (plan.map) plan.map.panTo([f.lat, f.lon]);
+    toast(f.acc > 15 ? "Corner " + plan.corners.length + " added, but GPS was only accurate to ±" + accR(f.acc) + " m" : "Corner " + plan.corners.length + " added", f.acc > 15);
+  });
+  $("#btn-plan-use").addEventListener("click", async () => {
+    if (!plan.points || !state.session) return;
+    const method = plan.modes.size > 1 ? "mixed" : (Array.from(plan.modes)[0] || "map");
+    state.session.plan = { method, corners: plan.corners.slice(), cornerAcc: plan.cornerAcc.slice(), areaM2: Math.round(polyAreaM2(plan.corners) * 10) / 10, n: plan.n, gap: plan.gap,
+      seed: plan.seed, created: new Date().toISOString(), points: plan.points };
+    state.session.design = "random"; state.session.designOther = "";
+    await put("sessions", state.session);
+    state.navTarget = null;
+    plan.points = null; plan.corners = []; plan.cornerAcc = [];
+    show("record");
+    toast(state.session.plan.points.length + " points saved. Head to point 1");
+  });
+  $("#btn-plan-skip").addEventListener("click", () => show("record"));
+  $("#btn-plan-back").addEventListener("click", () => show("record"));
+  $("#btn-plan-later").addEventListener("click", () => openPlan(false));
+  $("#btn-nav-map").addEventListener("click", () => openPlan(true));
+
+  /* Guidance to the next point */
+  function currentTarget() {
+    const sp = planOf();
+    if (!sp) return null;
+    let t = sp.points.find(x => x.id === state.navTarget && x.status === "todo");
+    if (!t) {
+      t = sp.points.find(x => x.status === "todo") || null;
+      state.navTarget = t ? t.id : null;
+    }
+    return t;
+  }
+  let pickKey = "";
+  function renderPick(sp, t) {
+    const sel = $("#nav-pick");
+    const key = sp.points.map(x => x.id + x.status).join(",") + "|" + (t ? t.id : "");
+    if (key === pickKey) return;
+    pickKey = key;
+    sel.innerHTML = "";
+    const head = document.createElement("option");
+    head.value = ""; head.textContent = "Go to another point";
+    sel.append(head);
+    sp.points.filter(x => x.status !== "done" && (!t || x.id !== t.id)).forEach(x => {
+      const o = document.createElement("option");
+      o.value = x.id; o.textContent = "Point " + x.id + (x.status === "skipped" ? " (skipped)" : "");
+      sel.append(o);
+    });
+    sel.classList.toggle("hidden", sel.options.length < 2);
+  }
+  $("#nav-pick").addEventListener("change", async e => {
+    const id = Number(e.target.value), sp = planOf();
+    if (!id || !sp) return;
+    const t = sp.points.find(x => x.id === id);
+    if (t && t.status === "skipped") { t.status = "todo"; t.reason = null; await put("sessions", state.session); }
+    state.navTarget = id;
+    $("#nav-skip").classList.add("hidden");
+    renderNav();
+  });
+  function renderNav() {
+    const card = $("#nav-card"), sp = planOf();
+    $("#plan-later-wrap").classList.toggle("hidden", !(state.session && state.session.design === "random" && !sp && !state.editingId));
+    if (!sp || state.editingId) { card.classList.add("hidden"); return; }
+    card.classList.remove("hidden");
+    const total = sp.points.length, done = sp.points.filter(x => x.status === "done").length, sk = sp.points.filter(x => x.status === "skipped").length;
+    $("#nav-left").textContent = done + " of " + total + " done" + (sk ? ", " + sk + " skipped" : "");
+    const t = currentTarget();
+    renderPick(sp, t);
+    card.classList.toggle("finished", !t);
+    ["#btn-nav-compass", "#btn-nav-skip"].forEach(b => $(b).classList.toggle("hidden", !t));
+    if (!t) {
+      card.classList.remove("arrived");
+      $("#nav-title").textContent = "All points visited";
+      $("#nav-dist").textContent = "Done";
+      $("#nav-sub").textContent = "The survey area, points and any skips are in the exports.";
+      $("#nav-skip").classList.add("hidden");
+      return;
+    }
+    $("#nav-skip-q").textContent = "Why skip point " + t.id + "?";
+    const f = freshFix();
+    if (!f) {
+      card.classList.remove("arrived");
+      $("#nav-title").textContent = "Go to point " + t.id;
+      $("#nav-dist").textContent = "–";
+      $("#nav-sub").textContent = state.gpsBlocked || state.gpsNeedsAsk ? "Turn on location to be guided to the point." : "Waiting for GPS…";
+      $("#nav-needle").setAttribute("visibility", "hidden");
+      return;
+    }
+    $("#nav-needle").removeAttribute("visibility");
+    const here = [f.lat, f.lon], d = distM(here, [t.lat, t.lon]), b = bearingDeg(here, [t.lat, t.lon]);
+    // "Arrived" follows the current accuracy: about 3-5 m on a phone, down to 2 m with an external DGPS/RTK receiver.
+    const arrived = d <= Math.min(10, Math.max(2, f.acc || 0));
+    card.classList.toggle("arrived", arrived);
+    const heading = state.heading != null && Date.now() - state.headingT < 3000 ? state.heading : null;
+    $("#nav-title").textContent = arrived ? "You're at point " + t.id : "Go to point " + t.id;
+    $("#nav-dist").textContent = arrived ? "Here" : fmtDist(d);
+    $("#nav-sub").textContent = arrived ? "Place the quadrat and record it below. GPS ±" + accR(f.acc) + " m."
+      : "Head " + compassName(b) + (heading == null ? " (north is at the top of the dial)" : "") + ". GPS ±" + accR(f.acc) + " m.";
+    $("#nav-dial").setAttribute("transform", "rotate(" + (-(heading || 0)).toFixed(1) + " 50 50)");
+    $("#nav-needle").setAttribute("transform", "rotate(" + (b - (heading || 0)).toFixed(1) + " 50 50)");
+  }
+  // Compass: iPhones ask for permission from a tap; Android gives an absolute heading directly.
+  let navFrame = null;
+  function onOrient(e) {
+    let h = null;
+    if (typeof e.webkitCompassHeading === "number") h = e.webkitCompassHeading;
+    else if (e.absolute && typeof e.alpha === "number") h = 360 - e.alpha;
+    if (h == null) return;
+    const so = (screen.orientation && screen.orientation.angle) || 0;
+    state.heading = (h + so + 360) % 360;
+    state.headingT = Date.now();
+    if (!navFrame) navFrame = requestAnimationFrame(() => { navFrame = null; if (!$("#view-record").classList.contains("hidden")) renderNav(); });
+  }
+  $("#btn-nav-compass").addEventListener("click", async () => {
+    const b = $("#btn-nav-compass");
+    if (state.compassOn) {
+      window.removeEventListener("deviceorientationabsolute", onOrient, true);
+      window.removeEventListener("deviceorientation", onOrient, true);
+      state.compassOn = false; state.heading = null;
+      b.textContent = "Use compass"; b.setAttribute("aria-pressed", "false");
+      renderNav();
+      return;
+    }
+    if (typeof DeviceOrientationEvent === "undefined") { toast("This phone doesn't share its compass with web apps", true); return; }
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      try { if (await DeviceOrientationEvent.requestPermission() !== "granted") { toast("Compass access wasn't allowed", true); return; } }
+      catch (e) { toast("Compass access wasn't allowed", true); return; }
+    }
+    window.addEventListener("deviceorientationabsolute", onOrient, true);
+    window.addEventListener("deviceorientation", onOrient, true);
+    state.compassOn = true;
+    b.textContent = "Compass on"; b.setAttribute("aria-pressed", "true");
+    setTimeout(() => { if (state.compassOn && state.heading == null) toast("No compass reading yet. Hold the phone flat, or carry on with north at the top.", true); }, 2500);
+  });
+  $("#btn-nav-skip").addEventListener("click", () => { setSeg("skipwhy", null); $("#nav-skip").classList.toggle("hidden"); });
+  $("#btn-skip-cancel").addEventListener("click", () => $("#nav-skip").classList.add("hidden"));
+  $("#btn-skip-ok").addEventListener("click", async () => {
+    const t = currentTarget();
+    if (!t) return;
+    t.status = "skipped"; t.reason = getSeg("skipwhy") || "other";
+    await put("sessions", state.session);
+    state.navTarget = null;
+    $("#nav-skip").classList.add("hidden");
+    toast("Point " + t.id + " skipped (" + PLAN_REASONS[t.reason].toLowerCase() + ")");
+    renderNav();
+  });
+  // Ties a newly saved quadrat to the point being navigated to, if it was recorded close enough to it.
+  function linkPoint(existing, record) {
+    if (existing) {
+      ["point", "plannedLat", "plannedLon", "pointOffset"].forEach(k => { if (existing[k] != null) record[k] = existing[k]; });
+      if (record.point != null && record.lat != null && record.lon != null && record.plannedLat != null)
+        record.pointOffset = Math.round(distM([record.lat, record.lon], [record.plannedLat, record.plannedLon]) * 10) / 10;
+      return null;
+    }
+    const t = currentTarget();
+    if (!t) return null;
+    const off = (record.lat != null && record.lon != null) ? distM([record.lat, record.lon], [t.lat, t.lon]) : null;
+    if (off != null && off > 25) return { far: off, t };
+    record.point = t.id; record.plannedLat = t.lat; record.plannedLon = t.lon;
+    record.pointOffset = off != null ? Math.round(off * 10) / 10 : null;
+    t.status = "done"; t.quadratId = record.id; t.reason = null;
+    return { t };
+  }
+
   /* ---------- Sampling design ---------- */
   const DESIGN_TEXT = { random: "quadrats placed randomly", haphazard: "quadrats placed haphazardly", nonrandom: "quadrats placed non-randomly at chosen positions",
     transect: "quadrats placed at intervals along transects", fixed: "quadrats at fixed plots revisited over time" };
   const designLabel = sess => !sess || !sess.design ? null : sess.design === "other" ? "other: " + (sess.designOther || "") : sess.design;
-  const designSentence = sess => !sess || !sess.design ? "" : sess.design === "other" ? "quadrat placement: " + (sess.designOther || "other") : DESIGN_TEXT[sess.design];
+  const designSentence = sess => !sess || !sess.design ? "" : sess.design === "other" ? "quadrat placement: " + (sess.designOther || "other")
+    : (sess.plan && sess.plan.points) ? "quadrats placed at " + sess.plan.points.length + " random points generated within a " + fmtArea(sess.plan.areaM2) + " survey area"
+      + (sess.plan.gap ? " with a minimum spacing of " + sess.plan.gap + " m" : "") + " (random seed " + sess.plan.seed + ")"
+    : DESIGN_TEXT[sess.design];
   $("#btn-design-info").addEventListener("click", () => {
     const b = $("#btn-design-info"), open = b.getAttribute("aria-expanded") !== "true";
     b.setAttribute("aria-expanded", String(open));
@@ -2812,6 +3490,7 @@ const APP_CONFIG = {
   });
   $('.seg[data-name="design"]').addEventListener("click", () => {
     $("#design-other-wrap").classList.toggle("hidden", getSeg("design") !== "other");
+    $("#plan-check-wrap").classList.toggle("hidden", getSeg("design") !== "random");
   });
   const designOf = () => (state.session && state.session.design) || null;
   function renderDesignFields() {
@@ -3525,6 +4204,8 @@ const APP_CONFIG = {
       setSeg("design", lastDesign.value);
       $("#s-design-other").value = lastDesign.other || "";
       $("#design-other-wrap").classList.toggle("hidden", lastDesign.value !== "other");
+      $("#s-plan").checked = !!lastDesign.plan;
+      $("#plan-check-wrap").classList.toggle("hidden", lastDesign.value !== "random");
     }
     const lastRegion = await get("meta", "lastRegion");
     if (lastRegion && SPECIES[lastRegion.value]) $("#s-region").value = lastRegion.value;

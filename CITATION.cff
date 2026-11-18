@@ -7,9 +7,9 @@ authors:
   - family-names: Thomas
     given-names: Oliver R
     # orcid: "https://orcid.org/0000-0000-0000-0000"
-version: 0.15.0
+version: 0.16.0
 doi: 10.5281/zenodo.24295028
-date-released: 2026-11-16
+date-released: 2026-11-18
 url: "https://quadratnotes.com"
 repository-code: "https://github.com/ollietidal/quadratnotes"
 license: MIT

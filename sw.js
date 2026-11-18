@@ -1,6 +1,6 @@
 // QuadratNotes offline cache. Bump the version when you change jszip, fonts or icons.
-const CACHE = "quadratnotes-v5";
-const CORE = ["./", "./index.html", "./jszip.min.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
+const CACHE = "quadratnotes-v6";
+const CORE = ["./", "./index.html", "./jszip.min.js", "./leaflet/leaflet.js", "./leaflet/leaflet.css", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "./fonts/atkinson-hyperlegible-latin-400-normal.woff2", "./fonts/atkinson-hyperlegible-latin-400-italic.woff2",
   "./fonts/atkinson-hyperlegible-latin-700-normal.woff2", "./fonts/barlow-condensed-latin-600-normal.woff2",
   "./fonts/barlow-condensed-latin-700-normal.woff2", "./fonts/nunito-latin-800-normal.woff2"];
@@ -30,6 +30,10 @@ self.addEventListener("fetch", e => {
     );
     return;
   }
+
+  // OpenStreetMap tiles are not cached here: their tile policy doesn't allow offline use, so the
+  // browser fetches them normally (and honours their caching headers).
+  if (new URL(req.url).hostname === "tile.openstreetmap.org") return;
 
   // Everything else (script, icons, fonts): cached copy first, refreshed in the background.
   e.respondWith(
