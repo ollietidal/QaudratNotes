@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "If you use QuadratNotes in your work, please cite it as below."
 title: "QuadratNotes"
-abstract: "Free, offline, open-source app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, with analysis-ready CSV and Darwin Core exports."
+abstract: "Free, offline, open-source app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, with optional random point sampling and GPS guidance, backup and restore, and analysis-ready CSV, GeoJSON, KML and Darwin Core exports."
 type: software
 authors:
   - family-names: Thomas
     given-names: Oliver R
-    # orcid: "https://orcid.org/0000-0000-0000-0000"
+    orcid: "https://orcid.org/0009-0000-1636-9492"
 version: 0.17.1
 doi: 10.5281/zenodo.24295028
 date-released: 2026-11-18
