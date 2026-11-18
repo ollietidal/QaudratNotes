@@ -204,6 +204,11 @@ textarea { min-height: 88px; resize: vertical; }
 .surveys span { color: var(--muted); font-size: .9rem; }
 .tag { font-size: .8rem; font-weight: 700; color: var(--green); }
 
+.backup-nudge { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  border: 2px solid var(--tape); border-radius: var(--radius-l); background: var(--surface); padding: 10px 12px; margin: 0 0 16px; }
+.backup-nudge span { flex: 1 1 180px; }
+.backup-btns { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 0 0 10px; }
+.restore-result { background: var(--green-soft); border-radius: var(--radius-s); padding: 10px 12px; margin: 0 0 14px; }
 .note { background: var(--surface); border-left: 4px solid var(--green); padding: 10px 12px; border-radius: 0 var(--radius-s) var(--radius-s) 0; font-size: .95rem; margin: 0 0 18px; }
 .export-actions { display: grid; gap: 10px; margin-bottom: 8px; }
 
@@ -1049,6 +1054,10 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <select id="survey-switch"></select>
     <button class="linkish" type="button" id="btn-new-from-data">Start a new survey</button>
   </div>
+  <div class="backup-nudge hidden" id="backup-nudge" role="status">
+    <span id="backup-nudge-text"></span>
+    <button class="btn btn-small" type="button" id="btn-nudge-backup">Back up now</button>
+  </div>
   <h1 id="h-data">This survey</h1>
   <div class="stats">
     <div class="stat"><b id="st-n">0</b><span>quadrats</span></div>
@@ -1062,7 +1071,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <!-- EXPORT -->
 <section id="view-export" class="hidden" aria-labelledby="h-export">
   <h1 id="h-export">Export</h1>
-  <p class="note">Your data is stored only on this phone, in this browser. Export after every survey so you always have a copy.</p>
+  <p class="note">Your data is stored only on this phone, in this browser. Back up after every survey so you always have a copy you can restore.</p>
 
   <div class="field">
     <span class="label">What to export</span>
@@ -1121,6 +1130,17 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   </div>
   </details>
 
+  <h2 id="h-backup">Back up and restore</h2>
+  <p class="hint">A backup holds every survey, quadrat and photo on this phone in one file. Save it somewhere safe, such as your email, Google Drive or iCloud. Restoring adds the surveys from a backup to this phone without changing anything already here, so you can also use it to combine surveys from several phones.</p>
+  <p class="hint" id="backup-status"></p>
+  <div class="backup-btns">
+    <button class="btn btn-primary btn-wide" type="button" id="btn-backup">Back up everything (.zip)</button>
+    <button class="btn btn-wide" type="button" id="btn-restore">Restore from a backup</button>
+    <input type="file" id="f-restore" accept=".zip,application/zip,application/x-zip-compressed" class="hidden">
+  </div>
+  <div class="restore-result hidden" id="restore-result" role="status"></div>
+  <p class="hint">On iPhone and iPad, add QuadratNotes to your Home Screen (Share, then Add to Home Screen). Safari can clear data from websites you haven't opened for a while, but not from apps on the Home Screen.</p>
+
   <h2>Storage</h2>
   <p class="hint" id="storage-line">Checking storage…</p>
   <button class="btn btn-danger btn-wide" type="button" id="btn-wipe">Delete all data on this phone</button>
@@ -1165,7 +1185,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.16.0",
+  version: "0.17.0",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
@@ -2239,6 +2259,7 @@ const APP_CONFIG = {
 
   /* ---------- Data view ---------- */
   async function renderData() {
+    renderBackupStatus();
     await renderSwitcher();
     const hasSession = !!state.session;
     $("#h-data").classList.toggle("hidden", !hasSession);
@@ -2720,6 +2741,149 @@ const APP_CONFIG = {
   function afterExport() {
     if (APP_CONFIG.supportUrl) $("#support-line").classList.remove("hidden");
   }
+
+  /* ---------- Backup and restore ---------- */
+  const BACKUP_FORMAT = 1;
+  const BACKUP_JSON = "quadratnotes-backup.json";
+  const changedSince = (q, t) => !t || (q.updatedAt || q.recordedAt || "") > t;
+  async function renderBackupStatus() {
+    try {
+      const [quads, sessions, last] = await Promise.all([all("quadrats"), all("sessions"), get("meta", "lastBackup")]);
+      const t = last && last.value;
+      const unsaved = quads.filter(q => changedSince(q, t)).length;
+      const when = t ? new Date(t).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : null;
+      $("#backup-status").textContent = !sessions.length ? "Nothing to back up yet."
+        : !t ? "Not backed up yet."
+        : "Last backup " + when + ". " + (unsaved ? unsaved + (unsaved === 1 ? " quadrat has" : " quadrats have") + " been added or changed since." : "Everything is in it.");
+      const nudge = $("#backup-nudge");
+      nudge.classList.toggle("hidden", !unsaved);
+      if (unsaved) $("#backup-nudge-text").textContent = t
+        ? unsaved + (unsaved === 1 ? " quadrat isn't" : " quadrats aren't") + " in a backup yet."
+        : "Nothing on this phone has been backed up yet.";
+    } catch (e) {}
+  }
+  async function makeBackup(btn) {
+    if (typeof JSZip === "undefined") { toast("Backups need a connection the first time the app is used. Try again with signal.", true); return; }
+    const [sessions, quads, photos] = await Promise.all([all("sessions"), all("quadrats"), all("photos")]);
+    if (!sessions.length) { toast("Nothing to back up yet", true); return; }
+    const label = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Preparing backup…"; }
+    try {
+      const started = new Date().toISOString();
+      const zip = new JSZip();
+      const folder = zip.folder("photos");
+      photos.forEach(ph => folder.file(ph.id + ".jpg", ph.blob));
+      zip.file(BACKUP_JSON, JSON.stringify({
+        app: "QuadratNotes", format: BACKUP_FORMAT, appVersion: APP_CONFIG.version, created: started,
+        counts: { surveys: sessions.length, quadrats: quads.length, photos: photos.length },
+        sessions, quadrats: quads, photos: photos.map(ph => ({ id: ph.id, quadratId: ph.quadratId, file: "photos/" + ph.id + ".jpg" }))
+      }, null, 1));
+      zip.file("README.txt", "QuadratNotes backup made " + started + " with app version " + APP_CONFIG.version + ".\r\n" +
+        sessions.length + " surveys, " + quads.length + " quadrats, " + photos.length + " photos.\r\n\r\n" +
+        "To restore: open https://quadratnotes.com, go to Export, tap 'Restore from a backup' and choose this zip file (keep it zipped).\r\n" +
+        "Restoring adds surveys to the phone without changing anything already there.\r\n\r\n" +
+        "For analysis, use the CSV export instead: this file is for keeping your data safe.\r\n");
+      const blob = await zip.generateAsync({ type: "blob" });
+      const d = new Date(started);
+      const name = "quadratnotes-backup_" + today() + "_" + pad(d.getHours()) + pad(d.getMinutes()) + ".zip";
+      const ok = await saveFile(name, blob);
+      if (ok) {
+        await put("meta", { key: "lastBackup", value: started });
+        toast("Backup saved: " + sessions.length + (sessions.length === 1 ? " survey" : " surveys") + ", " + quads.length + (quads.length === 1 ? " quadrat" : " quadrats"));
+      }
+    } catch (e) {
+      toast("The backup couldn't be made" + (e && e.message ? ": " + e.message : ""), true);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+      renderBackupStatus();
+    }
+  }
+  $("#btn-backup").addEventListener("click", e => makeBackup(e.currentTarget));
+  $("#btn-nudge-backup").addEventListener("click", e => makeBackup(e.currentTarget));
+  $("#btn-restore").addEventListener("click", () => $("#f-restore").click());
+  $("#f-restore").addEventListener("change", async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const btn = $("#btn-restore"), label = btn.textContent;
+    btn.disabled = true; btn.textContent = "Restoring…";
+    try { await restoreBackup(file); }
+    finally { btn.disabled = false; btn.textContent = label; }
+  });
+  // Adds what's in a backup without overwriting: new surveys, quadrats and photos are added; a quadrat that is
+  // already here is only replaced if the backup holds a newer edit of it. Survey codes that clash get a suffix.
+  async function restoreBackup(file) {
+    const notBackup = "That file isn't a QuadratNotes backup. Choose the backup zip (the one starting quadratnotes-backup), not a data export.";
+    if (typeof JSZip === "undefined") { toast("Restoring needs a connection the first time the app is used. Try again with signal.", true); return null; }
+    let zip, data;
+    try { zip = await JSZip.loadAsync(file); } catch (e) { toast(notBackup, true); return null; }
+    const jf = zip.file(BACKUP_JSON);
+    if (!jf) { toast(notBackup, true); return null; }
+    try { data = JSON.parse(await jf.async("string")); } catch (e) { toast("This backup is damaged and can't be read", true); return null; }
+    if (!data || data.app !== "QuadratNotes" || !Array.isArray(data.sessions) || !Array.isArray(data.quadrats)) { toast(notBackup, true); return null; }
+    if (data.format > BACKUP_FORMAT) { toast("This backup was made by a newer version of QuadratNotes. Update the app (close and reopen it), then try again.", true); return null; }
+
+    const [sessions, quads, photos] = await Promise.all([all("sessions"), all("quadrats"), all("photos")]);
+    const haveS = new Set(sessions.map(x => x.id)), haveQ = new Map(quads.map(x => [x.id, x])), haveP = new Set(photos.map(x => x.id));
+    const codes = new Set(codeMap(sessions).values());
+    const r = { surveys: 0, quadrats: 0, updated: 0, photos: 0, already: 0, renamed: [], missingPhotos: 0 };
+    for (const sv of data.sessions) {
+      if (!sv || !sv.id || !sv.site || !sv.date) continue;
+      if (haveS.has(sv.id)) { r.already++; continue; }
+      const base = sv.code || codeBase(sv.site, sv.date);
+      if (codes.has(base)) {
+        let n = 2;
+        while (codes.has(base + "-" + n)) n++;
+        sv.code = base + "-" + n;
+        r.renamed.push(base + " → " + sv.code);
+      } else sv.code = base;
+      codes.add(sv.code);
+      await put("sessions", sv);
+      haveS.add(sv.id);
+      r.surveys++;
+    }
+    const photoMeta = new Map((data.photos || []).map(x => [x.id, x]));
+    const wantPhotos = new Set();
+    for (const q of data.quadrats) {
+      if (!q || !q.id || !haveS.has(q.sessionId)) continue;
+      const cur = haveQ.get(q.id);
+      if (cur && !((q.updatedAt || "") > (cur.updatedAt || ""))) { r.already++; continue; }
+      await put("quadrats", q);
+      if (cur) r.updated++; else r.quadrats++;
+      (q.photoIds || []).forEach(id => wantPhotos.add(id));
+    }
+    for (const id of wantPhotos) {
+      if (haveP.has(id)) continue;
+      const meta = photoMeta.get(id);
+      const zf = zip.file(meta && meta.file ? meta.file : "photos/" + id + ".jpg");
+      if (!zf) { r.missingPhotos++; continue; }
+      const blob = new Blob([await zf.async("arraybuffer")], { type: "image/jpeg" });
+      await put("photos", { id, quadratId: meta ? meta.quadratId : null, blob });
+      haveP.add(id);
+      r.photos++;
+    }
+    const parts = [];
+    if (r.surveys) parts.push(r.surveys + (r.surveys === 1 ? " survey" : " surveys"));
+    if (r.quadrats) parts.push(r.quadrats + (r.quadrats === 1 ? " quadrat" : " quadrats"));
+    if (r.photos) parts.push(r.photos + (r.photos === 1 ? " photo" : " photos"));
+    let msg = parts.length ? "Restored " + parts.join(", ") + "." : r.updated ? "" : "Nothing new to add: everything in this backup is already on this phone.";
+    if (r.updated) msg += (msg ? " " : "") + r.updated + (r.updated === 1 ? " quadrat was" : " quadrats were") + " updated to a newer edit from the backup.";
+    if (r.surveys) msg += " Open them from the Data tab.";
+    if (r.renamed.length) msg += " Survey codes already in use were renamed: " + r.renamed.join("; ") + ".";
+    if (r.missingPhotos) msg += " " + r.missingPhotos + (r.missingPhotos === 1 ? " photo was" : " photos were") + " missing from the backup.";
+    const box = $("#restore-result");
+    box.textContent = msg;
+    box.classList.remove("hidden");
+    toast(parts.length || r.updated ? "Backup restored" : "Nothing new to add");
+    await renderExport();
+    if (!state.session) {
+      const active = await get("meta", "active");
+      const s0 = active && await get("sessions", active.value);
+      if (s0) { state.session = s0; renderHeader(); }
+    }
+    return r;
+  }
+
   /* ---------- Map files (GeoJSON and KML) ---------- */
   const MAP_KEYS = ["quadrat_id", "survey_id", "site", "survey_date", "habitat", "quadrat", "zone", "seagrass_cover_pct", "species_summary",
     "n_species", "transect", "distance_from_start_m", "plot_id", "point_id", "distance_from_point_m", "gps_accuracy_m", "notes"];
@@ -2814,12 +2978,13 @@ const APP_CONFIG = {
         await downloads.save({ filename, data });
         toast("Downloaded " + filename);
         afterExport();
+        return true;
       } catch (e) {
-        if (e && e.code === "declined") return;
-        if (e && e.code === "rate_limited") { toast("A download is already waiting for you to confirm", true); return; }
+        if (e && e.code === "declined") return false;
+        if (e && e.code === "rate_limited") { toast("A download is already waiting for you to confirm", true); return false; }
         toast("Download didn't work here" + (e && e.message ? ": " + e.message : ""), true);
       }
-      return;
+      return false;
     }
     const blob = data instanceof Blob ? data : new Blob([data], { type: mimeOf(filename) });
     const isPhone = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
@@ -2830,10 +2995,10 @@ const APP_CONFIG = {
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: filename });
           afterExport();
-          return;
+          return true;
         }
       } catch (e) {
-        if (e && e.name === "AbortError") return;
+        if (e && e.name === "AbortError") return false;
       }
     }
     const url = URL.createObjectURL(blob);
@@ -2842,6 +3007,7 @@ const APP_CONFIG = {
     document.body.append(a); a.click(); a.remove();
     afterExport();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return true;
   }
 
   $("#btn-csv").addEventListener("click", async () => {
@@ -2895,6 +3061,7 @@ const APP_CONFIG = {
     } catch (e) {}
     line.textContent = text;
     if (!state.session) setSeg("scope", "all");
+    renderBackupStatus();
   }
   armButton($("#btn-wipe"), "Tap again to delete everything", async () => {
     await Promise.all(["sessions", "quadrats", "photos", "meta"].map(clearStore));

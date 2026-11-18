@@ -9,6 +9,10 @@ without signal. Everything stays on the device until you export it. Exports are 
 and species tables (CSV) ready for R, photos in a zip, map files (GeoJSON and KML) and a Darwin
 Core archive for OBIS and GBIF.
 
+Backup and restore: one zip file holds every survey, quadrat and photo on the device. Restoring adds
+surveys without overwriting anything already there (a newer edit of the same quadrat wins), so it
+also combines surveys recorded on several phones. The app reminds you when quadrats aren't backed up.
+
 For random sampling, you can draw the survey area on a map or walk its boundary with GPS. The app
 places random points inside it (with an optional minimum spacing), guides you to each one, and
 records skipped points with a reason. The survey outline and points are included in the exports.
