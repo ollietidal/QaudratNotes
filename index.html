@@ -263,6 +263,9 @@ select:focus { border-color: var(--ink); outline: none; }
 .back-link { font-size: .92rem; padding: 4px 0; margin: 4px 0 2px; }
 .home-byline { color: var(--muted); font-size: .88rem; font-style: italic; margin: 6px auto 0; }
 .home-tagline { color: var(--muted); font-size: 1.05rem; margin: 8px auto 0; max-width: 32ch; text-wrap: balance; }
+.early { display: inline-flex; align-items: center; gap: 6px; margin: 10px auto 0; padding: 3px 4px 3px 12px; border: 1.5px solid var(--line); border-radius: 999px; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.early-info { text-align: left; margin: 10px 0 0; }
+.early-info a { color: var(--ink); font-weight: 700; }
 .continue-card { background: var(--green); color: var(--green-ink); border-radius: var(--radius-l); padding: 14px 16px; margin: 22px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .continue-card small { display: block; opacity: .85; font-size: .9rem; }
 .continue-card strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -314,6 +317,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 .info-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink); background: transparent; color: var(--ink);
   font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: .95rem; line-height: 1; cursor: pointer; padding: 0; position: relative; }
 .info-btn::before { content: ""; position: absolute; inset: -8px; }
+.info-btn.info-inline { width: 24px; height: 24px; font-size: .8rem; vertical-align: middle; margin-left: 2px; }
 .info-btn[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
 .info-panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; margin: 0 0 12px; font-size: .92rem; }
 .info-panel dl { margin: 0; }
@@ -354,6 +358,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 .plan-map { height: 58vh; min-height: 300px; max-height: 620px; border: 2px solid var(--ink); border-radius: var(--radius-l); overflow: hidden;
   background: var(--surface); margin: 12px 0 8px; position: relative; z-index: 0; isolation: isolate; }
 .plan-map.nomap { display: grid; place-items: center; padding: 20px; text-align: center; color: var(--muted); }
+.leaflet-bar a.locate-me { display: flex; align-items: center; justify-content: center; color: #17242C; }
 .plan-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 10px; }
 .plan-area { font-weight: 700; margin: 4px 0 14px; }
 .plan-gps { margin: 0; color: var(--muted); }
@@ -415,6 +420,11 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <svg class="home-logo" viewBox="-4 -4 108 108" aria-hidden="true"><g fill="var(--green)"><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/></g><g stroke="var(--ink)" stroke-width="1.6"><path d="M20 0V100M40 0V100M60 0V100M80 0V100M0 20H100M0 40H100M0 60H100M0 80H100"/></g><rect x="0" y="0" width="100" height="100" fill="none" stroke="var(--ink)" stroke-width="5"/></svg>
     <h1 class="home-title" id="home-title">QuadratNotes</h1>
     <p class="home-tagline">Free, offline quadrat surveys for coastal habitats</p>
+    <p class="early"><span>Early version: field testers wanted</span>
+      <button class="info-btn info-inline" type="button" data-info="early-info" aria-expanded="false" aria-controls="early-info" aria-label="About field testing">i</button></p>
+    <div class="info-panel hidden early-info" id="early-info">
+      QuadratNotes is new and still being tested in the field, so please export or back up your data after each survey. If you survey seagrass, rocky shores or saltmarsh and would like to help test it, or you spot a problem, please <a href="mailto:hello@quadratnotes.com?subject=Field%20testing%20QuadratNotes&amp;body=Habitat(s)%20I%20survey%3A%0AWhere%3A%0APhone%20or%20tablet%3A%0A">get in touch</a>.
+    </div>
   </div>
 
   <div class="continue-card hidden" id="continue-card">
@@ -662,7 +672,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
           <dt>External GPS receivers</dt><dd>A Bluetooth GNSS, DGPS or RTK receiver set up as the phone or tablet's location source is used automatically, and its accuracy is recorded down to the centimetre.</dd>
         </dl>
   </div>
-  <button class="btn btn-small hidden" type="button" id="btn-plan-allow">Allow location</button>
+  <button class="btn btn-primary btn-wide hidden" type="button" id="btn-plan-allow">Turn on location</button>
   <div id="plan-map" class="plan-map" role="application" aria-label="Map of the survey area"></div>
   <p class="hint" id="plan-maphint"></p>
   <div class="plan-edit">
@@ -697,7 +707,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </span>
   </div>
 
-  <p class="del-empty hidden" id="del-empty-wrap"><button class="linkish danger" type="button" id="btn-del-empty">Started this survey by mistake? Delete it</button></p>
+  <p class="del-empty hidden" id="del-empty-wrap"><button class="linkish back-link" type="button" id="btn-del-empty">← Back</button></p>
   <div class="quadrat-head">
     <div class="qnum">
       <label for="f-qnum">Quadrat</label>
@@ -785,6 +795,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 
   <div class="hidden" id="taxa-wrap">
     <p class="taxa-sum" id="taxa-sum" aria-live="polite"></p>
+    <div class="info-panel hidden" id="shared-info">Grid figures are the share of squares a species occurs in, not cover judged by eye: a square with a few shoots counts the same as a dense mat. Where species share a square, each gets that square, so together they can add up to more than the total, which counts each square once.</div>
     <div id="taxa-cards"></div>
   </div>
 
@@ -1199,7 +1210,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.3",
+  version: "0.17.4",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
@@ -1372,6 +1383,11 @@ const APP_CONFIG = {
   $("#s-date").value = today();
   $("#survey-form").addEventListener("submit", async e => {
     e.preventDefault();
+    // Random points need your position for the map, so ask straight away while the tap still counts as permission.
+    if (getSeg("design") === "random" && $("#s-plan").checked && $("#s-site").value.trim() && "geolocation" in navigator && !state.live) {
+      state.gpsAsked = true; state.gpsNeedsAsk = false;
+      try { navigator.geolocation.getCurrentPosition(pos => { state.gpsBlocked = false; onGpsFix(pos); }, onGpsError, { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }); } catch (err) {}
+    }
     const site = $("#s-site").value.trim();
     if (!site) { toast("Add a site name", true); return; }
     const qsel = getSeg("qsize") || "0.25";
@@ -1629,6 +1645,30 @@ const APP_CONFIG = {
   function taxaCoverSum() {
     return measuredSpecies().reduce((a, n) => a + (taxonData(n).cover || 0), 0);
   }
+  // When every species' cover came from the grid, squares shared by two species are expected and explain
+  // why the species add up to more than the total (which counts each square once).
+  function gridOverlap() {
+    const list = measuredSpecies().map(n => taxonData(n)).filter(t => t.cover !== null && t.cover > 0);
+    const allGrid = list.length >= 2 && list.every(t => Array.isArray(t.cells) && t.cells.length * 4 === t.cover);
+    if (!allGrid) return null;
+    const count = new Map();
+    list.forEach(t => t.cells.forEach(i => count.set(i, (count.get(i) || 0) + 1)));
+    return { union: count.size, shared: [...count.values()].filter(v => v > 1).length };
+  }
+  function sharedInfoButton() {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "info-btn info-inline"; b.textContent = "i";
+    b.setAttribute("aria-label", "Why can species add up to more than the total?");
+    b.setAttribute("aria-controls", "shared-info");
+    const open = !$("#shared-info").classList.contains("hidden");
+    b.setAttribute("aria-expanded", String(open));
+    b.addEventListener("click", () => {
+      const nowOpen = $("#shared-info").classList.contains("hidden");
+      $("#shared-info").classList.toggle("hidden", !nowOpen);
+      b.setAttribute("aria-expanded", String(nowOpen));
+    });
+    return b;
+  }
   function updateTaxaSum() {
     const p = $("#taxa-sum");
     if (!p || !isMulti()) return;
@@ -1638,7 +1678,22 @@ const APP_CONFIG = {
     const total = state.cover;
     p.classList.remove("warn");
     p.textContent = "";
+    const ov = gridOverlap();
+    if (!ov || !ov.shared) $("#shared-info").classList.add("hidden");
     if (!entered) { p.textContent = "Give each species its share of the quadrat. Together they can't add up to more than 100%."; return; }
+    if (ov && ov.shared) {
+      const u = ov.union * 4;
+      p.append(ov.shared + (ov.shared === 1 ? " square has" : " squares have") + " more than one species, so they add up to " + sum + "%" +
+        (total === u ? ", more than the total of " + total + "%. That's expected. " : ". Together they cover " + u + "% of the quadrat" + (total === null ? ". " : "; total cover is " + total + "%. ")));
+      p.append(sharedInfoButton());
+      if (total !== u) {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "linkish"; b.textContent = "Set total to " + u + "%";
+        b.addEventListener("click", () => setCover(u, false));
+        p.append(" ", b);
+      }
+      return;
+    }
     if (sum > 100) { p.classList.add("warn"); p.textContent = "Species cover adds up to " + sum + "%, more than the whole quadrat. Check the values."; return; }
     if (total === null || total !== sum) {
       p.append("Species add up to " + sum + "%" + (total === null ? ". " : "; total cover is " + total + "%. "));
@@ -2131,7 +2186,7 @@ const APP_CONFIG = {
     resetMud(keepSticky);
     renderHabitatForm();
     $("#f-qnum").value = await nextQuadratNumber();
-    $("#del-empty-wrap").classList.toggle("hidden", !state.session || Number($("#f-qnum").value) !== 1);
+    $("#del-empty-wrap").classList.toggle("hidden", !state.session || !!state.session.plan || Number($("#f-qnum").value) !== 1);
     $("#editing-bar").classList.add("hidden");
     $("#btn-save").textContent = "Save quadrat";
     renderNav();
@@ -2173,7 +2228,7 @@ const APP_CONFIG = {
     const multi = mNames.length >= 2;
     if (multi) {
       document.querySelectorAll('#taxa-cards input[data-taxon]').forEach(inp => addTaxonHeight(inp.dataset.name, inp));
-      if (taxaCoverSum() > 100) { toast("Species cover adds up to more than 100%. Check the values.", true); return; }
+      if (taxaCoverSum() > 100 && !gridOverlap()) { toast("Species cover adds up to more than 100%. Check the values.", true); return; }
     }
     const taxa = multi
       ? mNames.map(n => { const t = taxonData(n); return { name: n, cover: t.cover, shoots: t.shoots, heights: t.heights.slice(), cells: Array.isArray(t.cells) ? t.cells.slice().sort((a, b) => a - b) : null }; })
@@ -2782,7 +2837,7 @@ const APP_CONFIG = {
   }
 
   /* ---------- Deleting a survey ---------- */
-  async function deleteSurvey(id) {
+  async function deleteSurvey(id, quiet) {
     const qs = await byIndex("quadrats", "sessionId", id);
     for (const q of qs) {
       for (const ph of await byIndex("photos", "quadratId", q.id)) await del("photos", ph.id);
@@ -2794,13 +2849,28 @@ const APP_CONFIG = {
       await del("meta", "active");
       renderHeader();
     }
-    toast(qs.length ? "Survey and its " + qs.length + (qs.length === 1 ? " quadrat" : " quadrats") + " deleted" : "Survey deleted");
+    if (!quiet) toast(qs.length ? "Survey and its " + qs.length + (qs.length === 1 ? " quadrat" : " quadrats") + " deleted" : "Survey deleted");
   }
+  // Back from an empty survey: return to the setup screen with its details filled in, and drop the empty survey.
   $("#btn-del-empty").addEventListener("click", async () => {
     if (!state.session) return;
     const n = (await byIndex("quadrats", "sessionId", state.session.id)).length;
-    if (n) { toast("This survey has quadrats now. Delete it from the Data tab instead.", true); return; }
-    await deleteSurvey(state.session.id);
+    if (n) { show("survey"); return; }
+    const s0 = state.session;
+    await deleteSurvey(s0.id, true);
+    setSurveyHabitat(habitatOf(s0));
+    $("#s-site").value = s0.site || ""; $("#s-date").value = s0.date || today(); $("#s-surveyor").value = s0.surveyor || ""; $("#s-notes").value = s0.notes || "";
+    if (habitatOf(s0) === "seagrass" && s0.region) $("#s-region").value = s0.region;
+    if (s0.rkRegion) setSeg("rkregion", s0.rkRegion);
+    const std = { 25: "0.0625", 50: "0.25", 100: "1" }[s0.quadratSideCm];
+    setSeg("qsize", std || "custom");
+    $("#qsize-custom").classList.toggle("hidden", !!std);
+    $("#s-side").value = std ? "" : (s0.quadratSideCm || "");
+    setSeg("design", s0.design || null);
+    $("#s-design-other").value = s0.designOther || "";
+    $("#design-other-wrap").classList.toggle("hidden", s0.design !== "other");
+    $("#plan-check-wrap").classList.toggle("hidden", s0.design !== "random");
+    if (s0.conditions) state.conditions = s0.conditions;
     show("survey");
   });
   armButton($("#btn-del-survey"), "Tap again to delete this survey", async () => {
@@ -3422,10 +3492,27 @@ const APP_CONFIG = {
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, crossOrigin: true,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(plan.map);
       plan.layers = L.layerGroup().addTo(plan.map);
+      const Locate = L.Control.extend({ options: { position: "topleft" }, onAdd() {
+        const div = L.DomUtil.create("div", "leaflet-bar");
+        const a = L.DomUtil.create("a", "locate-me", div);
+        a.href = "#"; a.title = "Zoom to my location"; a.setAttribute("role", "button"); a.setAttribute("aria-label", "Zoom to my location");
+        a.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M12 1.5V5M12 19V22.5M1.5 12H5M19 12H22.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.on(a, "click", ev => { L.DomEvent.preventDefault(ev); zoomToMe(); });
+        return div;
+      } });
+      new Locate().addTo(plan.map);
       plan.map.on("click", e => { if (!plan.viewing && (getSeg("planmode") || "map") === "map") addCorner([e.latlng.lat, e.latlng.lng], "map"); });
       plan.map.setView([54.5, -3.5], 5);
     }
     setTimeout(() => { plan.map.invalidateSize(); drawPlan(); fitPlan(); }, 0);
+  }
+  function zoomToMe() {
+    const f = freshFix();
+    if (f) { plan.map.setView([f.lat, f.lon], Math.max(plan.map.getZoom(), 18)); return; }
+    plan.zoomOnFix = true;
+    if (state.gpsNeedsAsk || state.gpsBlocked) $("#btn-allow-loc").click();
+    toast("Finding your location…");
   }
   function fitPlan() {
     if (!plan.map) return;
@@ -3514,7 +3601,8 @@ const APP_CONFIG = {
   }
   function planOnFix() {
     if (!$("#view-plan").classList.contains("hidden")) {
-      if (plan.map && !plan.centred && !plan.viewing && !plan.corners.length) { plan.map.setView([state.live.lat, state.live.lon], 18); plan.centred = true; }
+      if (plan.map && plan.zoomOnFix) { plan.zoomOnFix = false; plan.map.setView([state.live.lat, state.live.lon], Math.max(plan.map.getZoom(), 18)); plan.centred = true; }
+      else if (plan.map && !plan.centred && !plan.viewing && !plan.corners.length) { plan.map.setView([state.live.lat, state.live.lon], 18); plan.centred = true; }
       drawPlan();
     }
     if (!$("#view-record").classList.contains("hidden")) renderNav();
