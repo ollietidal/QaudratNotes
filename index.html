@@ -8,7 +8,18 @@
 <!-- PRE-LAUNCH: delete the next line when you're ready for search engines to list the app -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Free, offline quadrat surveys for coastal habitats: seagrass, rocky shores and saltmarsh, with CSV and Darwin Core export.">
-<script src="jszip.min.js"></script>
+<link rel="canonical" href="https://quadratnotes.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="QuadratNotes">
+<meta property="og:title" content="QuadratNotes: free, offline quadrat surveys">
+<meta property="og:description" content="Record seagrass, rocky shore and saltmarsh quadrats on your phone, with no signal needed. Export to CSV, GeoJSON and Darwin Core.">
+<meta property="og:url" content="https://quadratnotes.com/">
+<meta property="og:image" content="https://quadratnotes.com/docs/social-preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="QuadratNotes logo above round illustrations of seagrass, rocky shore and saltmarsh">
+<meta name="twitter:card" content="summary_large_image">
+<script src="jszip.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#17242C">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -90,7 +101,8 @@ p.lead { color: var(--muted); margin: 0 0 18px; }
 .field { margin: 0 0 18px; }
 .field > label, .label { display: block; font-weight: 700; margin-bottom: 6px; }
 .hint { color: var(--muted); font-size: .9rem; font-weight: 400; }
-input[type=text], input[type=number], input[type=date], textarea {
+.region-places { margin: 6px 0 0; }
+input[type=text], input[type=number], input[type=date], input[type=email], textarea {
   width: 100%; min-height: 48px; padding: 10px 12px;
   background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-s);
 }
@@ -226,6 +238,7 @@ textarea { min-height: 88px; resize: vertical; }
   background: var(--ink); color: var(--paper);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   display: grid; grid-template-columns: repeat(4, 1fr);
+  padding-inline: max(0px, calc((100% - 640px) / 2));
 }
 .tabs button {
   min-height: 64px; background: none; border: 0; color: inherit; cursor: pointer;
@@ -265,6 +278,13 @@ select:focus { border-color: var(--ink); outline: none; }
 .home-tagline { color: var(--muted); font-size: 1.05rem; margin: 8px auto 0; max-width: 32ch; text-wrap: balance; }
 .early { display: inline-flex; align-items: center; gap: 6px; margin: 10px auto 0; padding: 3px 4px 3px 12px; border: 1.5px solid var(--line); border-radius: 999px; font-size: .85rem; font-weight: 700; color: var(--muted); }
 .early-info { text-align: left; margin: 10px 0 0; }
+.fb-intro { margin: 0 0 12px; }
+.fb-form .field { margin-bottom: 12px; }
+.fb-form .btn { width: 100%; }
+.fb-status { margin: 8px 0 0; font-weight: 700; }
+.fb-status:empty { display: none; }
+.fb-status.fb-err { color: var(--tape); }
+.fb-note { display: block; margin: 8px 0 0; font-size: .85rem; }
 .early-info a { color: var(--ink); font-weight: 700; }
 .continue-card { background: var(--green); color: var(--green-ink); border-radius: var(--radius-l); padding: 14px 16px; margin: 22px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .continue-card small { display: block; opacity: .85; font-size: .9rem; }
@@ -279,7 +299,8 @@ select:focus { border-color: var(--ink); outline: none; }
 .habitat-card p { margin: 0 0 12px; color: var(--muted); font-size: .95rem; }
 @media (max-width: 360px) { .habitat-card { grid-template-columns: 1fr; } .habitat-art { max-width: 180px; margin: 0 auto; } }
 .home-soon { text-align: center; color: var(--muted); font-size: .92rem; margin: 18px 0 0; }
-.home-foot a { color: var(--ink); font-weight: 700; }
+.home-soon .linkish { min-height: 44px; padding: 8px 12px; }
+.home-foot a, #contact-about a { color: var(--ink); font-weight: 700; display: inline-block; padding: 12px 4px; margin: -12px 0; }
 .home-foot { text-wrap: balance; text-align: center; color: var(--muted); font-size: .85rem; margin: 26px 0 0; }
 .cond { margin-top: 10px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; }
 .cond-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 10px; font-variant-numeric: tabular-nums; }
@@ -318,6 +339,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: .95rem; line-height: 1; cursor: pointer; padding: 0; position: relative; }
 .info-btn::before { content: ""; position: absolute; inset: -8px; }
 .info-btn.info-inline { width: 24px; height: 24px; font-size: .8rem; vertical-align: middle; margin-left: 2px; }
+.info-btn.info-inline::before { inset: -10px; }
 .info-btn[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
 .info-panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; margin: 0 0 12px; font-size: .92rem; }
 .info-panel dl { margin: 0; }
@@ -423,7 +445,21 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <p class="early"><span>Early version: field testers wanted</span>
       <button class="info-btn info-inline" type="button" data-info="early-info" aria-expanded="false" aria-controls="early-info" aria-label="About field testing">i</button></p>
     <div class="info-panel hidden early-info" id="early-info">
-      QuadratNotes is new and still being tested in the field, so please export or back up your data after each survey. If you survey seagrass, rocky shores or saltmarsh and would like to help test it, or you spot a problem, please <a href="mailto:hello@quadratnotes.com?subject=Field%20testing%20QuadratNotes&amp;body=Habitat(s)%20I%20survey%3A%0AWhere%3A%0APhone%20or%20tablet%3A%0A">get in touch</a>.
+      <p class="fb-intro">QuadratNotes is new and still being tested in the field, so please export or back up your data after each survey. If you'd like to help test it, spot a problem or have an idea, tell us here.</p>
+      <form id="fb-form" class="fb-form" novalidate>
+        <div class="field">
+          <label for="fb-msg">Your feedback</label>
+          <textarea id="fb-msg" maxlength="4000" placeholder="What worked, what didn't, which habitat and which phone you used"></textarea>
+        </div>
+        <div class="field" id="fb-email-field">
+          <label for="fb-email">Your email <span class="hint">optional, only if you'd like a reply</span></label>
+          <input type="email" id="fb-email" autocomplete="email" inputmode="email">
+        </div>
+        <input type="checkbox" id="fb-hp" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn btn-primary" type="submit" id="fb-send">Send feedback</button>
+        <p class="fb-status" id="fb-status" role="status" aria-live="polite"></p>
+        <p class="hint fb-note" id="fb-note"></p>
+      </form>
     </div>
   </div>
 
@@ -526,6 +562,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   <div class="about">
     <p>QuadratNotes <span id="app-version"></span> is a free app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, built by a marine biologist for coastal surveys.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
+    <p>If you send feedback from the field-testers note, only what you type (and the app version) is sent.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
     <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
     <p><strong>How to cite:</strong> <span id="cite-text"></span> <button class="linkish" type="button" id="btn-copy-cite">Copy</button></p>
@@ -572,7 +609,8 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </div>
     <div class="field" id="region-field">
       <label for="s-region">Region <span class="hint">sets which seagrass species are listed</span></label>
-      <select id="s-region"></select>
+      <select id="s-region" aria-describedby="region-places"></select>
+      <p class="hint region-places" id="region-places"></p>
     </div>
     <div class="field">
       <span class="label">Quadrat size</span>
@@ -1210,9 +1248,12 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.4",
+  version: "0.17.7",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
+  // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
+  // Leave empty and the form opens the person's email app instead.
+  feedbackKey: "b884043b-bcaf-4a06-b2d4-3c587d1402a0",
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
   habitats: ["seagrass", "rocky", "saltmarsh"],
   citeUrl: "https://quadratnotes.com",  // the app's public address
@@ -1367,6 +1408,8 @@ const APP_CONFIG = {
   }));
   $("#btn-change").addEventListener("click", () => show("survey"));
 
+  const niceDate = iso => { const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); };
+
   function renderHeader() {
     if (state.session) {
       $("#top-site").textContent = state.session.site;
@@ -1456,7 +1499,7 @@ const APP_CONFIG = {
       const o = document.createElement("option");
       const n = counts[x.id] || 0;
       o.value = x.id;
-      o.textContent = x.site + ", " + x.date + " (" + (habitatOf(x) === "rocky" ? "rocky shore, " : "") + n + (n === 1 ? " quadrat)" : " quadrats)");
+      o.textContent = x.site + ", " + niceDate(x.date) + " (" + (habitatOf(x) === "rocky" ? "rocky shore, " : "") + n + (n === 1 ? " quadrat)" : " quadrats)");
       if (state.session && state.session.id === x.id) o.selected = true;
       sel.append(o);
     });
@@ -1483,7 +1526,7 @@ const APP_CONFIG = {
       name.textContent = s.site;
       const sub = document.createElement("span");
       const n = counts[s.id] || 0;
-      sub.textContent = s.date + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (habitatOf(s) === "rocky" ? ", rocky shore, " + RK_REGION_NAME[rkRegionOf(s)] : (s.region ? ", " + regionLabel(s.region) : ""));
+      sub.textContent = niceDate(s.date) + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (habitatOf(s) === "rocky" ? ", rocky shore, " + RK_REGION_NAME[rkRegionOf(s)] : (s.region ? ", " + regionLabel(s.region) : ""));
       info.append(name, sub);
       li.append(info);
       const btns = document.createElement("span");
@@ -1500,7 +1543,7 @@ const APP_CONFIG = {
       }
       const delBtn = document.createElement("button");
       delBtn.className = "btn btn-small btn-danger"; delBtn.type = "button"; delBtn.textContent = "Delete";
-      delBtn.setAttribute("aria-label", "Delete survey " + s.site + ", " + s.date);
+      delBtn.setAttribute("aria-label", "Delete survey " + s.site + ", " + niceDate(s.date));
       armButton(delBtn, n ? "Delete " + n + (n === 1 ? " quadrat?" : " quadrats?") : "Sure?", async () => { await deleteSurvey(s.id); renderSurveyList(); });
       btns.append(delBtn);
       li.append(btns);
@@ -1542,10 +1585,16 @@ const APP_CONFIG = {
     REGIONS.forEach(r => {
       const o = document.createElement("option");
       o.value = r.id;
-      o.textContent = r.hint ? r.name + " (" + r.hint + ")" : r.name;
+      o.textContent = r.name;
       sel.append(o);
     });
+    sel.addEventListener("change", showRegionPlaces);
   })();
+  function showRegionPlaces() {
+    const r = REGIONS.find(x => x.id === $("#s-region").value);
+    $("#region-places").textContent = r && r.hint ? "Includes " + r.hint + "." : "";
+  }
+  showRegionPlaces();
 
   state.species = new Set();
   state.customSg = [];
@@ -2860,7 +2909,7 @@ const APP_CONFIG = {
     await deleteSurvey(s0.id, true);
     setSurveyHabitat(habitatOf(s0));
     $("#s-site").value = s0.site || ""; $("#s-date").value = s0.date || today(); $("#s-surveyor").value = s0.surveyor || ""; $("#s-notes").value = s0.notes || "";
-    if (habitatOf(s0) === "seagrass" && s0.region) $("#s-region").value = s0.region;
+    if (habitatOf(s0) === "seagrass" && s0.region) { $("#s-region").value = s0.region; showRegionPlaces(); }
     if (s0.rkRegion) setSeg("rkregion", s0.rkRegion);
     const std = { 25: "0.0625", 50: "0.25", 100: "1" }[s0.quadratSideCm];
     setSeg("qsize", std || "custom");
@@ -3620,6 +3669,58 @@ const APP_CONFIG = {
     if (pts.length < n) toast("Only " + pts.length + " points fit " + gap + " m apart. Try a smaller gap or fewer points.", true);
     drawPlan(); renderPlanPanel(); fitPlan();
   }
+  // Feedback form in the field-testers panel. With a Web3Forms key it sends straight to
+  // contactEmail (only the message, an optional reply address and the app version); without one
+  // it opens the person's email app with the message filled in.
+  (function feedbackForm() {
+    const form = $("#fb-form");
+    if (!form) return;
+    const viaService = !!APP_CONFIG.feedbackKey;
+    if (!viaService && !APP_CONFIG.contactEmail) { form.classList.add("hidden"); return; }
+    const status = $("#fb-status");
+    const say = (msg, err) => { status.textContent = msg; status.classList.toggle("fb-err", !!err); };
+    if (viaService) {
+      $("#fb-note").textContent = "Sent to " + APP_CONFIG.contactEmail + " through Web3Forms. Only what you type here and the app version are sent, nothing from your surveys.";
+    } else {
+      $("#fb-email-field").classList.add("hidden");
+      $("#fb-send").textContent = "Open in my email app";
+      $("#fb-note").textContent = "Opens your email app with your message ready to send to " + APP_CONFIG.contactEmail + ".";
+    }
+    form.addEventListener("submit", async ev => {
+      ev.preventDefault();
+      if ($("#fb-hp").checked) return;
+      const msg = $("#fb-msg").value.trim();
+      const email = $("#fb-email").value.trim();
+      if (!msg) { say("Please write your feedback first.", true); $("#fb-msg").focus(); return; }
+      const subject = "QuadratNotes feedback (" + APP_CONFIG.version + ")";
+      if (!viaService) {
+        location.href = "mailto:" + APP_CONFIG.contactEmail + "?subject=" + encodeURIComponent(subject) +
+          "&body=" + encodeURIComponent(msg + "\n\n(QuadratNotes " + APP_CONFIG.version + ")");
+        say("Your email app should open with the message ready to send.");
+        return;
+      }
+      if (email && !$("#fb-email").checkValidity()) { say("That email address doesn't look right. Leave it blank to send without one.", true); $("#fb-email").focus(); return; }
+      if (!navigator.onLine) { say("No signal at the moment. Your message is still here, so try again when you have signal.", true); return; }
+      const btn = $("#fb-send");
+      btn.disabled = true; say("Sending…");
+      try {
+        const payload = { access_key: APP_CONFIG.feedbackKey, subject, from_name: "QuadratNotes app", message: msg, app_version: APP_CONFIG.version, botcheck: false };
+        if (email) payload.email = email;
+        const res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload)
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || out.success === false) throw new Error(out.message || String(res.status));
+        form.reset();
+        say(email ? "Thank you, your feedback has been sent. We'll reply to the address you gave." : "Thank you, your feedback has been sent.");
+      } catch (e) {
+        say("Couldn't send just now (weak or no signal?). Your message is still here, so try again later.", true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+
   $$("[data-info]").forEach(b => b.addEventListener("click", () => {
     const open = b.getAttribute("aria-expanded") !== "true";
     b.setAttribute("aria-expanded", String(open));
@@ -4496,7 +4597,7 @@ const APP_CONFIG = {
     if (!state.session) { card.classList.add("hidden"); return; }
     const qs = await byIndex("quadrats", "sessionId", state.session.id);
     $("#continue-site").textContent = state.session.site;
-    $("#continue-meta").textContent = state.session.date + ", " + qs.length + (qs.length === 1 ? " quadrat" : " quadrats");
+    $("#continue-meta").textContent = niceDate(state.session.date) + ", " + qs.length + (qs.length === 1 ? " quadrat" : " quadrats");
     card.classList.remove("hidden");
   }
   $("#btn-continue").addEventListener("click", () => show("record"));
@@ -4530,7 +4631,7 @@ const APP_CONFIG = {
       $("#plan-check-wrap").classList.toggle("hidden", lastDesign.value !== "random");
     }
     const lastRegion = await get("meta", "lastRegion");
-    if (lastRegion && SPECIES[lastRegion.value]) $("#s-region").value = lastRegion.value;
+    if (lastRegion && SPECIES[lastRegion.value]) { $("#s-region").value = lastRegion.value; showRegionPlaces(); }
     const active = await get("meta", "active");
     const session = active ? await get("sessions", active.value) : null;
     if (session) {

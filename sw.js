@@ -21,12 +21,23 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
 
-  // The page itself: try the network first so updates arrive, fall back to the cached copy offline.
+  // The page itself: try the network first so updates arrive, but don't wait more than a few
+  // seconds. On weak signal ("one bar" on the shore) a request can hang for a long time before it
+  // fails, so after NAV_TIMEOUT the saved copy is shown and the network copy, if it arrives, is
+  // saved for next time. Offline, the saved copy is shown straight away.
   if (req.mode === "navigate") {
+    const NAV_TIMEOUT = 3000;
+    const net = fetch(req).then(res => {
+      if (res.ok) { const copy = res.clone(); return caches.open(CACHE).then(c => c.put("./index.html", copy)).then(() => res); }
+      return res;
+    });
+    e.waitUntil(net.catch(() => {}));
     e.respondWith(
-      fetch(req)
-        .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put("./index.html", copy)); return res; })
-        .catch(() => caches.match("./index.html"))
+      caches.match("./index.html").then(cached => {
+        if (!cached) return net; // first visit: nothing saved yet, so wait for the network
+        const timer = new Promise(resolve => setTimeout(() => resolve(cached), NAV_TIMEOUT));
+        return Promise.race([net.then(res => res.ok ? res : cached, () => cached), timer]);
+      })
     );
     return;
   }
