@@ -104,6 +104,8 @@ p.lead { color: var(--muted); margin: 0 0 18px; }
 .region-places { margin: 6px 0 0; }
 #inat-hint a { color: var(--ink); font-weight: 700; }
 .inat-line { margin: 4px 0 10px; }
+#backup-info p { margin: 0 0 8px; }
+#backup-info p:last-child { margin-bottom: 0; }
 input[type=text], input[type=number], input[type=date], input[type=email], textarea {
   width: 100%; min-height: 48px; padding: 10px 12px;
   background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-s);
@@ -1197,8 +1199,13 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   </div>
   </details>
 
-  <h2 id="h-backup">Back up and restore</h2>
-  <p class="hint">A backup holds every survey, quadrat and photo on this phone in one file. Save it somewhere safe, such as your email, Google Drive or iCloud. Restoring adds the surveys from a backup to this phone without changing anything already here, so you can also use it to combine surveys from several phones.</p>
+  <h2 id="h-backup">Back up and restore
+    <button class="info-btn info-inline" type="button" data-info="backup-info" aria-expanded="false" aria-controls="backup-info" aria-label="About backups">i</button></h2>
+  <div class="info-panel hidden" id="backup-info">
+    <p>A backup holds every survey, quadrat and photo on this phone in one file. Save it somewhere safe, such as your email, Google Drive or iCloud.</p>
+    <p>Restoring adds the surveys from a backup to this phone without changing anything already here, so you can also use it to combine surveys from several phones.</p>
+    <p>On iPhone and iPad, add QuadratNotes to your Home Screen (Share, then Add to Home Screen). Safari can clear data from websites you haven't opened for a while, but not from apps on the Home Screen.</p>
+  </div>
   <p class="hint" id="backup-status"></p>
   <div class="backup-btns">
     <button class="btn btn-primary btn-wide" type="button" id="btn-backup">Back up everything (.zip)</button>
@@ -1206,7 +1213,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <input type="file" id="f-restore" accept=".zip,application/zip,application/x-zip-compressed" class="hidden">
   </div>
   <div class="restore-result hidden" id="restore-result" role="status"></div>
-  <p class="hint">On iPhone and iPad, add QuadratNotes to your Home Screen (Share, then Add to Home Screen). Safari can clear data from websites you haven't opened for a while, but not from apps on the Home Screen.</p>
+  <p class="hint hidden" id="ios-home-tip">Add QuadratNotes to your Home Screen (Share, then Add to Home Screen) so Safari can't clear your surveys.</p>
 
   <h2>Storage</h2>
   <p class="hint" id="storage-line">Checking storage…</p>
@@ -1252,7 +1259,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.9",
+  version: "0.17.10",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -1959,6 +1966,8 @@ const APP_CONFIG = {
   const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isAndroid = /Android/.test(ua);
   const isInstalled = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+  // Only iPhone/iPad users still in Safari need the Home Screen warning on the Export tab.
+  if (isIOS && !isInstalled) $("#ios-home-tip").classList.remove("hidden");
 
   function blockedSteps() {
     if (isIOS) {
