@@ -590,12 +590,12 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </article>
   </div>
   <p class="home-soon"><button class="linkish" type="button" id="btn-all-surveys">See all your surveys</button></p>
-  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a> · <a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a></p>
+  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a> · <a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a> · <a href="privacy.html">Privacy</a></p>
   <details class="about-box">
   <summary>About QuadratNotes</summary>
   <div class="about">
     <p>QuadratNotes <span id="app-version"></span> is a free app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, built by a marine biologist for coastal surveys.</p>
-    <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
+    <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself. <a href="privacy.html">Privacy notice</a>.</p>
     <p>If you send feedback from the field-testers note, only your rating, what you type and the app version are sent.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
     <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
@@ -1337,7 +1337,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.18.1",
+  version: "0.18.2",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -4204,7 +4204,8 @@ const APP_CONFIG = {
     const status = $("#fb-status");
     const say = (msg, err) => { status.textContent = msg; status.classList.toggle("fb-err", !!err); };
     if (viaService) {
-      $("#fb-note").textContent = "Sent to " + APP_CONFIG.contactEmail + " through Web3Forms. Only your rating, what you type here and the app version are sent, nothing from your surveys.";
+      $("#fb-note").textContent = "Sent to " + APP_CONFIG.contactEmail + " through Web3Forms. Only your rating, what you type here and the app version are sent, nothing from your surveys. ";
+      const pl = document.createElement("a"); pl.href = "privacy.html"; pl.textContent = "Privacy"; $("#fb-note").append(pl);
     } else {
       $("#fb-email-field").classList.add("hidden");
       $("#fb-send").textContent = "Open in my email app";

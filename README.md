@@ -45,6 +45,9 @@ the device, and exports tidy data ready for analysis and for biodiversity databa
   without overwriting it, so it also combines surveys recorded on several phones.
 
 ## Exports
+Full column descriptions: [docs/DATA-DICTIONARY.md](docs/DATA-DICTIONARY.md). Changes to exported columns
+and files are flagged in [CHANGELOG.md](CHANGELOG.md).
+
 - Quadrat and species tables (CSV). The quadrats table has one row per quadrat: location, time,
   conditions and habitat details. The species table has one row per species per quadrat, with
   cover, layer, counts, shoots and canopy heights as recorded. Join them in R on `quadrat_id`.
@@ -73,7 +76,7 @@ No accounts, no tracking and no analytics. Survey data never leaves the device u
 it. If you tap "Get current conditions", an approximate location (to about 1 km) is sent to
 Open-Meteo for the weather and tide; map tiles come from OpenStreetMap when the map is used. Feedback sent
 from the app's field-testers note goes through Web3Forms to hello@quadratnotes.com and contains only the
-optional 1–5 rating, what the person types and the app version.
+optional 1–5 rating, what the person types and the app version. Full details: [privacy notice](https://quadratnotes.com/privacy.html).
 
 ## Feedback and contributing
 Bug reports and suggestions are welcome as GitHub issues, or by email to hello@quadratnotes.com.
