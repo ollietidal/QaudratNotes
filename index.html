@@ -102,6 +102,7 @@ p.lead { color: var(--muted); margin: 0 0 18px; }
 .field > label, .label { display: block; font-weight: 700; margin-bottom: 6px; }
 .hint { color: var(--muted); font-size: .9rem; font-weight: 400; }
 .region-places { margin: 6px 0 0; }
+#inat-hint a { color: var(--ink); font-weight: 700; }
 input[type=text], input[type=number], input[type=date], input[type=email], textarea {
   width: 100%; min-height: 48px; padding: 10px 12px;
   background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-s);
@@ -1150,6 +1151,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <button class="btn btn-wide" type="button" id="btn-sp-csv">Download species table (.csv)</button>
   </div>
   <p class="hint" id="export-hint">The quadrats table has one row per quadrat: location, time, conditions and habitat details. The species table has one row per species per quadrat, with cover, layer, counts, shoots and canopy heights as recorded. Join them in R on <code>quadrat_id</code>.</p>
+  <p class="hint" id="inat-hint">Photos in the zip carry their quadrat's location, time and species list. To share them on iNaturalist, unzip the folder and drag the photos into the <a href="https://www.inaturalist.org/observations/upload" target="_blank" rel="noopener">iNaturalist uploader</a>, which fills in the place and date. Add one organism per observation, and tick Captive / cultivated for planted seagrass.</p>
 
   <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
 
@@ -1248,7 +1250,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.7",
+  version: "0.17.8",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -2473,6 +2475,82 @@ const APP_CONFIG = {
     });
   }
 
+  /* ---------- Photo details for exported photos ----------
+     Photos are shrunk when added, which drops the camera's own details. On export, each photo gets
+     its quadrat's position, time and species written back in as standard EXIF (GPS, DateTimeOriginal,
+     ImageDescription), so photo tools and iNaturalist's uploader can read them. Stored photos are
+     not changed. */
+  function exifTiff(meta) {
+    const T = { BYTE: 1, ASCII: 2, LONG: 4, RATIONAL: 5 };
+    const ascii = s => { const out = []; for (const ch of String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) { const k = ch.charCodeAt(0); out.push(k >= 32 && k < 127 ? k : 63); } out.push(0); return out; };
+    const p2 = n => String(n).padStart(2, "0");
+    const ifd0 = [], exif = [], gps = [];
+    if (meta.desc) ifd0.push([0x010E, T.ASCII, ascii(meta.desc.slice(0, 600))]);
+    ifd0.push([0x0131, T.ASCII, ascii("QuadratNotes " + APP_CONFIG.version)]);
+    const d = meta.when;
+    if (d && !isNaN(d)) {
+      const stamp = d.getFullYear() + ":" + p2(d.getMonth() + 1) + ":" + p2(d.getDate()) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes()) + ":" + p2(d.getSeconds());
+      const off = -d.getTimezoneOffset(), offs = (off < 0 ? "-" : "+") + p2(Math.floor(Math.abs(off) / 60)) + ":" + p2(Math.abs(off) % 60);
+      ifd0.push([0x0132, T.ASCII, ascii(stamp)]);
+      exif.push([0x9003, T.ASCII, ascii(stamp)], [0x9004, T.ASCII, ascii(stamp)], [0x9011, T.ASCII, ascii(offs)]);
+    }
+    if (Number.isFinite(meta.lat) && Number.isFinite(meta.lon)) {
+      const dms = v => { v = Math.abs(v); const dg = Math.floor(v), mf = (v - dg) * 60, m = Math.floor(mf); const s = Math.min(599999, Math.round((mf - m) * 600000)); return [[dg, 1], [m, 1], [s, 10000]]; };
+      gps.push([0x0000, T.BYTE, [2, 3, 0, 0]], [0x0001, T.ASCII, ascii(meta.lat < 0 ? "S" : "N")], [0x0002, T.RATIONAL, dms(meta.lat)],
+        [0x0003, T.ASCII, ascii(meta.lon < 0 ? "W" : "E")], [0x0004, T.RATIONAL, dms(meta.lon)], [0x0012, T.ASCII, ascii("WGS-84")]);
+      if (Number.isFinite(meta.acc) && meta.acc >= 0) gps.push([0x001F, T.RATIONAL, [[Math.round(meta.acc * 100), 100]]]);
+    }
+    if (exif.length) ifd0.push([0x8769, T.LONG, [0]]);
+    if (gps.length) ifd0.push([0x8825, T.LONG, [0]]);
+    const len = ([, t, v]) => t === T.RATIONAL ? v.length * 8 : t === T.LONG ? v.length * 4 : v.length;
+    const size = list => list.length ? 2 + list.length * 12 + 4 + list.reduce((n, e) => n + (len(e) > 4 ? len(e) + (len(e) & 1) : 0), 0) : 0;
+    const oE = 8 + size(ifd0), oG = oE + size(exif);
+    if (exif.length) ifd0.find(e => e[0] === 0x8769)[2] = [oE];
+    if (gps.length) ifd0.find(e => e[0] === 0x8825)[2] = [oG];
+    const buf = new Uint8Array(oG + size(gps)), dv = new DataView(buf.buffer);
+    buf.set([0x4D, 0x4D, 0, 42, 0, 0, 0, 8]);
+    const write = (list, at) => {
+      dv.setUint16(at, list.length);
+      let data = at + 2 + list.length * 12 + 4;
+      list.forEach((e, i) => {
+        const [tag, t, v] = e, n = len(e), p = at + 2 + i * 12;
+        dv.setUint16(p, tag); dv.setUint16(p + 2, t); dv.setUint32(p + 4, v.length);
+        let w = p + 8;
+        if (n > 4) { dv.setUint32(p + 8, data); w = data; data += n + (n & 1); }
+        if (t === T.RATIONAL) v.forEach(([a, b], k) => { dv.setUint32(w + k * 8, a); dv.setUint32(w + k * 8 + 4, b); });
+        else if (t === T.LONG) v.forEach((x, k) => dv.setUint32(w + k * 4, x));
+        else buf.set(v, w);
+      });
+      dv.setUint32(at + 2 + list.length * 12, 0);
+    };
+    write(ifd0, 8);
+    if (exif.length) write(exif, oE);
+    if (gps.length) write(gps, oG);
+    return buf;
+  }
+  async function withPhotoMeta(blob, meta) {
+    try {
+      const src = new Uint8Array(await blob.arrayBuffer());
+      if (src[0] !== 0xFF || src[1] !== 0xD8) return blob;
+      // Leave photos that already carry EXIF alone.
+      let at = 2;
+      while (at + 4 <= src.length && src[at] === 0xFF && src[at + 1] >= 0xE0 && src[at + 1] <= 0xEF) {
+        if (src[at + 1] === 0xE1 && src[at + 4] === 0x45 && src[at + 5] === 0x78) return blob;
+        at += 2 + ((src[at + 2] << 8) | src[at + 3]);
+      }
+      // Insert after the JFIF header if there is one, otherwise straight after the start marker.
+      const ins = (src[2] === 0xFF && src[3] === 0xE0) ? 4 + ((src[4] << 8) | src[5]) : 2;
+      const tiff = exifTiff(meta), segLen = 2 + 6 + tiff.length;
+      if (segLen > 65535) return blob;
+      const seg = new Uint8Array(2 + segLen);
+      seg.set([0xFF, 0xE1, segLen >> 8, segLen & 0xFF, 0x45, 0x78, 0x69, 0x66, 0, 0]);
+      seg.set(tiff, 10);
+      return new Blob([src.subarray(0, ins), seg, src.subarray(ins)], { type: "image/jpeg" });
+    } catch (e) {
+      return blob;
+    }
+  }
+
   /* ---------- Export ---------- */
   const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "habitat", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design", "survey_area_m2",
     "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state",
@@ -2530,13 +2608,19 @@ const APP_CONFIG = {
         ordered.forEach((p, i) => {
           const name = slug(s.site) + "_" + s.date + "_Q" + pad(q.quadrat) + "_" + (i + 1) + ".jpg";
           names.push(name);
-          photoFiles.push({ name, blob: p.blob });
+          photoFiles.push({ name, blob: p.blob, q });
         });
         const area = s.quadratAreaM2 || null;
         const code = codes.get(s.id), qid = quadratId(code, q.quadrat);
         qidById.set(q.id, qid);
         if (q.acc != null) accById.set(q.id, q.acc);
         const tx = taxaOf(q);
+        photoFiles.filter(f => f.q === q).forEach(f => {
+          const sp = tx.map(t => t.name).filter(Boolean);
+          f.meta = { lat: q.lat, lon: q.lon, acc: q.acc, when: q.recordedAt ? new Date(q.recordedAt) : null,
+            desc: (sp.length ? sp.join(", ") + ". " : "") + s.site + ", quadrat " + q.quadrat + " (" + qid + "). Recorded with QuadratNotes." };
+          delete f.q;
+        });
         const hab = habitatOf(s), rk = hab === "rocky", sm = hab === "saltmarsh", mf = hab === "mudflat", sg = hab === "seagrass";
         const vh = q.vegHeights || [];
         const cond = condCells(s.conditions);
@@ -3227,7 +3311,7 @@ const APP_CONFIG = {
         zip.file(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans));
       }
       const folder = zip.folder("photos");
-      out.photoFiles.forEach(p => folder.file(p.name, p.blob));
+      for (const p of out.photoFiles) folder.file(p.name, p.meta ? await withPhotoMeta(p.blob, p.meta) : p.blob);
       const blob = await zip.generateAsync({ type: "blob" });
       await saveFile(out.base + ".zip", blob);
     } finally {

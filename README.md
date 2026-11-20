@@ -42,7 +42,9 @@ the device, and exports tidy data ready for analysis and for biodiversity databa
 
 ## Exports
 - Quadrat and species tables (CSV), ready for R, joined on `quadrat_id`.
-- Photos, named by site, date and quadrat, in a zip with the tables.
+- Photos, named by site, date and quadrat, in a zip with the tables. Each photo carries its
+  quadrat's location, time and species list (EXIF), so it can be dragged straight into the
+  iNaturalist web uploader.
 - Map files: GeoJSON (QGIS, ArcGIS, R) and KML (Google Earth), including the survey area and
   random points if used.
 - A Darwin Core archive for sharing with OBIS and GBIF.
