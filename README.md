@@ -41,7 +41,9 @@ the device, and exports tidy data ready for analysis and for biodiversity databa
   without overwriting it, so it also combines surveys recorded on several phones.
 
 ## Exports
-- Quadrat and species tables (CSV), ready for R, joined on `quadrat_id`.
+- Quadrat and species tables (CSV). The quadrats table has one row per quadrat: location, time,
+  conditions and habitat details. The species table has one row per species per quadrat, with
+  cover, layer, counts, shoots and canopy heights as recorded. Join them in R on `quadrat_id`.
 - Photos, named by site, date and quadrat, in a zip with the tables. Each photo carries its
   quadrat's location, time and species list (EXIF), so it can be dragged straight into the
   iNaturalist web uploader.

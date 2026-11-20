@@ -103,6 +103,7 @@ p.lead { color: var(--muted); margin: 0 0 18px; }
 .hint { color: var(--muted); font-size: .9rem; font-weight: 400; }
 .region-places { margin: 6px 0 0; }
 #inat-hint a { color: var(--ink); font-weight: 700; }
+.inat-line { margin: 4px 0 10px; }
 input[type=text], input[type=number], input[type=date], input[type=email], textarea {
   width: 100%; min-height: 48px; padding: 10px 12px;
   background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-s);
@@ -1150,8 +1151,9 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <button class="btn btn-wide" type="button" id="btn-csv">Download quadrats table (.csv)</button>
     <button class="btn btn-wide" type="button" id="btn-sp-csv">Download species table (.csv)</button>
   </div>
-  <p class="hint" id="export-hint">The quadrats table has one row per quadrat: location, time, conditions and habitat details. The species table has one row per species per quadrat, with cover, layer, counts, shoots and canopy heights as recorded. Join them in R on <code>quadrat_id</code>.</p>
-  <p class="hint" id="inat-hint">Photos in the zip carry their quadrat's location, time and species list. To share them on iNaturalist, unzip the folder and drag the photos into the <a href="https://www.inaturalist.org/observations/upload" target="_blank" rel="noopener">iNaturalist uploader</a>, which fills in the place and date. Add one organism per observation, and tick Captive / cultivated for planted seagrass.</p>
+  <p class="hint inat-line">Sharing photos on iNaturalist
+    <button class="info-btn info-inline" type="button" data-info="inat-hint" aria-expanded="false" aria-controls="inat-hint" aria-label="How to share photos on iNaturalist">i</button></p>
+  <div class="info-panel hidden" id="inat-hint">Photos in the zip carry their quadrat's location, time and species list. To share them on iNaturalist, unzip the folder and drag the photos into the <a href="https://www.inaturalist.org/observations/upload" target="_blank" rel="noopener">iNaturalist uploader</a>, which fills in the place and date. Add one organism per observation, and tick Captive / cultivated for planted seagrass.</div>
 
   <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
 
@@ -1250,7 +1252,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.8",
+  version: "0.17.9",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
