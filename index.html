@@ -284,6 +284,9 @@ select:focus { border-color: var(--ink); outline: none; }
 .fb-intro { margin: 0 0 12px; }
 .fb-form .field { margin-bottom: 12px; }
 .fb-form .btn { width: 100%; }
+.fb-rate { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.fb-rate button { justify-content: center; min-width: 0; }
+.fb-rate-ends { display: flex; justify-content: space-between; margin-top: 4px; font-size: .85rem; }
 .fb-status { margin: 8px 0 0; font-weight: 700; }
 .fb-status:empty { display: none; }
 .fb-status.fb-err { color: var(--tape); }
@@ -468,7 +471,18 @@ details.about-box, details.about-box * { box-sizing: border-box; }
       <p class="fb-intro">QuadratNotes is new and still being tested in the field, so please export or back up your data after each survey. If you'd like to help test it, spot a problem or have an idea, tell us here.</p>
       <form id="fb-form" class="fb-form" novalidate>
         <div class="field">
-          <label for="fb-msg">Your feedback</label>
+          <span class="label" id="fb-rate-q">How are you finding QuadratNotes? <span class="hint">optional</span></span>
+          <div class="seg fb-rate" data-name="fbrating" role="group" aria-labelledby="fb-rate-q">
+            <button type="button" data-value="1" aria-label="1, poor">1</button>
+            <button type="button" data-value="2" aria-label="2">2</button>
+            <button type="button" data-value="3" aria-label="3">3</button>
+            <button type="button" data-value="4" aria-label="4">4</button>
+            <button type="button" data-value="5" aria-label="5, great">5</button>
+          </div>
+          <div class="fb-rate-ends hint" aria-hidden="true"><span>1 Poor</span><span>5 Great</span></div>
+        </div>
+        <div class="field">
+          <label for="fb-msg">Your feedback <span class="hint">optional</span></label>
           <textarea id="fb-msg" maxlength="4000" placeholder="What worked, what didn't, which habitat and which phone you used"></textarea>
         </div>
         <div class="field" id="fb-email-field">
@@ -582,7 +596,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   <div class="about">
     <p>QuadratNotes <span id="app-version"></span> is a free app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, built by a marine biologist for coastal surveys.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself.</p>
-    <p>If you send feedback from the field-testers note, only what you type (and the app version) is sent.</p>
+    <p>If you send feedback from the field-testers note, only your rating, what you type and the app version are sent.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
     <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
     <p><strong>How to cite:</strong> <span id="cite-text"></span> <button class="linkish" type="button" id="btn-copy-cite">Copy</button></p>
@@ -1323,7 +1337,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.18.0",
+  version: "0.18.1",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -4190,7 +4204,7 @@ const APP_CONFIG = {
     const status = $("#fb-status");
     const say = (msg, err) => { status.textContent = msg; status.classList.toggle("fb-err", !!err); };
     if (viaService) {
-      $("#fb-note").textContent = "Sent to " + APP_CONFIG.contactEmail + " through Web3Forms. Only what you type here and the app version are sent, nothing from your surveys.";
+      $("#fb-note").textContent = "Sent to " + APP_CONFIG.contactEmail + " through Web3Forms. Only your rating, what you type here and the app version are sent, nothing from your surveys.";
     } else {
       $("#fb-email-field").classList.add("hidden");
       $("#fb-send").textContent = "Open in my email app";
@@ -4201,11 +4215,13 @@ const APP_CONFIG = {
       if ($("#fb-hp").checked) return;
       const msg = $("#fb-msg").value.trim();
       const email = $("#fb-email").value.trim();
-      if (!msg) { say("Please write your feedback first.", true); $("#fb-msg").focus(); return; }
-      const subject = "QuadratNotes feedback (" + APP_CONFIG.version + ")";
+      const rating = getSeg("fbrating");
+      if (!msg && !rating) { say("Pick a number or write a message first.", true); return; }
+      // The rating goes in the subject (to see at a glance in the inbox) and as its own field (a column in the Web3Forms CSV export).
+      const subject = "QuadratNotes feedback (" + APP_CONFIG.version + ")" + (rating ? " – rating " + rating + "/5" : "");
       if (!viaService) {
         location.href = "mailto:" + APP_CONFIG.contactEmail + "?subject=" + encodeURIComponent(subject) +
-          "&body=" + encodeURIComponent(msg + "\n\n(QuadratNotes " + APP_CONFIG.version + ")");
+          "&body=" + encodeURIComponent((rating ? "Rating: " + rating + "/5\n\n" : "") + msg + "\n\n(QuadratNotes " + APP_CONFIG.version + ")");
         say("Your email app should open with the message ready to send.");
         return;
       }
@@ -4214,7 +4230,7 @@ const APP_CONFIG = {
       const btn = $("#fb-send");
       btn.disabled = true; say("Sending…");
       try {
-        const payload = { access_key: APP_CONFIG.feedbackKey, subject, from_name: "QuadratNotes app", message: msg, app_version: APP_CONFIG.version, botcheck: false };
+        const payload = { access_key: APP_CONFIG.feedbackKey, subject, from_name: "QuadratNotes app", rating: rating || "", message: msg || "(no message)", app_version: APP_CONFIG.version, botcheck: false };
         if (email) payload.email = email;
         const res = await fetch("https://api.web3forms.com/submit", {
           method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload)
@@ -4222,6 +4238,7 @@ const APP_CONFIG = {
         const out = await res.json().catch(() => ({}));
         if (!res.ok || out.success === false) throw new Error(out.message || String(res.status));
         form.reset();
+        setSeg("fbrating", null);
         say(email ? "Thank you, your feedback has been sent. We'll reply to the address you gave." : "Thank you, your feedback has been sent.");
       } catch (e) {
         say("Couldn't send just now (weak or no signal?). Your message is still here, so try again later.", true);

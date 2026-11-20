@@ -72,8 +72,8 @@ phone heights are usually only good to ±10–30 m, so convert and check them be
 No accounts, no tracking and no analytics. Survey data never leaves the device unless you export
 it. If you tap "Get current conditions", an approximate location (to about 1 km) is sent to
 Open-Meteo for the weather and tide; map tiles come from OpenStreetMap when the map is used. Feedback sent
-from the app's field-testers note goes through Web3Forms to hello@quadratnotes.com and contains only what
-the person types (and the app version).
+from the app's field-testers note goes through Web3Forms to hello@quadratnotes.com and contains only the
+optional 1–5 rating, what the person types and the app version.
 
 ## Feedback and contributing
 Bug reports and suggestions are welcome as GitHub issues, or by email to hello@quadratnotes.com.
