@@ -102,8 +102,7 @@ p.lead { color: var(--muted); margin: 0 0 18px; }
 .field > label, .label { display: block; font-weight: 700; margin-bottom: 6px; }
 .hint { color: var(--muted); font-size: .9rem; font-weight: 400; }
 .region-places { margin: 6px 0 0; }
-#inat-hint a { color: var(--ink); font-weight: 700; }
-.inat-line { margin: 4px 0 10px; }
+
 #backup-info p { margin: 0 0 8px; }
 #backup-info p:last-child { margin-bottom: 0; }
 input[type=text], input[type=number], input[type=date], input[type=email], textarea {
@@ -399,6 +398,23 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 .pt-mark.done { background: #2D6A4F; }
 .pt-mark.skipped { background: #8A8F8C; text-decoration: line-through; }
 .pt-mark.target { box-shadow: 0 0 0 3px #17242C; transform: scale(1.25); }
+.fx-mark { display: inline-block; transform: translate(-50%, -50%); white-space: nowrap; padding: 2px 7px; border-radius: 999px; background: var(--tape); color: #fff;
+  font-weight: 700; font-size: 12px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+.fx-mark.done { background: #2D6A4F; }
+.fx-mark.skipped { background: #8A8F8C; text-decoration: line-through; }
+.fx-mark.target { box-shadow: 0 0 0 3px #17242C; }
+.fx-tap { margin: 0 0 12px; }
+.fx-mark-row { margin-bottom: 10px; }
+.fx-avg { display: grid; gap: 6px; background: var(--surface); border: 2px solid var(--green); border-radius: var(--radius-l); padding: 12px 14px; margin: 0 0 12px; }
+.fx-more { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 8px; }
+.fx-more select { min-height: 48px; width: 100%; min-width: 0; }
+.fx-h { margin-top: 18px; }
+.fx-list { list-style: none; margin: 0 0 16px; padding: 0; }
+.fx-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.fx-list li div { min-width: 0; }
+.fx-list small { display: block; color: var(--muted); }
+.fx-list .fx-btns { display: flex; gap: 4px; flex: none; }
+.fx-dl { text-align: center; margin: 10px 0 0; }
 .nav-card { border: 2px solid var(--ink); border-radius: var(--radius-l); padding: 14px; margin: 0 0 18px; background: var(--surface); }
 .nav-card.arrived { border-color: var(--green); background: var(--green-soft); }
 .nav-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
@@ -669,6 +685,19 @@ details.about-box, details.about-box * { box-sizing: border-box; }
         </dl>
         </div>
       </div>
+      <div class="hidden" id="fixed-check-wrap" style="margin-top:12px">
+        <div class="plan-check-row">
+          <label class="check"><input type="checkbox" id="s-fixed"> <span>Guide me to fixed points <span class="hint">mark, import or reuse your plot positions, then the app guides you to each one</span></span></label>
+          <button class="info-btn" type="button" data-info="fixed-info-setup" aria-expanded="false" aria-controls="fixed-info-setup" aria-label="About fixed points">i</button>
+        </div>
+        <div class="info-panel hidden" id="fixed-info-setup">
+        <dl>
+          <dt>Adding points</dt><dd>Stand on each plot and mark it (the app averages GPS for 20 seconds), tap the map, import a file, or copy the points from an earlier survey of the same site.</dd>
+          <dt>Files</dt><dd>CSV with point_id, latitude and longitude in decimal degrees (e.g. 52.87123, -4.61234), GeoJSON or KML. To use a shapefile or British National Grid coordinates, save them as GeoJSON or KML in WGS 84 first, for example in QGIS.</dd>
+          <dt>Accuracy</dt><dd>Phone GPS is usually accurate to 3–10&nbsp;m, so a saved point gets you to the right area rather than the exact spot. For plots you need to find to the centimetre, use a physical marker or an RTK receiver.</dd>
+        </dl>
+        </div>
+      </div>
     </div>
     <div class="field">
       <span class="label">Conditions <span class="hint">optional, needs signal</span></span>
@@ -690,6 +719,41 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <h2>Previous surveys</h2>
     <ul class="surveys" id="survey-list"></ul>
   </div>
+</section>
+
+<!-- FIXED POINTS -->
+<section id="view-fixed" class="hidden" aria-labelledby="h-fixed">
+  <h1 id="h-fixed">Fixed points
+    <button class="info-btn info-inline" type="button" data-info="fixed-info" aria-expanded="false" aria-controls="fixed-info" aria-label="About fixed points">i</button></h1>
+  <div class="info-panel hidden" id="fixed-info">
+    <dl>
+      <dt>Reusing points</dt><dd>Points are saved with this survey. Next visit, start a new survey and copy them across, or import the points file you downloaded. Point names stay the same, so your data lines up from year to year.</dd>
+      <dt>Files</dt><dd>CSV with point_id, latitude and longitude in decimal degrees (e.g. 52.87123, -4.61234), GeoJSON or KML. To use a shapefile or British National Grid coordinates, save them as GeoJSON or KML in WGS 84 first, for example in QGIS.</dd>
+      <dt>Accuracy</dt><dd>Phone GPS is usually accurate to 3–10&nbsp;m, so a saved point gets you to the right area rather than the exact spot. For plots you need to find to the centimetre, use a physical marker or an RTK receiver.</dd>
+    </dl>
+  </div>
+  <p class="lead" id="fx-sum"></p>
+  <div class="plan-map" id="fx-map"></div>
+  <p class="hint" id="fx-gps"></p>
+  <label class="check fx-tap"><input type="checkbox" id="fx-tap"> Add a point wherever I tap the map</label>
+  <div class="field fx-mark-row">
+    <label for="fx-label">Name of the next point</label>
+    <div class="with-grid"><input type="text" id="fx-label" autocomplete="off"><button class="btn btn-primary" type="button" id="btn-fx-mark">Mark this spot</button></div>
+  </div>
+  <div class="fx-avg hidden" id="fx-avg" role="status" aria-live="polite">
+    <b id="fx-avg-title">Averaging GPS…</b>
+    <span class="hint" id="fx-avg-text"></span>
+    <div class="nav-btns"><button class="btn btn-small btn-primary" type="button" id="btn-fx-avg-stop">Save now</button><button class="btn btn-small" type="button" id="btn-fx-avg-cancel">Cancel</button></div>
+  </div>
+  <div class="fx-more">
+    <button class="btn" type="button" id="btn-fx-import">Import a file</button>
+    <input type="file" id="fx-file" class="hidden" accept=".csv,.txt,.geojson,.json,.kml,text/csv,application/json,application/vnd.google-earth.kml+xml">
+    <select id="fx-copy" aria-label="Copy points from an earlier survey"></select>
+  </div>
+  <h2 class="fx-h">Points</h2>
+  <ul class="fx-list" id="fx-list"></ul>
+  <button class="btn btn-primary btn-wide" type="button" id="btn-fx-done">Start recording</button>
+  <p class="fx-dl"><button class="linkish" type="button" id="btn-fx-download">Download these points (.csv)</button></p>
 </section>
 
 <!-- RANDOM POINTS -->
@@ -785,6 +849,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </div>
   </div>
   <p class="hidden" id="plan-later-wrap"><button class="linkish" type="button" id="btn-plan-later">Pick random points on a map</button></p>
+  <p class="hidden" id="fixed-later-wrap"><button class="linkish" type="button" id="btn-fixed-later">Set up fixed points</button></p>
   <p class="gps" id="gps-line"><span class="gps-dot" id="gps-dot"></span><span id="gps-text" class="gps-text">No location yet</span></p>
   <div class="loc-card hidden" id="loc-card" role="region" aria-labelledby="loc-title">
     <b id="loc-title"></b>
@@ -1153,9 +1218,6 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <button class="btn btn-wide" type="button" id="btn-csv">Download quadrats table (.csv)</button>
     <button class="btn btn-wide" type="button" id="btn-sp-csv">Download species table (.csv)</button>
   </div>
-  <p class="hint inat-line">Sharing photos on iNaturalist
-    <button class="info-btn info-inline" type="button" data-info="inat-hint" aria-expanded="false" aria-controls="inat-hint" aria-label="How to share photos on iNaturalist">i</button></p>
-  <div class="info-panel hidden" id="inat-hint">Photos in the zip carry their quadrat's location, time and species list. To share them on iNaturalist, unzip the folder and drag the photos into the <a href="https://www.inaturalist.org/observations/upload" target="_blank" rel="noopener">iNaturalist uploader</a>, which fills in the place and date. Add one organism per observation, and tick Captive / cultivated for planted seagrass.</div>
 
   <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
 
@@ -1196,6 +1258,8 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   </div>
   <label class="check"><input type="checkbox" id="dwc-names"> Include surveyor names in the records</label>
   </div>
+  <h3 class="mf-head">Photo records</h3>
+  <p class="hint share-note" id="inat-hint"><a href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> is a free community where people share photos of wildlife and help each other identify them. Records the community agrees on are shared with GBIF. Photos in the data and photos zip are already set up for it: each carries its quadrat's location, time and species list, so the <a href="https://www.inaturalist.org/observations/upload" target="_blank" rel="noopener">iNaturalist uploader</a> fills in the place and date. Add one organism per observation, and tick Captive / cultivated for planted seagrass.</p>
   </div>
   </details>
 
@@ -1259,7 +1323,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.17.10",
+  version: "0.18.0",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -1400,7 +1464,7 @@ const APP_CONFIG = {
 
   /* ---------- Views ---------- */
   function show(view) {
-    ["home", "survey", "record", "plan", "data", "export"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== view));
+    ["home", "survey", "record", "plan", "fixed", "data", "export"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== view));
     $$(".tabs button").forEach(b => {
       if (b.dataset.tab === view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     });
@@ -1409,7 +1473,7 @@ const APP_CONFIG = {
     if (view === "survey") renderSurveyList();
     if (view === "home") renderHome();
     $(".top").classList.toggle("hidden", view === "home");
-    if (view === "record" || view === "plan") startGps(); else stopGps();
+    if (view === "record" || view === "plan" || view === "fixed") startGps(); else stopGps();
     if (view === "record") renderNav();
     window.scrollTo(0, 0);
   }
@@ -1438,7 +1502,7 @@ const APP_CONFIG = {
   $("#survey-form").addEventListener("submit", async e => {
     e.preventDefault();
     // Random points need your position for the map, so ask straight away while the tap still counts as permission.
-    if (getSeg("design") === "random" && $("#s-plan").checked && $("#s-site").value.trim() && "geolocation" in navigator && !state.live) {
+    if (((getSeg("design") === "random" && $("#s-plan").checked) || (getSeg("design") === "fixed" && $("#s-fixed").checked)) && $("#s-site").value.trim() && "geolocation" in navigator && !state.live) {
       state.gpsAsked = true; state.gpsNeedsAsk = false;
       try { navigator.geolocation.getCurrentPosition(pos => { state.gpsBlocked = false; onGpsFix(pos); }, onGpsError, { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }); } catch (err) {}
     }
@@ -1476,14 +1540,16 @@ const APP_CONFIG = {
     await put("sessions", session);
     await put("meta", { key: "lastRegion", value: session.region });
     const wantPlan = session.design === "random" && $("#s-plan").checked;
-    await put("meta", { key: "lastDesign", value: session.design || "", other: session.designOther || "", plan: wantPlan });
+    const wantFixed = session.design === "fixed" && $("#s-fixed").checked;
+    await put("meta", { key: "lastDesign", value: session.design || "", other: session.designOther || "", plan: wantPlan, fixed: wantFixed });
     await openSession(session);
     if (wantPlan) openPlan(false);
+    if (wantFixed) openFixed();
     $("#s-site").value = ""; $("#s-notes").value = ""; $("#s-side").value = "";
     setSeg("qsize", "0.25"); $("#qsize-custom").classList.add("hidden");
     state.conditions = null;
     $("#cond-card").classList.add("hidden");
-    toast(wantPlan ? "Survey started. Now mark the survey area" : "Survey started");
+    toast(wantPlan ? "Survey started. Now mark the survey area" : wantFixed ? "Survey started. Now add your points" : "Survey started");
   });
 
   async function openSession(session, stayOn) {
@@ -2068,6 +2134,7 @@ const APP_CONFIG = {
     if (state.gpsMode === "live") fillCoords(state.live.lat, state.live.lon);
     renderGps();
     planOnFix();
+    fixedOnFix();
   }
   function onGpsError(err) {
     if (err && err.code === 1) {
@@ -2341,8 +2408,8 @@ const APP_CONFIG = {
     await put("quadrats", record);
     if (link && link.t && !link.far) { await put("sessions", state.session); state.navTarget = null; }
     const wasEditing = !!existing;
-    if (link && link.far) toast("Quadrat " + qn + " saved, but not linked to point " + link.t.id + ": you were " + fmtDist(link.far) + " from it", true);
-    else if (link && link.t) toast("Quadrat " + qn + " saved at point " + link.t.id);
+    if (link && link.far) toast("Quadrat " + qn + " saved, but not linked to " + (link.t.label ? link.t.label : "point " + link.t.id) + ": you were " + fmtDist(link.far) + " from it", true);
+    else if (link && link.t) toast("Quadrat " + qn + " saved at " + (link.t.label ? link.t.label : "point " + link.t.id));
     else if (!$("#toast").classList.contains("show") || !$("#toast").textContent.startsWith("Saved. For species"))
       toast((wasEditing ? "Changes saved to quadrat " : "Quadrat " + qn + " saved") + (wasEditing ? qn : ""));
     await resetForm(true);
@@ -2638,7 +2705,7 @@ const APP_CONFIG = {
         const qrow = { survey_id: code, quadrat_id: qid, site: s.site, surveyor: s.surveyor, survey_date: s.date, habitat: HABITAT_NAME[hab],
           region: sg ? (s.region ? regionLabel(s.region) : null) : RK_REGION_NAME[rkRegionOf(s)], quadrat_side_cm: s.quadratSideCm || null, quadrat_area_m2: area,
           sampling_design: designLabel(s), survey_area_m2: s.plan ? s.plan.areaM2 : null, quadrat: q.quadrat, transect: q.transect, distance_from_start_m: q.distance, plot_id: q.plot,
-          point_id: q.point != null ? pointLabel(q.point) : null, planned_latitude: q.plannedLat ?? null, planned_longitude: q.plannedLon ?? null, distance_from_point_m: q.pointOffset ?? null, recorded_at: q.recordedAt,
+          point_id: q.point != null ? fixedLabel(s, q.point) : null, planned_latitude: q.plannedLat ?? null, planned_longitude: q.plannedLon ?? null, distance_from_point_m: q.pointOffset ?? null, recorded_at: q.recordedAt,
           latitude: q.lat, longitude: q.lon, gps_accuracy_m: q.acc, gps_altitude_m: q.alt ?? null, gps_altitude_accuracy_m: q.altAcc ?? null, seagrass_cover_pct: sg ? q.cover : null, n_species: sg ? tx.length : tx.filter(isPresent).length,
           epiphytes: sg ? q.epiphytes : null, algae_cover_pct: sg ? q.algae : null, sediment: (sg || mf) ? q.sediment : null,
           zone: sg ? null : q.zone, height_above_cd_m: rk ? q.heightCD : null, elevation_m: (sm || mf) ? q.elevation : null, substrate: rk ? q.substrate : null,
@@ -2692,7 +2759,16 @@ const APP_CONFIG = {
     plans.forEach(({ s, code, points }) => points.forEach(t => ptRows.push([code, s.site, s.date, t.point_id, t.lat, t.lon, t.status, t.skip_reason, t.quadrat_id, t.quadrat_gps_accuracy_m,
       s.plan.areaM2, s.plan.n, s.plan.gap || 0, s.plan.seed, PLAN_METHOD[s.plan.method] || s.plan.method, cornerAccText(s.plan), cornerAccMax(s.plan)])));
     const ptCsv = plans.length ? [PT_COLS.join(",")].concat(ptRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n" : null;
-    return { csv, spCsv, photoFiles, rows: rows.length, base, mapItems, plans, ptCsv };
+    const fixed = chosen.filter(s => s.plan && s.plan.kind === "fixed" && Array.isArray(s.plan.points) && s.plan.points.length)
+      .sort((a, b) => a.date.localeCompare(b.date)).map(s => ({ s, code: codes.get(s.id),
+        points: s.plan.points.map(t => ({ point_id: ptName(t), lat: t.lat, lon: t.lon, acc: t.acc ?? "", how: FX_HOW[t.how] || t.how || "",
+          status: t.status === "done" ? "surveyed" : t.status === "skipped" ? "skipped" : "not visited",
+          skip_reason: t.status === "skipped" ? (PLAN_REASONS[t.reason] || t.reason || "") : "", quadrat_id: t.quadratId ? (qidById.get(t.quadratId) || "") : "",
+          quadrat_gps_accuracy_m: t.quadratId && accById.has(t.quadratId) ? accById.get(t.quadratId) : "" })) }));
+    const fxRows = [];
+    fixed.forEach(({ s, code, points }) => points.forEach(t => fxRows.push([code, s.site, s.date, t.point_id, t.lat, t.lon, t.acc, t.how, t.status, t.skip_reason, t.quadrat_id, t.quadrat_gps_accuracy_m])));
+    const fxCsv = fixed.length ? [FX_COLS.join(",")].concat(fxRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n" : null;
+    return { csv, spCsv, photoFiles, rows: rows.length, base, mapItems, plans, ptCsv, fixed, fxCsv };
   }
 
   /* ---------- Darwin Core archive (OBIS event core + occurrence + extended measurement or fact) ---------- */
@@ -3014,6 +3090,7 @@ const APP_CONFIG = {
     $("#s-design-other").value = s0.designOther || "";
     $("#design-other-wrap").classList.toggle("hidden", s0.design !== "other");
     $("#plan-check-wrap").classList.toggle("hidden", s0.design !== "random");
+    $("#fixed-check-wrap").classList.toggle("hidden", s0.design !== "fixed");
     if (s0.conditions) state.conditions = s0.conditions;
     show("survey");
   });
@@ -3170,7 +3247,7 @@ const APP_CONFIG = {
     "n_species", "transect", "distance_from_start_m", "plot_id", "point_id", "distance_from_point_m", "gps_accuracy_m", "notes"];
   const LABEL = { quadrat_id: "Quadrat ID", survey_id: "Survey", site: "Site", survey_date: "Date", habitat: "Habitat", quadrat: "Quadrat",
     zone: "Zone", seagrass_cover_pct: "Seagrass cover %", species_summary: "Species", n_species: "Number of species", transect: "Transect",
-    distance_from_start_m: "Distance from start (m)", plot_id: "Plot", point_id: "Random point", distance_from_point_m: "Distance from point (m)", gps_accuracy_m: "GPS accuracy (m)", notes: "Notes" };
+    distance_from_start_m: "Distance from start (m)", plot_id: "Plot", point_id: "Point", distance_from_point_m: "Distance from point (m)", gps_accuracy_m: "GPS accuracy (m)", notes: "Notes" };
   const ring = corners => corners.concat([corners[0]]).map(c => [c[1], c[0]]);
   const areaProps = (s, code) => cleanProps({ feature_type: "survey_area", survey_id: code, site: s.site, survey_date: s.date, habitat: HABITAT_NAME[habitatOf(s)],
     area_m2: s.plan.areaM2, area_ha: Number((s.plan.areaM2 / 10000).toFixed(4)), points_requested: s.plan.n, points_placed: s.plan.points.length,
@@ -3178,8 +3255,11 @@ const APP_CONFIG = {
     corner_gps_accuracy_m: cornerAccText(s.plan), outline_max_gps_accuracy_m: cornerAccMax(s.plan) });
   const located = items => items.filter(i => typeof i.lat === "number" && typeof i.lon === "number");
   const cleanProps = p => { const o = {}; Object.keys(p).forEach(k => { if (p[k] !== null && p[k] !== undefined && p[k] !== "") o[k] = p[k]; }); return o; };
-  function buildGeoJSON(items, plans) {
+  function buildGeoJSON(items, plans, fixed) {
     const features = [];
+    (fixed || []).forEach(({ code, points }) => points.forEach(t => features.push({ type: "Feature", geometry: { type: "Point", coordinates: [t.lon, t.lat] },
+      properties: cleanProps({ feature_type: "fixed_point", survey_id: code, point_id: t.point_id, point_gps_accuracy_m: t.acc, how_added: t.how, status: t.status, skip_reason: t.skip_reason,
+        quadrat_id: t.quadrat_id, quadrat_gps_accuracy_m: t.quadrat_gps_accuracy_m }) })));
     (plans || []).forEach(({ s, code, points }) => {
       features.push({ type: "Feature", geometry: { type: "Polygon", coordinates: [ring(s.plan.corners)] }, properties: areaProps(s, code) });
       points.forEach(t => features.push({ type: "Feature", geometry: { type: "Point", coordinates: [t.lon, t.lat] },
@@ -3189,10 +3269,11 @@ const APP_CONFIG = {
       properties: Object.assign({ feature_type: "quadrat" }, cleanProps(i.props)) }));
     return JSON.stringify({ type: "FeatureCollection", features }, null, 1);
   }
-  function buildKML(items, title, plans) {
+  function buildKML(items, title, plans, fixed) {
     const x = xmlEsc;
-    const bySurvey = new Map(), planBy = new Map(), info = new Map();
+    const bySurvey = new Map(), planBy = new Map(), info = new Map(), fixedBy = new Map();
     (plans || []).forEach(pl => { planBy.set(pl.code, pl); bySurvey.set(pl.code, []); info.set(pl.code, { site: pl.s.site, date: pl.s.date, habitat: HABITAT_NAME[habitatOf(pl.s)] }); });
+    (fixed || []).forEach(fx => { fixedBy.set(fx.code, fx); bySurvey.set(fx.code, []); info.set(fx.code, { site: fx.s.site, date: fx.s.date, habitat: HABITAT_NAME[habitatOf(fx.s)] }); });
     located(items).forEach(i => {
       if (!bySurvey.has(i.code)) bySurvey.set(i.code, []);
       bySurvey.get(i.code).push(i);
@@ -3201,11 +3282,14 @@ const APP_CONFIG = {
     const table = obj => "<description><![CDATA[<table>" + Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== "")
       .map(([k, v]) => "<tr><th align=\"left\">" + x(k) + "</th><td>" + x(v) + "</td></tr>").join("").replace(/]]>/g, "]] >") + "</table>]]></description>";
     const folders = Array.from(bySurvey.entries()).map(([code, list]) => {
-      const p0 = info.get(code), pl = planBy.get(code);
+      const p0 = info.get(code), pl = planBy.get(code), fxp = fixedBy.get(code);
       let planKml = "";
+      if (fxp) planKml += "<Folder><name>Fixed points</name>\n" + fxp.points.map(t => "<Placemark><name>" + x(t.point_id) + "</name><styleUrl>#" + (t.status === "skipped" ? "skip" : t.status === "surveyed" ? "done" : "todo") + "</styleUrl>" +
+        table({ "Point": t.point_id, "Status": t.status, "Point GPS accuracy (m)": t.acc, "How added": t.how, "Skip reason": t.skip_reason, "Quadrat": t.quadrat_id, "Quadrat GPS accuracy (m)": t.quadrat_gps_accuracy_m }) +
+        "<Point><coordinates>" + t.lon + "," + t.lat + ",0</coordinates></Point></Placemark>").join("\n") + "\n</Folder>\n";
       if (pl) {
         const a = pl.s.plan;
-        planKml = "<Placemark><name>Survey area</name><styleUrl>#area</styleUrl>" +
+        planKml += "<Placemark><name>Survey area</name><styleUrl>#area</styleUrl>" +
           table({ "Area": fmtArea(a.areaM2), "Points placed": a.points.length + (a.points.length < a.n ? " of " + a.n + " requested" : ""), "Minimum spacing (m)": a.gap || 0,
             "Random seed": a.seed, "Outline": PLAN_METHOD[a.method] || a.method,
             "Corner GPS accuracy (m)": cornerAccText(a), "Worst corner accuracy (m)": cornerAccMax(a) }) +
@@ -3240,8 +3324,8 @@ const APP_CONFIG = {
     if (!out.rows && !out.plans.length) { toast("Nothing to export yet", true); return; }
     const n = located(out.mapItems).length, missing = out.mapItems.length - n;
     if (!n && !out.plans.length) { toast("None of these quadrats has a location, so there's nothing to map", true); return; }
-    if (kind === "geojson") await saveFile(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans));
-    else await saveFile(out.base + "_map.kml", buildKML(out.mapItems, "QuadratNotes: " + out.base, out.plans));
+    if (kind === "geojson") await saveFile(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans, out.fixed));
+    else await saveFile(out.base + "_map.kml", buildKML(out.mapItems, "QuadratNotes: " + out.base, out.plans, out.fixed));
     if (missing) toast(missing + (missing === 1 ? " quadrat has" : " quadrats have") + " no location and " + (missing === 1 ? "was" : "were") + " left off the map", true);
   }
   $("#btn-geojson").addEventListener("click", () => exportMap("geojson"));
@@ -3313,14 +3397,13 @@ const APP_CONFIG = {
     btn.disabled = true; btn.textContent = "Preparing…";
     try {
       const out = await gather(scope);
-      if (!out.rows && !out.plans.length) { toast("Nothing to export yet", true); return; }
+      if (!out.rows && !out.plans.length && !out.fixed.length) { toast("Nothing to export yet", true); return; }
       const zip = new JSZip();
       zip.file(out.base + "_quadrats.csv", out.csv);
       zip.file(out.base + "_species.csv", out.spCsv);
-      if (out.ptCsv) {
-        zip.file(out.base + "_random_points.csv", out.ptCsv);
-        zip.file(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans));
-      }
+      if (out.ptCsv) zip.file(out.base + "_random_points.csv", out.ptCsv);
+      if (out.fxCsv) zip.file(out.base + "_fixed_points.csv", out.fxCsv);
+      if (out.ptCsv || out.fxCsv) zip.file(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans, out.fixed));
       const folder = zip.folder("photos");
       for (const p of out.photoFiles) folder.file(p.name, p.meta ? await withPhotoMeta(p.blob, p.meta) : p.blob);
       const blob = await zip.generateAsync({ type: "blob" });
@@ -3594,7 +3677,9 @@ const APP_CONFIG = {
   const cornerAccMax = a => Array.isArray(a.cornerAcc) && a.cornerAcc.some(v => v != null) ? Math.max(...a.cornerAcc.filter(v => v != null)) : null;
   const fmtDist = m => m >= 1000 ? (m / 1000).toFixed(2) + " km" : m < 10 ? m.toFixed(1) + " m" : Math.round(m) + " m";
   const pointLabel = id => "P" + pad(id);
-  function gpsView() { return !$("#view-record").classList.contains("hidden") || !$("#view-plan").classList.contains("hidden"); }
+  // Fixed points carry their own names (from the person or an imported file); random points are P01, P02, ...
+  const ptName = t => (t && t.label) || pointLabel(t.id);
+  function gpsView() { return ["record", "plan", "fixed"].some(v => !$("#view-" + v).classList.contains("hidden")); }
   const freshFix = () => state.live && Date.now() - state.live.t < 20000 ? state.live : null;
 
   // The map library is only loaded when someone opens this feature; the service worker keeps it for offline use.
@@ -3764,6 +3849,336 @@ const APP_CONFIG = {
     if (pts.length < n) toast("Only " + pts.length + " points fit " + gap + " m apart. Try a smaller gap or fewer points.", true);
     drawPlan(); renderPlanPanel(); fitPlan();
   }
+  /* ---------- Fixed points: mark, import, reuse and guide ----------
+     Stored on the survey as plan = { kind: "fixed", corners: [], points: [...] }, so the guidance card,
+     skipping and quadrat linking used for random points work unchanged. Each point keeps its own name. */
+  const FX_HOW = { here: "marked on site", map: "placed on map", file: "imported from file" };
+  const FX_COLS = ["survey_id", "site", "survey_date", "point_id", "latitude", "longitude", "point_gps_accuracy_m", "how_added", "status", "skip_reason", "quadrat_id", "quadrat_gps_accuracy_m"];
+  const FX_AVG_MS = 20000, FX_MAX = 500;
+  const fx = { map: null, layers: null, avg: null, centred: false };
+  const fixedPlan = () => (state.session && state.session.plan && state.session.plan.kind === "fixed") ? state.session.plan : null;
+  function fixedLabel(s, id) {
+    const p = s && s.plan && s.plan.kind === "fixed" && Array.isArray(s.plan.points) ? s.plan.points.find(t => t.id === id) : null;
+    return p ? ptName(p) : pointLabel(id);
+  }
+  function ensureFixed() {
+    if (!fixedPlan()) state.session.plan = { kind: "fixed", corners: [], points: [], created: new Date().toISOString() };
+    return state.session.plan;
+  }
+  function nextFixedLabel() {
+    const pts = fixedPlan() ? fixedPlan().points : [];
+    let n = 0;
+    pts.forEach(t => { const m = /^P(\d+)$/i.exec(t.label || ""); if (m) n = Math.max(n, Number(m[1])); });
+    let lab = "P" + pad(n + 1);
+    while (pts.some(t => (t.label || "").toLowerCase() === lab.toLowerCase())) lab = "P" + pad(++n + 1);
+    return lab;
+  }
+  // Adds points to this survey's set. Points whose name is already used are left out and counted.
+  async function addFixed(list) {
+    const fp = ensureFixed();
+    const used = new Set(fp.points.map(t => (t.label || "").toLowerCase()));
+    let id = fp.points.reduce((m, t) => Math.max(m, t.id), 0), added = 0, dup = 0, over = 0;
+    const r7 = v => Number(Number(v).toFixed(7));
+    for (const p of list) {
+      if (fp.points.length >= FX_MAX) { over++; continue; }
+      const label = (p.label != null && String(p.label).trim()) ? String(p.label).trim().slice(0, 40) : nextFixedLabel();
+      if (used.has(label.toLowerCase())) { dup++; continue; }
+      used.add(label.toLowerCase());
+      fp.points.push({ id: ++id, label, lat: r7(p.lat), lon: r7(p.lon), acc: p.acc != null ? accR(p.acc) : null, nFixes: p.nFixes || null, how: p.how, status: "todo" });
+      added++;
+    }
+    if (added) await put("sessions", state.session);
+    renderFixed(); drawFixed();
+    return { added, dup, over };
+  }
+
+  async function openFixed() {
+    if (!state.session) return;
+    show("fixed");
+    $("#fx-label").value = nextFixedLabel();
+    renderFixed();
+    renderFixedGps();
+    fillCopyList();
+    try {
+      await loadLeaflet();
+    } catch (e) {
+      const m = $("#fx-map");
+      if (!fx.map) { m.classList.add("nomap"); m.textContent = "The map needs a connection the first time it's used. Marking points on site, importing files and the guidance arrow still work."; }
+      return;
+    }
+    $("#fx-map").classList.remove("nomap");
+    if (!fx.map) {
+      $("#fx-map").textContent = "";
+      fx.map = L.map("fx-map", { zoomControl: true });
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, crossOrigin: true,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(fx.map);
+      fx.layers = L.layerGroup().addTo(fx.map);
+      fx.map.on("click", async e => {
+        if (!$("#fx-tap").checked) return;
+        const label = $("#fx-label").value.trim() || nextFixedLabel();
+        const r = await addFixed([{ label, lat: e.latlng.lat, lon: e.latlng.lng, how: "map" }]);
+        if (r.dup) toast("There's already a point called " + label, true);
+        else { toast(label + " added"); $("#fx-label").value = nextFixedLabel(); }
+      });
+      fx.map.setView([54.5, -3.5], 5);
+    }
+    fx.centred = false;
+    setTimeout(() => { fx.map.invalidateSize(); drawFixed(); fitFixed(); }, 0);
+  }
+  function fitFixed() {
+    if (!fx.map) return;
+    const fp = fixedPlan(), pts = fp ? fp.points.map(t => [t.lat, t.lon]) : [];
+    const f = freshFix();
+    if (f && pts.length && distM([f.lat, f.lon], pts[0]) < 2000) pts.push([f.lat, f.lon]);
+    if (pts.length >= 2) { fx.map.fitBounds(pts, { padding: [28, 28], maxZoom: 19 }); fx.centred = true; }
+    else if (pts.length === 1) { fx.map.setView(pts[0], 18); fx.centred = true; }
+    else if (f) { fx.map.setView([f.lat, f.lon], 18); fx.centred = true; }
+  }
+  function drawFixed() {
+    if (!fx.map || !window.L) return;
+    const g = fx.layers;
+    g.clearLayers();
+    const fp = fixedPlan();
+    const target = fp && fp.points.length ? currentTarget() : null;
+    (fp ? fp.points : []).forEach(t => {
+      const cls = "fx-mark " + (t.status || "todo") + (target && target.id === t.id ? " target" : "");
+      const m = L.marker([t.lat, t.lon], { icon: L.divIcon({ className: "", html: '<span class="' + cls + '">' + xmlEsc(ptName(t)) + "</span>", iconSize: [0, 0] }),
+        keyboard: false, title: ptName(t) }).addTo(g);
+      m.on("click", () => goToFixed(t.id));
+    });
+    const f = freshFix();
+    if (f) {
+      L.circle([f.lat, f.lon], { radius: f.acc, color: "#1B5FA8", weight: 1, fillOpacity: 0.08, interactive: false }).addTo(g);
+      L.circleMarker([f.lat, f.lon], { radius: 7, color: "#fff", weight: 2, fillColor: "#1B5FA8", fillOpacity: 1, interactive: false }).addTo(g);
+    }
+  }
+  async function goToFixed(id) {
+    const fp = fixedPlan(), t = fp && fp.points.find(x => x.id === id);
+    if (!t) return;
+    if (t.status === "done") { toast(ptName(t) + " is already done"); return; }
+    if (t.status === "skipped") { t.status = "todo"; t.reason = null; await put("sessions", state.session); }
+    state.navTarget = t.id;
+    show("record");
+    toast("Heading to " + ptName(t));
+  }
+  function renderFixedGps() {
+    const el = $("#fx-gps");
+    el.textContent = state.gpsBlocked ? "Location is blocked, so points can't be marked on site. You can still import a file or tap the map."
+      : state.gpsNeedsAsk ? "Turn on location to mark points where you stand."
+      : !state.live ? "Finding your location…"
+      : "You're the blue dot. GPS accurate to ±" + accR(state.live.acc) + " m.";
+  }
+  function renderFixed() {
+    const fp = fixedPlan(), pts = fp ? fp.points : [];
+    const done = pts.filter(t => t.status === "done").length, sk = pts.filter(t => t.status === "skipped").length;
+    $("#fx-sum").textContent = !pts.length ? "Add the points you want to visit: mark them where you stand, tap the map, import a file or copy them from an earlier survey."
+      : pts.length + (pts.length === 1 ? " point" : " points") + (done || sk ? ": " + done + " done" + (sk ? ", " + sk + " skipped" : "") : "") + ". Tap a point on the map or in the list to go there.";
+    const ul = $("#fx-list");
+    ul.innerHTML = "";
+    if (!pts.length) { const li = document.createElement("li"); li.innerHTML = '<span class="hint">No points yet.</span>'; ul.append(li); }
+    pts.forEach(t => {
+      const li = document.createElement("li");
+      const d = document.createElement("div");
+      const b = document.createElement("b"); b.textContent = ptName(t);
+      const sm = document.createElement("small");
+      sm.textContent = t.lat.toFixed(6) + ", " + t.lon.toFixed(6) + (t.acc != null ? " ±" + t.acc + " m" : "") + ", " + (FX_HOW[t.how] || t.how || "") +
+        (t.status === "done" ? ", done" : t.status === "skipped" ? ", skipped" : "");
+      d.append(b, sm);
+      const btns = document.createElement("span"); btns.className = "fx-btns";
+      if (t.status !== "done") {
+        const go = document.createElement("button"); go.type = "button"; go.className = "btn btn-small"; go.textContent = "Go";
+        go.setAttribute("aria-label", "Go to " + ptName(t));
+        go.addEventListener("click", () => goToFixed(t.id));
+        const del = document.createElement("button"); del.type = "button"; del.className = "linkish danger"; del.textContent = "Remove";
+        del.setAttribute("aria-label", "Remove " + ptName(t));
+        del.addEventListener("click", async () => {
+          // Ask for a second tap: a marked point takes 20 seconds of standing still to replace.
+          if (del.dataset.sure !== "1") {
+            del.dataset.sure = "1"; del.textContent = "Sure?";
+            setTimeout(() => { if (del.isConnected) { del.dataset.sure = ""; del.textContent = "Remove"; } }, 3000);
+            return;
+          }
+          fp.points = fp.points.filter(x => x.id !== t.id);
+          if (state.navTarget === t.id) state.navTarget = null;
+          await put("sessions", state.session);
+          renderFixed(); drawFixed();
+          toast(ptName(t) + " removed");
+        });
+        btns.append(go, del);
+      }
+      li.append(d, btns);
+      ul.append(li);
+    });
+    $("#btn-fx-done").textContent = pts.length ? "Start recording" : "Record without points";
+    $("#btn-fx-download").parentElement.classList.toggle("hidden", !pts.length);
+  }
+  async function fillCopyList() {
+    const sel = $("#fx-copy");
+    const sessions = (await all("sessions")).filter(s => s.id !== (state.session && state.session.id) && s.plan && s.plan.kind === "fixed" && Array.isArray(s.plan.points) && s.plan.points.length);
+    const here = state.session ? state.session.site.trim().toLowerCase() : "";
+    sessions.sort((a, b) => ((b.site.trim().toLowerCase() === here) - (a.site.trim().toLowerCase() === here)) || (b.date + (b.created || "")).localeCompare(a.date + (a.created || "")));
+    sel.innerHTML = "";
+    const head = document.createElement("option"); head.value = ""; head.textContent = sessions.length ? "Copy from earlier" : "No earlier points";
+    sel.append(head);
+    sessions.forEach(s => { const o = document.createElement("option"); o.value = s.id; o.textContent = s.site + ", " + niceDate(s.date) + " (" + s.plan.points.length + " points)"; sel.append(o); });
+    sel.disabled = !sessions.length;
+  }
+  $("#fx-copy").addEventListener("change", async e => {
+    const id = e.target.value;
+    e.target.value = "";
+    if (!id) return;
+    const src = await get("sessions", id);
+    if (!src || !src.plan || !Array.isArray(src.plan.points)) return;
+    const r = await addFixed(src.plan.points.map(t => ({ label: ptName(t), lat: t.lat, lon: t.lon, acc: t.acc, nFixes: t.nFixes, how: t.how })));
+    toast(r.added + (r.added === 1 ? " point" : " points") + " copied" + (r.dup ? ", " + r.dup + " already here" : ""));
+    $("#fx-label").value = nextFixedLabel();
+  });
+
+  // Reads point files: CSV (decimal degrees), GeoJSON and KML. Returns points plus counts of anything left out.
+  function parsePointFile(name, text) {
+    const out = { points: [], skipped: 0, grid: 0, error: null };
+    const t = text.replace(/^\uFEFF/, "").trim();
+    const ext = (name.split(".").pop() || "").toLowerCase();
+    const push = (label, lat, lon) => {
+      lat = Number(lat); lon = Number(lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) { out.skipped++; return; }
+      if (Math.abs(lat) > 90 || Math.abs(lon) > 180) { out.grid++; return; }
+      out.points.push({ label: label == null ? null : String(label).trim() || null, lat, lon });
+    };
+    try {
+      if (ext === "kml" || t.startsWith("<")) {
+        const doc = new DOMParser().parseFromString(t, "application/xml");
+        if (doc.getElementsByTagName("parsererror").length) { out.error = "That KML file couldn't be read."; return out; }
+        Array.from(doc.getElementsByTagName("Placemark")).forEach(pm => {
+          const pt = pm.getElementsByTagName("Point")[0], co = pt && pt.getElementsByTagName("coordinates")[0];
+          if (!co) { out.skipped++; return; }
+          const nm = Array.from(pm.children).find(c => c.localName === "name");
+          const xyz = co.textContent.trim().split(/[\s]+/)[0].split(",");
+          push(nm ? nm.textContent : null, xyz[1], xyz[0]);
+        });
+        return out;
+      }
+      if (ext === "geojson" || ext === "json" || t.startsWith("{")) {
+        const g = JSON.parse(t);
+        const feats = g.type === "FeatureCollection" ? g.features || [] : g.type === "Feature" ? [g] : [];
+        const nameOf = pr => { if (!pr) return null; for (const k of ["point_id", "name", "label", "plot_id", "plot", "id", "Name", "ID"]) if (pr[k] != null && pr[k] !== "") return pr[k]; return null; };
+        feats.forEach(f => {
+          const geo = f && f.geometry, nm = nameOf(f && f.properties);
+          if (geo && geo.type === "Point") push(nm, geo.coordinates[1], geo.coordinates[0]);
+          else if (geo && geo.type === "MultiPoint") geo.coordinates.forEach((c, i) => push(nm != null ? nm + "-" + (i + 1) : null, c[1], c[0]));
+          else out.skipped++;
+        });
+        return out;
+      }
+      // CSV, semicolon or tab separated text
+      const lines = t.split(/\r?\n/).filter(l => l.trim());
+      if (!lines.length) { out.error = "That file is empty."; return out; }
+      const delim = [",", ";", "\t"].sort((a, b) => lines[0].split(b).length - lines[0].split(a).length)[0];
+      const split = l => { const cells = []; let cur = "", q = false;
+        for (const ch of l) { if (ch === '"') q = !q; else if (ch === delim && !q) { cells.push(cur.trim()); cur = ""; } else cur += ch; }
+        cells.push(cur.trim()); return cells; };
+      const rows = lines.map(split);
+      const isNum = v => v !== "" && Number.isFinite(Number(v));
+      const head = rows[0].map(h => h.toLowerCase().replace(/[^a-z_]/g, ""));
+      // A header row has words in it; a data row has at least two numbers (latitude and longitude).
+      const hasHead = rows[0].filter(isNum).length < 2;
+      let iL = -1, iLa = -1, iLo = -1;
+      if (hasHead) {
+        const find = names => head.findIndex(h => names.includes(h));
+        iLa = find(["latitude", "lat", "decimallatitude", "y"]);
+        iLo = find(["longitude", "lon", "long", "lng", "decimallongitude", "x"]);
+        iL = find(["point_id", "pointid", "point", "name", "label", "plot_id", "plotid", "plot", "id", "station"]);
+        if (iLa < 0 || iLo < 0) {
+          if (head.some(h => ["easting", "northing", "eastings", "northings"].includes(h))) { out.error = "These look like grid coordinates (eastings and northings). Convert them to latitude and longitude in decimal degrees first, for example in QGIS."; return out; }
+          out.error = "Couldn't find latitude and longitude columns. Name them latitude and longitude (or lat and lon).";
+          return out;
+        }
+      } else if (!isNum(rows[0][0])) { iL = 0; iLa = 1; iLo = 2; }
+      else { iLa = 0; iLo = 1; iL = rows[0].length >= 3 ? 2 : -1; }
+      rows.slice(hasHead ? 1 : 0).forEach(r => {
+        if (r.every(c => c === "")) return;
+        push(iL >= 0 ? r[iL] : null, (r[iLa] || "").replace(",", "."), (r[iLo] || "").replace(",", "."));
+      });
+    } catch (e) {
+      out.error = "That file couldn't be read. Use CSV, GeoJSON or KML.";
+    }
+    return out;
+  }
+  $("#btn-fx-import").addEventListener("click", () => $("#fx-file").click());
+  $("#fx-file").addEventListener("change", async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const lower = file.name.toLowerCase();
+    if (/\.(shp|zip|dbf|shx|prj|gpkg|xlsx?)$/.test(lower)) { toast("Save it as CSV, GeoJSON or KML first (for example in QGIS or Excel), then import that.", true); return; }
+    const res = parsePointFile(file.name, await file.text());
+    if (res.error) { toast(res.error, true); return; }
+    if (!res.points.length) {
+      toast(res.grid ? "These look like grid coordinates, not latitude and longitude. Convert them to decimal degrees first, for example in QGIS." : "No points found in that file.", true);
+      return;
+    }
+    const r = await addFixed(res.points.map(p => Object.assign(p, { how: "file" })));
+    const left = res.skipped + res.grid + r.dup + r.over;
+    toast(r.added + (r.added === 1 ? " point" : " points") + " imported" + (left ? ", " + left + " left out" + (r.dup ? " (" + r.dup + " with names already used)" : "") : ""), !!left);
+    $("#fx-label").value = nextFixedLabel();
+    fitFixed();
+  });
+
+  // Mark this spot: averages the GPS readings that arrive over 20 seconds, weighting each by its accuracy.
+  function fixedOnFix() {
+    if (fx.avg && state.live) fx.avg.samples.push({ lat: state.live.lat, lon: state.live.lon, acc: state.live.acc });
+    if (!$("#view-fixed").classList.contains("hidden")) {
+      if (fx.map && !fx.centred) fitFixed();
+      renderFixedGps(); drawFixed(); renderAvg();
+    }
+  }
+  function renderAvg() {
+    const a = fx.avg;
+    $("#fx-avg").classList.toggle("hidden", !a);
+    $("#btn-fx-mark").disabled = !!a;
+    if (!a) return;
+    const left = Math.max(0, Math.ceil((FX_AVG_MS - (Date.now() - a.t0)) / 1000));
+    const accs = a.samples.map(s => s.acc).sort((x, y) => x - y);
+    $("#fx-avg-title").textContent = "Averaging GPS for " + a.label + "…";
+    $("#fx-avg-text").textContent = left + " s left, " + a.samples.length + (a.samples.length === 1 ? " reading" : " readings") +
+      (accs.length ? ", ±" + accR(accs[Math.floor(accs.length / 2)]) + " m" : "") + ". Keep the phone still over the plot.";
+  }
+  $("#btn-fx-mark").addEventListener("click", () => {
+    if (state.gpsNeedsAsk || state.gpsBlocked) { $("#btn-allow-loc").click(); toast("Allow location, then mark the spot", true); return; }
+    const label = $("#fx-label").value.trim() || nextFixedLabel();
+    const fp = fixedPlan();
+    if (fp && fp.points.some(t => (t.label || "").toLowerCase() === label.toLowerCase())) { toast("There's already a point called " + label, true); return; }
+    const f = freshFix();
+    fx.avg = { label, t0: Date.now(), samples: f && Date.now() - f.t < 3000 ? [{ lat: f.lat, lon: f.lon, acc: f.acc }] : [] };
+    fx.avg.timer = setInterval(() => { if (Date.now() - fx.avg.t0 >= FX_AVG_MS) finishAvg(); else renderAvg(); }, 500);
+    renderAvg();
+  });
+  async function finishAvg() {
+    const a = fx.avg;
+    if (!a) return;
+    clearInterval(a.timer);
+    fx.avg = null;
+    renderAvg();
+    if (!a.samples.length) { toast("No GPS reading yet, so nothing was saved. Wait for the blue dot and try again.", true); return; }
+    let w = 0, la = 0, lo = 0;
+    a.samples.forEach(s => { const k = 1 / Math.max(0.01, s.acc) ** 2; w += k; la += s.lat * k; lo += s.lon * k; });
+    const accs = a.samples.map(s => s.acc).sort((x, y) => x - y), med = accs[Math.floor(accs.length / 2)];
+    const r = await addFixed([{ label: a.label, lat: la / w, lon: lo / w, acc: med, nFixes: a.samples.length, how: "here" }]);
+    if (r.added) {
+      toast(a.label + " saved from " + a.samples.length + (a.samples.length === 1 ? " reading" : " readings") + ", ±" + accR(med) + " m", med > 15);
+      $("#fx-label").value = nextFixedLabel();
+    }
+  }
+  $("#btn-fx-avg-stop").addEventListener("click", finishAvg);
+  $("#btn-fx-avg-cancel").addEventListener("click", () => { if (fx.avg) { clearInterval(fx.avg.timer); fx.avg = null; renderAvg(); toast("Not saved"); } });
+  $("#btn-fx-done").addEventListener("click", () => { state.navTarget = null; show("record"); });
+  $("#btn-fixed-later").addEventListener("click", openFixed);
+  $("#btn-fx-download").addEventListener("click", async () => {
+    const out = await gather("current");
+    if (!out.fxCsv) { toast("No points to download yet", true); return; }
+    await saveFile(out.base + "_fixed_points.csv", out.fxCsv);
+  });
+
   // Feedback form in the field-testers panel. With a Web3Forms key it sends straight to
   // contactEmail (only the message, an optional reply address and the app version); without one
   // it opens the person's email app with the message filled in.
@@ -3849,7 +4264,7 @@ const APP_CONFIG = {
   $("#btn-plan-skip").addEventListener("click", () => show("record"));
   $("#btn-plan-back").addEventListener("click", () => show("record"));
   $("#btn-plan-later").addEventListener("click", () => openPlan(false));
-  $("#btn-nav-map").addEventListener("click", () => openPlan(true));
+  $("#btn-nav-map").addEventListener("click", () => { const sp = planOf(); if (sp && sp.kind === "fixed") openFixed(); else openPlan(true); });
 
   /* Guidance to the next point */
   function currentTarget() {
@@ -3874,7 +4289,7 @@ const APP_CONFIG = {
     sel.append(head);
     sp.points.filter(x => x.status !== "done" && (!t || x.id !== t.id)).forEach(x => {
       const o = document.createElement("option");
-      o.value = x.id; o.textContent = "Point " + x.id + (x.status === "skipped" ? " (skipped)" : "");
+      o.value = x.id; o.textContent = (x.label ? x.label : "Point " + x.id) + (x.status === "skipped" ? " (skipped)" : "");
       sel.append(o);
     });
     sel.classList.toggle("hidden", sel.options.length < 2);
@@ -3889,8 +4304,9 @@ const APP_CONFIG = {
     renderNav();
   });
   function renderNav() {
-    const card = $("#nav-card"), sp = planOf();
+    const card = $("#nav-card"), sp0 = planOf(), sp = sp0 && sp0.points.length ? sp0 : null;
     $("#plan-later-wrap").classList.toggle("hidden", !(state.session && state.session.design === "random" && !sp && !state.editingId));
+    $("#fixed-later-wrap").classList.toggle("hidden", !(state.session && state.session.design === "fixed" && !sp && !state.editingId));
     if (!sp || state.editingId) { card.classList.add("hidden"); return; }
     card.classList.remove("hidden");
     const total = sp.points.length, done = sp.points.filter(x => x.status === "done").length, sk = sp.points.filter(x => x.status === "skipped").length;
@@ -3903,15 +4319,16 @@ const APP_CONFIG = {
       card.classList.remove("arrived");
       $("#nav-title").textContent = "All points visited";
       $("#nav-dist").textContent = "Done";
-      $("#nav-sub").textContent = "The survey area, points and any skips are in the exports.";
+      $("#nav-sub").textContent = sp.kind === "fixed" ? "The points and any skips are in the exports." : "The survey area, points and any skips are in the exports.";
       $("#nav-skip").classList.add("hidden");
       return;
     }
-    $("#nav-skip-q").textContent = "Why skip point " + t.id + "?";
+    const tn = t.label ? t.label : "point " + t.id;
+    $("#nav-skip-q").textContent = "Why skip " + tn + "?";
     const f = freshFix();
     if (!f) {
       card.classList.remove("arrived");
-      $("#nav-title").textContent = "Go to point " + t.id;
+      $("#nav-title").textContent = "Go to " + tn;
       $("#nav-dist").textContent = "–";
       $("#nav-sub").textContent = state.gpsBlocked || state.gpsNeedsAsk ? "Turn on location to be guided to the point." : "Waiting for GPS…";
       $("#nav-needle").setAttribute("visibility", "hidden");
@@ -3923,7 +4340,7 @@ const APP_CONFIG = {
     const arrived = d <= Math.min(10, Math.max(2, f.acc || 0));
     card.classList.toggle("arrived", arrived);
     const heading = state.heading != null && Date.now() - state.headingT < 3000 ? state.heading : null;
-    $("#nav-title").textContent = arrived ? "You're at point " + t.id : "Go to point " + t.id;
+    $("#nav-title").textContent = arrived ? "You're at " + tn : "Go to " + tn;
     $("#nav-dist").textContent = arrived ? "Here" : fmtDist(d);
     $("#nav-sub").textContent = arrived ? "Place the quadrat and record it below. GPS ±" + accR(f.acc) + " m."
       : "Head " + compassName(b) + (heading == null ? " (north is at the top of the dial)" : "") + ". GPS ±" + accR(f.acc) + " m.";
@@ -3972,7 +4389,7 @@ const APP_CONFIG = {
     await put("sessions", state.session);
     state.navTarget = null;
     $("#nav-skip").classList.add("hidden");
-    toast("Point " + t.id + " skipped (" + PLAN_REASONS[t.reason].toLowerCase() + ")");
+    toast((t.label ? t.label : "Point " + t.id) + " skipped (" + PLAN_REASONS[t.reason].toLowerCase() + ")");
     renderNav();
   });
   // Ties a newly saved quadrat to the point being navigated to, if it was recorded close enough to it.
@@ -3988,6 +4405,8 @@ const APP_CONFIG = {
     const off = (record.lat != null && record.lon != null) ? distM([record.lat, record.lon], [t.lat, t.lon]) : null;
     if (off != null && off > 25) return { far: off, t };
     record.point = t.id; record.plannedLat = t.lat; record.plannedLon = t.lon;
+    const spx = planOf();
+    if (spx && spx.kind === "fixed" && !record.plot) record.plot = ptName(t);
     record.pointOffset = off != null ? Math.round(off * 10) / 10 : null;
     t.status = "done"; t.quadratId = record.id; t.reason = null;
     return { t };
@@ -3998,7 +4417,8 @@ const APP_CONFIG = {
     transect: "quadrats placed at intervals along transects", fixed: "quadrats at fixed plots revisited over time" };
   const designLabel = sess => !sess || !sess.design ? null : sess.design === "other" ? "other: " + (sess.designOther || "") : sess.design;
   const designSentence = sess => !sess || !sess.design ? "" : sess.design === "other" ? "quadrat placement: " + (sess.designOther || "other")
-    : (sess.plan && sess.plan.points) ? "quadrats placed at " + sess.plan.points.length + " random points generated within a " + fmtArea(sess.plan.areaM2) + " survey area"
+    : (sess.plan && sess.plan.kind === "fixed" && sess.plan.points && sess.plan.points.length) ? "quadrats at " + sess.plan.points.length + " fixed points revisited over time"
+    : (sess.plan && sess.plan.points && sess.plan.kind !== "fixed") ? "quadrats placed at " + sess.plan.points.length + " random points generated within a " + fmtArea(sess.plan.areaM2) + " survey area"
       + (sess.plan.gap ? " with a minimum spacing of " + sess.plan.gap + " m" : "") + " (random seed " + sess.plan.seed + ")"
     : DESIGN_TEXT[sess.design];
   $("#btn-design-info").addEventListener("click", () => {
@@ -4009,6 +4429,7 @@ const APP_CONFIG = {
   $('.seg[data-name="design"]').addEventListener("click", () => {
     $("#design-other-wrap").classList.toggle("hidden", getSeg("design") !== "other");
     $("#plan-check-wrap").classList.toggle("hidden", getSeg("design") !== "random");
+    $("#fixed-check-wrap").classList.toggle("hidden", getSeg("design") !== "fixed");
   });
   const designOf = () => (state.session && state.session.design) || null;
   function renderDesignFields() {
@@ -4724,6 +5145,8 @@ const APP_CONFIG = {
       $("#design-other-wrap").classList.toggle("hidden", lastDesign.value !== "other");
       $("#s-plan").checked = !!lastDesign.plan;
       $("#plan-check-wrap").classList.toggle("hidden", lastDesign.value !== "random");
+      $("#s-fixed").checked = !!lastDesign.fixed;
+      $("#fixed-check-wrap").classList.toggle("hidden", lastDesign.value !== "fixed");
     }
     const lastRegion = await get("meta", "lastRegion");
     if (lastRegion && SPECIES[lastRegion.value]) { $("#s-region").value = lastRegion.value; showRegionPlaces(); }

@@ -35,6 +35,10 @@ the device, and exports tidy data ready for analysis and for biodiversity databa
 - **Grid estimator:** tap the squares a species covers (each is 4%); squares are saved and exported.
 - **Random sampling (optional):** draw or walk the survey area, place random points with an optional
   minimum spacing, and get guided to each one. Skipped points and reasons are recorded.
+- **Fixed points (optional):** for monitoring or restoration plots revisited over time. Mark each
+  plot where you stand (GPS is averaged for 20 seconds), tap the map, import a file, or copy the
+  points from an earlier survey of the site, then get guided to each one. Point names stay the
+  same from visit to visit, so data lines up across years on `point_id`.
 - **External GPS:** accuracy is kept to the centimetre, so GNSS, DGPS and RTK receivers set up as the
   device's location source are captured properly.
 - **Backup and restore:** one file holds every survey, quadrat and photo. Restoring adds data
@@ -47,9 +51,18 @@ the device, and exports tidy data ready for analysis and for biodiversity databa
 - Photos, named by site, date and quadrat, in a zip with the tables. Each photo carries its
   quadrat's location, time and species list (EXIF), so it can be dragged straight into the
   iNaturalist web uploader.
-- Map files: GeoJSON (QGIS, ArcGIS, R) and KML (Google Earth), including the survey area and
-  random points if used.
+- Map files: GeoJSON (QGIS, ArcGIS, R) and KML (Google Earth), including the survey area,
+  random points and fixed points if used.
+- Points tables: `_random_points.csv` and `_fixed_points.csv`, with each point's status, skip
+  reason and linked quadrat. A fixed points file can be imported into a later survey.
 - A Darwin Core archive for sharing with OBIS and GBIF.
+
+### Importing fixed points
+CSV with `point_id`, `latitude` and `longitude` columns in decimal degrees (WGS 84, e.g.
+`52.87123, -4.61234`), GeoJSON points or KML placemarks. Shapefiles and British National Grid
+coordinates aren't read directly: in QGIS, save the layer as GeoJSON or KML with CRS
+EPSG:4326 (WGS 84), then import that. Phone GPS is usually accurate to 3–10 m, so for plots that
+must be found to the centimetre use a physical marker or an RTK receiver.
 
 GPS height is exported raw (`gps_altitude_m`, `gps_altitude_accuracy_m`). Its reference level
 depends on the device and receiver (often the WGS84 ellipsoid, not sea level or chart datum), and
