@@ -1,6 +1,6 @@
 // QuadratNotes offline cache. Bump the version when you change jszip, fonts, icons or the list of cached files.
-const CACHE = "quadratnotes-v7";
-const CORE = ["./", "./index.html", "./jszip.min.js", "./leaflet/leaflet.js", "./leaflet/leaflet.css", "./manifest.webmanifest", "./privacy.html", "./icon-192.png", "./icon-512.png",
+const CACHE = "quadratnotes-v8";
+const CORE = ["./", "./index.html", "./jszip.min.js", "./leaflet/leaflet.js", "./leaflet/leaflet.css", "./manifest.webmanifest", "./privacy.html", "./help.html", "./icon-192.png", "./icon-512.png",
   "./fonts/atkinson-hyperlegible-latin-400-normal.woff2", "./fonts/atkinson-hyperlegible-latin-400-italic.woff2",
   "./fonts/atkinson-hyperlegible-latin-700-normal.woff2", "./fonts/barlow-condensed-latin-600-normal.woff2",
   "./fonts/barlow-condensed-latin-700-normal.woff2", "./fonts/nunito-latin-800-normal.woff2"];
@@ -27,7 +27,7 @@ self.addEventListener("fetch", e => {
   // saved for next time. Offline, the saved copy is shown straight away.
   if (req.mode === "navigate") {
     const NAV_TIMEOUT = 3000;
-    // Only the app itself is saved as the offline copy; other pages (e.g. privacy.html) are cached under their own address.
+    // Only the app itself is saved as the offline copy; other pages (privacy.html, help.html) are cached under their own address.
     const path = new URL(req.url).pathname;
     const isApp = path.endsWith("/") || path.endsWith("/index.html");
     const key = isApp ? "./index.html" : req;

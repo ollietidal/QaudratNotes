@@ -16,6 +16,8 @@ the device, and exports tidy data ready for analysis and for biodiversity databa
 > each survey. If you'd like to help test it, or you spot a problem, email hello@quadratnotes.com.
 
 ## Getting started
+Full guide: [quadratnotes.com/help.html](https://quadratnotes.com/help.html).
+
 1. Open https://quadratnotes.com on your phone or tablet while you have signal.
 2. Add it to your home screen (iPhone/iPad: Share, then Add to Home Screen; Android: the browser
    menu, then Install app). It then opens like an app and works offline.

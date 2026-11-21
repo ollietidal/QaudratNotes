@@ -251,6 +251,10 @@ textarea { min-height: 88px; resize: vertical; }
 .tabs button[aria-current="page"] { opacity: 1; font-weight: 700; box-shadow: inset 0 4px 0 var(--green); }
 .tabs svg { width: 24px; height: 24px; }
 
+.update-bar { position: fixed; z-index: 9; left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); max-width: 616px; margin: 0 auto;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 12px;
+  background: var(--surface); border: 2px solid var(--green); border-radius: var(--radius-l); box-shadow: 0 4px 16px rgba(0,0,0,.18); font-size: .95rem; }
+.update-btns { display: flex; align-items: center; gap: 8px; }
 .toast {
   position: fixed; left: 50%; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
   background: var(--green); color: var(--green-ink); padding: 12px 18px; border-radius: var(--radius-s);
@@ -590,11 +594,11 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </article>
   </div>
   <p class="home-soon"><button class="linkish" type="button" id="btn-all-surveys">See all your surveys</button></p>
-  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a> · <a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a> · <a href="privacy.html">Privacy</a></p>
+  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a> · <a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="help.html">Help</a></p>
   <details class="about-box">
   <summary>About QuadratNotes</summary>
   <div class="about">
-    <p>QuadratNotes <span id="app-version"></span> is a free app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, built by a marine biologist for coastal surveys.</p>
+    <p>QuadratNotes <span id="app-version"></span> is a free app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, built by a marine biologist for coastal surveys. New to it? Read the <a href="help.html">help guide</a>.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself. <a href="privacy.html">Privacy notice</a>.</p>
     <p>If you send feedback from the field-testers note, only your rating, what you type and the app version are sent.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
@@ -1333,11 +1337,15 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="update-bar hidden" id="update-bar" role="status" aria-live="polite">
+  <span>New version ready. Reload when you've saved the quadrat you're on.</span>
+  <span class="update-btns"><button class="btn btn-small btn-primary" type="button" id="btn-update">Reload</button><button class="linkish" type="button" id="btn-update-later">Later</button></span>
+</div>
 
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.18.2",
+  version: "0.18.3",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -1356,7 +1364,11 @@ const APP_CONFIG = {
   const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
   const num = v => (v === "" || v == null || isNaN(Number(v))) ? null : Number(v);
   const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-  const slug = s => (s || "survey").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "survey";
+  // Codes and file names: accents and special letters are folded to plain ones first (Llŷn → llyn, Ø → o),
+  // so place names keep their letters instead of turning into dashes.
+  const FOLD = { "ß": "ss", "æ": "ae", "œ": "oe", "ø": "o", "đ": "d", "ð": "d", "þ": "th", "ł": "l", "ı": "i" };
+  const slug = s => (s || "survey").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[ßæœøđðþłı]/g, c => FOLD[c]).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "survey";
   const pad = n => String(n).padStart(2, "0");
   // GPS accuracy: centimetres below 1 m and tenths below 10 m, so external DGPS/RTK receivers aren't rounded to 0.
   const accR = a => a == null ? null : a < 1 ? Math.round(a * 100) / 100 : a < 10 ? Math.round(a * 10) / 10 : Math.round(a);
@@ -5145,6 +5157,24 @@ const APP_CONFIG = {
   /* ---------- Offline support ---------- */
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  }
+  // New version banner. The offline worker installs updates straight away; if this page was already
+  // running under an older one, offer a reload (never forced, so an unsaved quadrat isn't lost).
+  if ("serviceWorker" in navigator) {
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController && !reloading) $("#update-bar").classList.remove("hidden");
+    });
+    $("#btn-update").addEventListener("click", () => { reloading = true; location.reload(); });
+    $("#btn-update-later").addEventListener("click", () => $("#update-bar").classList.add("hidden"));
+    // Check for a new version when the app comes back to the screen, at most every 30 minutes.
+    let lastCheck = Date.now();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible" || Date.now() - lastCheck < 30 * 60 * 1000) return;
+      lastCheck = Date.now();
+      navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
+    });
   }
 
   /* ---------- Start ---------- */

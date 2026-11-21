@@ -5,6 +5,14 @@ contents) is marked **Export change**, so analysis scripts can be checked. Expor
 [docs/DATA-DICTIONARY.md](docs/DATA-DICTIONARY.md). Released versions are archived on Zenodo:
 [10.5281/zenodo.24295028](https://doi.org/10.5281/zenodo.24295028).
 
+## 0.18.3 (21 Nov 2026)
+- Help guide (`help.html`), linked from the home screen footer, About and the README, and available offline.
+- "New version ready" banner when an update has downloaded, with Reload and Later. The app also checks for
+  updates when it comes back to the screen.
+- **Export change:** accented and special letters in site names are now folded to plain letters in survey codes
+  and file names instead of becoming dashes (Porth Llŷn → `porth-llyn`, previously `porth-ll-n`). Codes of
+  existing surveys are unchanged, but photo and export file names for them follow the new spelling.
+
 ## 0.18.2 (20 Nov 2026)
 - Privacy page (`privacy.html`), linked from About, the feedback form and the README.
 - This changelog, and an updated export guide in `docs/DATA-DICTIONARY.md`.

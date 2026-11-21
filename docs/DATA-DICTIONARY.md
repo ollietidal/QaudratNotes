@@ -1,6 +1,6 @@
 # QuadratNotes export guide
 
-Version 0.18.2. Every export uses the same columns whatever the habitat; columns that don't apply are left blank.
+Version 0.18.3. Every export uses the same columns whatever the habitat; columns that don't apply are left blank.
 Changes to export columns and files are listed in [CHANGELOG.md](../CHANGELOG.md).
 
 General conventions:
@@ -16,7 +16,7 @@ General conventions:
 
 | Column | Habitats | Meaning |
 |---|---|---|
-| survey_id | all | Readable survey code: site and date, e.g. `wilcove-2026-10-14` (`-2` added for a second survey the same day) |
+| survey_id | all | Readable survey code: site and date, e.g. `wilcove-2026-10-14` (`-2` added for a second survey the same day). Accented letters are folded to plain ones (Porth Llŷn → `porth-llyn`) |
 | quadrat_id | all | Survey code plus quadrat, e.g. `wilcove-2026-10-14-Q01`. Use this to join to the species table |
 | site, surveyor, survey_date | all | As entered at survey setup |
 | habitat | all | Seagrass, Rocky shore or Saltmarsh |

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!-- QuadratNotes help. Copyright (c) 2026 Oliver R Thomas. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help | QuadratNotes</title>
+<meta name="description" content="How to use QuadratNotes: install it, record quadrat surveys of seagrass, rocky shores and saltmarsh, use random and fixed points, back up and export your data.">
+<link rel="icon" href="icon-192.png">
+<link rel="canonical" href="https://quadratnotes.com/help.html">
+<style>
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+:root { --paper: #F6EFC4; --surface: #FFFBE6; --ink: #17242C; --muted: #56605B; --line: #D6C98A; --green: #2D6A4F; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Atkinson Hyperlegible", system-ui, sans-serif; font-size: 17px; line-height: 1.5; }
+main { max-width: 680px; margin: 0 auto; padding: 20px 18px 48px; }
+h1, h2, h3 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; line-height: 1.1; letter-spacing: .01em; }
+h1 { font-size: 2.2rem; margin: 12px 0 4px; }
+h2 { font-size: 1.5rem; margin: 34px 0 8px; padding-top: 6px; border-top: 2px solid var(--line); }
+h3 { font-size: 1.2rem; margin: 20px 0 6px; }
+p, li { margin: 0 0 10px; }
+ul, ol { padding-left: 1.3em; }
+a { color: var(--ink); font-weight: 700; }
+.back { display: inline-block; padding: 10px 0; }
+.muted { color: var(--muted); font-size: .95rem; }
+.box { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 16px 0; }
+.toc { columns: 2; column-gap: 24px; padding-left: 1.2em; margin: 0; }
+.toc li { margin: 0 0 6px; break-inside: avoid; }
+.ui { font-weight: 700; }
+dt { font-weight: 700; margin-top: 10px; }
+dd { margin: 2px 0 8px; }
+@media (max-width: 420px) { .toc { columns: 1; } }
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./">← Back to QuadratNotes</a>
+<h1>Help</h1>
+<p class="muted">How to record quadrat surveys with QuadratNotes. Buttons and labels in the app are shown in <span class="ui">bold</span>.</p>
+
+<div class="box">
+<ol class="toc">
+<li><a href="#start">Getting started</a></li>
+<li><a href="#survey">Starting a survey</a></li>
+<li><a href="#quadrat">Recording a quadrat</a></li>
+<li><a href="#habitats">Habitat by habitat</a></li>
+<li><a href="#data">Checking and editing</a></li>
+<li><a href="#random">Random points</a></li>
+<li><a href="#fixed">Fixed points</a></li>
+<li><a href="#gps">GPS tips</a></li>
+<li><a href="#backup">Backing up</a></li>
+<li><a href="#export">Exporting your data</a></li>
+<li><a href="#problems">Problems and questions</a></li>
+</ol>
+</div>
+
+<h2 id="start">1. Getting started</h2>
+<p>QuadratNotes runs in your phone's web browser and works without signal once it has been opened once. Your data is stored only on your phone until you export or back it up.</p>
+<ol>
+<li>Open <a href="https://quadratnotes.com">quadratnotes.com</a> while you have signal.</li>
+<li>Add it to your home screen so it opens like an app:
+<ul>
+<li><strong>iPhone or iPad (Safari):</strong> tap Share, then <span class="ui">Add to Home Screen</span>. Do this: Safari can clear data from websites you haven't opened for a while, but not from apps on the Home Screen.</li>
+<li><strong>Android (Chrome):</strong> tap the ⋮ menu, then <span class="ui">Install app</span> or <span class="ui">Add to Home screen</span>.</li>
+</ul></li>
+<li>When asked, allow location, so each quadrat gets its GPS position.</li>
+</ol>
+<p>Before your first real survey, try a test survey at home: start one, save a quadrat, export it and check you can open the files.</p>
+
+<h2 id="survey">2. Starting a survey</h2>
+<p>A survey is one site visit. On the home screen, tap <span class="ui">Start a survey</span> under Seagrass, Rocky shore or Saltmarsh, then fill in:</p>
+<dl>
+<dt>Site, Date, Surveyor</dt><dd>The site name is used in file names and survey codes, e.g. <code>porth-llyn-2026-11-21</code>.</dd>
+<dt>Region</dt><dd>Sets which species are listed. For seagrass it's the seagrass bioregion; for rocky shore and saltmarsh choose NE Atlantic, or Elsewhere for broad groups.</dd>
+<dt>Quadrat size</dt><dd>25 × 25 cm, 50 × 50 cm, 1 × 1 m, or Other for any square quadrat. Densities are worked out from this.</dd>
+<dt>Sampling design</dt><dd>How quadrats were placed: Random, Haphazard, Non-random, Along transects, Fixed plots or Other. Tap the <span class="ui">i</span> for definitions. Random and Fixed plots offer guidance to points (sections 6 and 7).</dd>
+<dt>Conditions</dt><dd>Optional and needs signal: <span class="ui">Get current conditions</span> looks up weather and a modelled tide for your location.</dd>
+</dl>
+<p>Tap <span class="ui">Start survey</span>. To carry on later, use <span class="ui">Continue</span> on the home screen, or the <span class="ui">Surveys</span> button at the top.</p>
+
+<h2 id="quadrat">3. Recording a quadrat</h2>
+<p>The <span class="ui">Record</span> tab shows one quadrat at a time. The quadrat number goes up automatically.</p>
+<dl>
+<dt>Position</dt><dd>Filled in from live GPS, with its accuracy shown. You can type coordinates instead (decimal degrees); tap <span class="ui">Use live GPS</span> to go back.</dd>
+<dt>Cover with the grid</dt><dd>The grid has 25 squares, each 4% of the quadrat. Tap the squares the species or habitat occupies, or type an <span class="ui">Exact %</span>. Grid squares are saved and exported, so they also give a frequency out of 25.</dd>
+<dt>Species</dt><dd>Tap the species present. <span class="ui">Show more species</span> lists rarer ones, and <span class="ui">Add a species not listed</span> lets you type others (separate several with commas).</dd>
+<dt>Photos and notes</dt><dd><span class="ui">Take photo</span> or <span class="ui">Choose from phone</span>. Photos are resized to save space. Notes are free text.</dd>
+</dl>
+<p>Tap <span class="ui">Save quadrat</span>. It's stored on the phone straight away.</p>
+
+<h2 id="habitats">4. Habitat by habitat</h2>
+<h3>Seagrass</h3>
+<p>Total seagrass cover (grid or %), species present, shoot count, canopy height (add each measurement), epiphytes, algae cover and sediment. With several species in a quadrat, each gets its own cover grid; a square can hold more than one species. Use <span class="ui">None (0%)</span> for a quadrat without seagrass.</p>
+<h3>Rocky shore</h3>
+<p>Shore zone, optional height above chart datum, substrate and whether the quadrat is in a rock pool. Seaweeds and attached animals are recorded as % cover in a canopy layer and an understorey layer (each up to 100%, with bare rock counting towards the understorey); mobile animals like limpets and topshells as counts. Species stay listed from quadrat to quadrat, and a species left at 0 is recorded as absent.</p>
+<h3>Saltmarsh</h3>
+<p>Marsh zone, optional elevation, % cover of each plant (plants overlap, so totals can exceed 100%), with the Domin class shown. Below 4% cover, pick few, several or many plants. Also bare ground, litter and strandline, vegetation height and grazing or trampling.</p>
+
+<h2 id="data">5. Checking and editing</h2>
+<p>The <span class="ui">Data</span> tab lists the quadrats in a survey with a summary. Tap a quadrat to open and edit it, then save again, or delete it. Use the <span class="ui">Survey</span> menu at the top to switch surveys, and <span class="ui">Delete this survey</span> to remove one.</p>
+
+<h2 id="random">6. Random points</h2>
+<p>For random sampling, the app can place the points and guide you to each one.</p>
+<ol>
+<li>Choose <span class="ui">Random</span> as the sampling design and tick <span class="ui">Pick random points on a map</span>.</li>
+<li>Mark the survey area: <span class="ui">Tap on the map</span> at each corner (needs signal for the map), or <span class="ui">Walk the boundary</span> and tap <span class="ui">Add corner here</span> at each corner (works without signal).</li>
+<li>Choose the <span class="ui">Number of points</span> and an optional <span class="ui">Minimum gap</span>, tap <span class="ui">Pick random points</span>, then <span class="ui">Use these points</span>.</li>
+<li>On the Record tab, the arrow, distance and compass guide you to each point. When it says you've arrived, place the quadrat and save it; it's linked to the point. Use <span class="ui">Skip point</span> (with a reason) if a point is underwater, unsafe or can't be reached.</li>
+</ol>
+<p>Tip: draw the area before you lose signal. Points, the arrow and recording all work offline.</p>
+
+<h2 id="fixed">7. Fixed points</h2>
+<p>For monitoring or restoration plots you return to over time. Choose <span class="ui">Fixed plots</span> and tick <span class="ui">Guide me to fixed points</span>. Add points in any of these ways:</p>
+<dl>
+<dt>Mark this spot</dt><dd>Stand on the plot and tap <span class="ui">Mark this spot</span>. The app averages GPS readings for 20 seconds (keep the phone still), or tap <span class="ui">Save now</span> to stop early. Type a name first, or use the suggested P01, P02…</dd>
+<dt>Tap the map</dt><dd>Tick <span class="ui">Add a point wherever I tap the map</span>, then tap. Useful for planning; less accurate than marking on site.</dd>
+<dt>Import a file</dt><dd>A CSV with <code>point_id</code>, <code>latitude</code> and <code>longitude</code> in decimal degrees (e.g. 52.87123, -4.61234), or GeoJSON or KML. Shapefiles and British National Grid coordinates need converting first: in QGIS, save the layer as GeoJSON or KML in WGS 84.</dd>
+<dt>Copy from earlier</dt><dd>Reuse the points from an earlier survey of the site. Names stay the same, so your data lines up from visit to visit.</dd>
+</dl>
+<p>Then tap <span class="ui">Go</span> next to a point (or the point on the map) to be guided there. <span class="ui">Download these points (.csv)</span> saves a file you can import next time or share with a colleague.</p>
+<p>Phone GPS gets you to the right area (usually within 3–10&nbsp;m), not the exact spot. For plots you need to find to the centimetre, use a physical marker or an RTK receiver.</p>
+
+<h2 id="gps">8. GPS tips</h2>
+<ul>
+<li>GPS takes a minute or so to settle after you start, and is worse under cliffs, near buildings and in the first few readings. The accuracy is shown next to the position.</li>
+<li>An external Bluetooth GNSS, DGPS or RTK receiver set up as your phone's location source is used automatically, and its accuracy is recorded to the centimetre.</li>
+<li>Height from GPS is exported exactly as the phone reports it. It's usually only good to ±10–30&nbsp;m and isn't relative to chart datum, so convert and check it before use.</li>
+</ul>
+
+<h2 id="backup">9. Backing up</h2>
+<p>Your surveys live only on your phone. If the phone is lost, or the browser's data is cleared, they're gone, so back up after every survey.</p>
+<ul>
+<li>On the <span class="ui">Export</span> tab, tap <span class="ui">Back up everything (.zip)</span> and save the file somewhere safe, such as your email, Google Drive or iCloud.</li>
+<li><span class="ui">Restore from a backup</span> adds the surveys in a backup to the phone without changing anything already there. You can also use it to combine surveys from several phones.</li>
+</ul>
+
+<h2 id="export">10. Exporting your data</h2>
+<p>On the <span class="ui">Export</span> tab, choose <span class="ui">This survey</span> or <span class="ui">All surveys</span>, then:</p>
+<dl>
+<dt>Download data and photos (.zip)</dt><dd>The quadrats table and species table (CSV), photos, and any random or fixed points tables and map file. Join the two tables in R on <code>quadrat_id</code>.</dd>
+<dt>More formats</dt><dd><strong>Map files:</strong> GeoJSON for QGIS, ArcGIS and R, or KML for Google Earth. <strong>For OBIS / GBIF:</strong> a Darwin Core archive, with options for the licence, credit, location precision and surveyor names; nothing is uploaded. <strong>Photo records:</strong> how to share the exported photos on iNaturalist.</dd>
+</dl>
+<p>On a phone, the file goes to your Downloads or the share sheet: send it to email or cloud storage to open it on a computer. Every column is described in the <a href="https://github.com/ollietidal/quadratnotes/blob/main/docs/DATA-DICTIONARY.md">export guide</a>.</p>
+
+<h2 id="problems">11. Problems and questions</h2>
+<dl>
+<dt>Location is blocked or not working</dt><dd>The app shows steps for your phone. Usually: on iPhone, Settings → Privacy &amp; Security → Location Services, and allow it for Safari (or the app). On Android, check location is on and allowed for Chrome in its site settings. Then reopen the app.</dd>
+<dt>The map is blank</dt><dd>Map images need signal. Without it, points, outlines, the arrow and recording still work; set up areas and points before you lose signal.</dd>
+<dt>An import says the file has grid coordinates</dt><dd>Convert to latitude and longitude in decimal degrees first, for example in QGIS (save as GeoJSON or KML in WGS 84).</dd>
+<dt>A photo has no location in the export</dt><dd>Photos take their location from the quadrat. If the quadrat had no GPS position, the photo has none either.</dd>
+<dt>"New version ready"</dt><dd>An update has been downloaded. Tap <span class="ui">Reload</span> once you've saved the quadrat you're on.</dd>
+<dt>My surveys have disappeared</dt><dd>On iPhone, Safari can clear data for websites that haven't been opened for a while; add the app to the Home Screen to prevent this. Restore your latest backup from the Export tab.</dd>
+<dt>Something else, or an idea</dt><dd>Tap the <span class="ui">i</span> next to "field testers wanted" on the home screen to send feedback. See also the <a href="privacy.html">privacy notice</a>.</dd>
+</dl>
+
+<p><a class="back" href="./">← Back to QuadratNotes</a></p>
+</main>
+</body>
+</html>
