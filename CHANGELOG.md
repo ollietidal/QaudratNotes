@@ -9,6 +9,10 @@ contents) is marked **Export change**, so analysis scripts can be checked. Expor
 - Home screen: a "Works best from your home screen" pill under "field testers wanted", shown until the app is
   installed. Its i opens three short steps for your phone (iPhone, Android or computer), with an Install button
   where the browser offers one, and "Hide this tip".
+- Feedback form: optional quick picks for which survey, whether it was used on a real survey, and who is sending
+  (student, volunteer, researcher or professional, other); a prompt with the questions that help most; the phone
+  type (iPhone, Android or other) is sent with each message; and an opt-in usage summary (number of surveys and
+  quadrats by habitat, shown before sending). Privacy notice updated.
 - Tests are now in the repository (`tests/`) and run automatically on GitHub for every change.
 - Contributing guide (`CONTRIBUTING.md`), support note (`SUPPORT.md`) and issue forms for bug reports
   and feature requests. No change to the app or its exports.

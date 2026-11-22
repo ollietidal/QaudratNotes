@@ -45,6 +45,6 @@ version. The access key is `feedbackKey` in `APP_CONFIG`; it is public by design
 to that address. If it is ever abused, create a new key at web3forms.com and swap it in.
 
 To keep a record of ratings, sign in to the Web3Forms dashboard once a month and export the
-submissions as CSV: the free plan only keeps 30 days. The CSV has `rating`, `message` and
-`app_version` columns, so the monthly files can be combined in R and ratings compared between
+submissions as CSV: the free plan only keeps 30 days. The CSV has `rating`, `message`, `app_version`,
+`survey_type`, `used_in_field`, `sender_type`, `phone_type` and `usage_summary` columns, so the monthly files can be combined in R and ratings compared between
 versions.
