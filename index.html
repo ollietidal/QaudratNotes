@@ -7,7 +7,7 @@
 <title>QuadratNotes</title>
 <!-- PRE-LAUNCH: delete the next line when you're ready for search engines to list the app -->
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Free, offline quadrat surveys for coastal habitats: seagrass, rocky shores and saltmarsh, with CSV and Darwin Core export.">
+<meta name="description" content="Free, offline quadrat surveys for seagrass, rocky shores and saltmarsh, or your own custom survey for any habitat, with CSV and Darwin Core export.">
 <link rel="canonical" href="https://quadratnotes.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="QuadratNotes">
@@ -312,6 +312,7 @@ select:focus { border-color: var(--ink); outline: none; }
 .home-soon .linkish { min-height: 44px; padding: 8px 12px; }
 .home-foot a, #contact-about a { color: var(--ink); font-weight: 700; display: inline-block; padding: 12px 4px; margin: -12px 0; }
 .home-foot { text-wrap: balance; text-align: center; color: var(--muted); font-size: .85rem; margin: 26px 0 0; }
+.home-foot .foot-line { display: block; margin-top: 10px; }
 .cond { margin-top: 10px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-l); padding: 12px 14px; }
 .cond-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 10px; font-variant-numeric: tabular-nums; }
 .cond-grid dt { color: var(--muted); }
@@ -359,6 +360,20 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 .rk-group { margin: 0 0 12px; }
 .rk-group h3 { font-size: .9rem; color: var(--muted); margin: 0 0 6px; font-weight: 700; }
 .rk-rows { margin: 4px 0 8px; border-top: 1px solid var(--line); }
+.tcheck { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 6px; }
+.tcheck li { border-left: 4px solid var(--tape); padding: 6px 10px; background: var(--surface); border-radius: var(--radius-s); font-size: .92rem; }
+.tcheck li.ok { border-left-color: var(--line); }
+.tcheck li b { display: block; }
+.tcheck .btn { margin-top: 6px; }
+.tpl-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tpl-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.tpl-del { margin-top: 18px; }
+.tfield { border: 2px solid var(--line); border-radius: var(--radius-s); padding: 10px; margin-bottom: 10px; display: grid; gap: 8px; }
+.tfield-top { display: flex; gap: 8px; align-items: center; }
+.tfield-top input { flex: 1; min-width: 0; }
+.tfield-top select { width: auto; }
+.tfield .linkish { justify-self: start; }
+.cu-scale { min-height: 44px; width: auto; max-width: 100%; }
 .rrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .rrow-name { font-weight: 700; min-width: 0; flex: 1 1 140px; }
 .rrow-name em { font-weight: 700; }
@@ -468,7 +483,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   <div class="home-hero">
     <svg class="home-logo" viewBox="-4 -4 108 108" aria-hidden="true"><g fill="var(--green)"><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/></g><g stroke="var(--ink)" stroke-width="1.6"><path d="M20 0V100M40 0V100M60 0V100M80 0V100M0 20H100M0 40H100M0 60H100M0 80H100"/></g><rect x="0" y="0" width="100" height="100" fill="none" stroke="var(--ink)" stroke-width="5"/></svg>
     <h1 class="home-title" id="home-title">QuadratNotes</h1>
-    <p class="home-tagline">Free, offline quadrat surveys for coastal habitats</p>
+    <p class="home-tagline">Free, offline quadrat surveys for coastal habitats and beyond</p>
     <p class="early"><span>Early version: field testers wanted</span>
       <button class="info-btn info-inline" type="button" data-info="early-info" aria-expanded="false" aria-controls="early-info" aria-label="About field testing">i</button></p>
     <div class="info-panel hidden early-info" id="early-info">
@@ -592,13 +607,29 @@ details.about-box, details.about-box * { box-sizing: border-box; }
         <button class="btn btn-primary btn-small" type="button" id="btn-start-mudflat">Start a survey</button>
       </div>
     </article>
+    <article class="habitat-card" id="card-custom">
+      <svg class="habitat-art round" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><clipPath id="hab-ccx"><circle cx="60" cy="60" r="54"/></clipPath></defs>
+  <g clip-path="url(#hab-ccx)">
+    <rect width="120" height="120" fill="var(--surface)"/>
+    <g fill="var(--green2)"><rect x="34" y="34" width="13" height="13"/><rect x="60" y="34" width="13" height="13"/><rect x="47" y="47" width="13" height="13"/><rect x="73" y="60" width="13" height="13"/><rect x="34" y="73" width="13" height="13"/><rect x="60" y="73" width="13" height="13"/></g>
+    <g fill="none" stroke="var(--ink)" stroke-width="2"><rect x="34" y="34" width="52" height="52"/><path d="M47 34V86M60 34V86M73 34V86M34 47H86M34 60H86M34 73H86"/></g>
+  </g>
+  <circle cx="60" cy="60" r="54" fill="none" stroke="var(--ink)" stroke-width="4"/>
+      </svg>
+      <div>
+        <h2>Custom survey</h2>
+        <p>Your own species list and measurements, for any habitat. Save it as a template and share it.</p>
+        <button class="btn btn-primary btn-small" type="button" id="btn-start-custom">Start a survey</button>
+      </div>
+    </article>
   </div>
   <p class="home-soon"><button class="linkish" type="button" id="btn-all-surveys">See all your surveys</button></p>
-  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<br><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a> · <a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="help.html">Help</a></p>
+  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<span class="foot-line"><a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="help.html">Help</a></span><span class="foot-line"><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a></span></p>
   <details class="about-box">
   <summary>About QuadratNotes</summary>
   <div class="about">
-    <p>QuadratNotes <span id="app-version"></span> is a free app for recording coastal quadrat surveys of seagrass, rocky shores and saltmarsh, built by a marine biologist for coastal surveys. New to it? Read the <a href="help.html">help guide</a>.</p>
+    <p>QuadratNotes <span id="app-version"></span> is a free app for recording quadrat surveys of seagrass, rocky shores and saltmarsh, or any habitat with a custom survey, built by a marine biologist for coastal surveys. New to it? Read the <a href="help.html">help guide</a>.</p>
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself. <a href="privacy.html">Privacy notice</a>.</p>
     <p>If you send feedback from the field-testers note, only your rating, what you type and the app version are sent.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
@@ -622,6 +653,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
         <button type="button" data-value="rocky">Rocky shore</button>
         <button type="button" data-value="saltmarsh">Saltmarsh</button>
         <button type="button" data-value="mudflat">Mudflat</button>
+        <button type="button" data-value="custom">Custom</button>
       </div>
     </div>
     <div class="field">
@@ -637,6 +669,17 @@ details.about-box, details.about-box * { box-sizing: border-box; }
         <label for="s-surveyor">Surveyor</label>
         <input type="text" id="s-surveyor" placeholder="Initials or names">
       </div>
+    </div>
+    <div class="field hidden" id="custom-template-field">
+      <label for="s-template">Template <span class="hint">your species list and measurements</span></label>
+      <select id="s-template"></select>
+      <div class="tpl-btns">
+        <button class="btn btn-small" type="button" id="btn-tpl-new">New template</button>
+        <button class="btn btn-small" type="button" id="btn-tpl-edit">Edit</button>
+        <button class="btn btn-small" type="button" id="btn-tpl-import">Import a template file</button>
+      </div>
+      <p class="hint" id="tpl-summary"></p>
+      <input type="file" id="f-tpl-import" class="sr-file" accept=".json,application/json" tabindex="-1" aria-hidden="true">
     </div>
     <div class="field hidden" id="rocky-region-field">
       <span class="label">Region <span class="hint">sets which species are listed</span></span>
@@ -740,6 +783,77 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 </section>
 
 <!-- FIXED POINTS -->
+<section id="view-template" class="hidden" aria-labelledby="h-template">
+  <h1 id="h-template">Survey template
+    <button class="info-btn info-inline" type="button" data-info="tpl-info" aria-expanded="false" aria-controls="tpl-info" aria-label="About templates">i</button></h1>
+  <div class="info-panel hidden" id="tpl-info">
+    <dl>
+      <dt>Templates</dt><dd>A template is your species list, how you score them and any extra details for each quadrat. It's saved on this phone. Share it as a file so a team records the same way.</dd>
+      <dt>Changing a template</dt><dd>Surveys keep a copy of the template they started with, so editing it later doesn't change data you've already recorded.</dd>
+      <dt>Species</dt><dd>Scientific names match best when you share data. You can still add a species while recording.</dd>
+    </dl>
+  </div>
+  <div class="field">
+    <label for="t-name">Name</label>
+    <input type="text" id="t-name" maxlength="80" autocomplete="off" placeholder="e.g. Chalk grassland, Dune slack, School field">
+  </div>
+  <div class="field">
+    <span class="label label-info">How to score species
+      <button class="info-btn info-toggle" type="button" aria-expanded="false" aria-controls="tmeasure-info" aria-label="What do the scoring options mean?">i</button></span>
+    <div class="info-panel hidden" id="tmeasure-info">
+      <dl>
+        <dt>% cover</dt><dd>Estimate each species' cover, or tap squares on a 5 × 5 grid. Species can overlap, so they can add up to more than 100%.</dd>
+        <dt>Count</dt><dd>Number of individuals in the quadrat. A density per m² is worked out on export.</dd>
+        <dt>Present / absent</dt><dd>Tap the species you find. Every other species on the list is recorded as absent.</dd>
+        <dt>Cover scale</dt><dd>Domin (1–10) or Braun-Blanquet (r, +, 1–5) classes, picked from a list.</dd>
+      </dl>
+    </div>
+    <div class="seg" data-name="tmeasure">
+      <button type="button" data-value="cover" aria-pressed="true">% cover</button>
+      <button type="button" data-value="count">Count</button>
+      <button type="button" data-value="presence">Present / absent</button>
+      <button type="button" data-value="scale">Cover scale</button>
+    </div>
+    <div class="seg hidden" data-name="tscale" id="t-scale-seg">
+      <button type="button" data-value="domin" aria-pressed="true">Domin</button>
+      <button type="button" data-value="bb">Braun-Blanquet</button>
+    </div>
+  </div>
+  <div class="field">
+    <label for="t-species">Species <span class="hint">one per line</span></label>
+    <textarea id="t-species" rows="7" autocapitalize="sentences" placeholder="Festuca ovina&#10;Thymus drucei&#10;Lotus corniculatus"></textarea>
+  </div>
+  <div class="field" id="t-counts-field">
+    <label for="t-counts">Also count <span class="hint">optional, e.g. snails or woodlice; one per line</span></label>
+    <textarea id="t-counts" rows="3" autocapitalize="sentences" placeholder="Cepaea nemoralis&#10;Oniscidea&#10;Formicidae"></textarea>
+  </div>
+  <div class="field">
+    <span class="label label-info">Check scientific names <span class="hint">needs signal</span>
+      <button class="info-btn info-toggle" type="button" aria-expanded="false" aria-controls="tcheck-info" aria-label="About checking names">i</button></span>
+    <div class="info-panel hidden" id="tcheck-info">
+      <dl>
+        <dt>What it does</dt><dd>Looks up each scientific name in the GBIF species list and flags spelling slips, names it doesn't know and names only matched to a broader group. Tap a suggestion to use it. Only the names are sent.</dd>
+        <dt>Common names</dt><dd>Not checked: names like snails or woodlice show as "common name or not found". That's fine for your own records, but scientific names (e.g. Gastropoda for snails) match up when data is shared.</dd>
+      </dl>
+    </div>
+    <button class="btn btn-small" type="button" id="btn-t-check">Check scientific names</button>
+    <p class="hint" id="t-check-sum" aria-live="polite"></p>
+    <ul class="tcheck" id="t-check-list"></ul>
+  </div>
+  <div class="field">
+    <span class="label">Quadrat details <span class="hint">optional, recorded once per quadrat</span></span>
+    <div id="t-fields"></div>
+    <p class="rk-empty" id="t-fields-empty">For example soil depth, aspect, grazed or not.</p>
+    <button class="btn btn-small" type="button" id="btn-t-addfield">Add a detail</button>
+  </div>
+  <div class="tpl-actions">
+    <button class="btn btn-primary" type="button" id="btn-t-save">Save template</button>
+    <button class="btn" type="button" id="btn-t-share">Share as a file</button>
+    <button class="btn" type="button" id="btn-t-cancel">Cancel</button>
+  </div>
+  <p class="tpl-del"><button class="linkish danger" type="button" id="btn-t-delete">Delete this template</button></p>
+</section>
+
 <section id="view-fixed" class="hidden" aria-labelledby="h-fixed">
   <h1 id="h-fixed">Fixed points
     <button class="info-btn info-inline" type="button" data-info="fixed-info" aria-expanded="false" aria-controls="fixed-info" aria-label="About fixed points">i</button></h1>
@@ -1113,6 +1227,35 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </div>
   </div><!-- /salt-form -->
 
+  <div id="custom-form" class="hidden">
+    <div class="field">
+      <span class="label" id="cu-label">Species</span>
+      <div id="cu-picker"></div>
+      <div class="species-more">
+        <button class="linkish" type="button" id="btn-cu-other">Add a species not listed</button>
+      </div>
+      <div class="rk-other hidden" id="cu-other-wrap">
+        <input type="text" id="cu-other-name" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="Scientific or common name" aria-label="Species name">
+        <button class="btn btn-primary" type="button" id="btn-cu-other-add">Add species</button>
+      </div>
+    </div>
+    <div class="rk-rows" id="cu-rows"></div>
+    <p class="rk-empty" id="cu-empty">Tap species above to add them to this quadrat.</p>
+    <div class="field" id="cu-count-block">
+      <span class="label">Counts <span class="hint">number in the quadrat</span></span>
+      <div id="cu-cpicker"></div>
+      <div class="species-more">
+        <button class="linkish" type="button" id="btn-cu-cother">Add something to count</button>
+      </div>
+      <div class="rk-other hidden" id="cu-cother-wrap">
+        <input type="text" id="cu-cother-name" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="e.g. Snails, Woodlice, Ants" aria-label="Name of what to count">
+        <button class="btn btn-primary" type="button" id="btn-cu-cother-add">Add</button>
+      </div>
+      <div class="rk-rows" id="cu-crows"></div>
+    </div>
+    <div id="cu-fields"></div>
+  </div><!-- /custom-form -->
+
   <div id="mud-form" class="hidden">
     <div class="field">
       <span class="label">Position on the flat</span>
@@ -1345,14 +1488,14 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.18.3",
+  version: "0.19.0",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
   // Leave empty and the form opens the person's email app instead.
   feedbackKey: "b884043b-bcaf-4a06-b2d4-3c587d1402a0",
   // Habitats offered when starting a survey. "mudflat" is built but switched off; add it here to turn it on.
-  habitats: ["seagrass", "rocky", "saltmarsh"],
+  habitats: ["seagrass", "rocky", "saltmarsh", "custom"],
   citeUrl: "https://quadratnotes.com",  // the app's public address
   doi: "10.5281/zenodo.24295028"  // Zenodo concept DOI (all versions)
 };
@@ -1440,8 +1583,9 @@ const APP_CONFIG = {
       if (!b) return;
       const name = seg.dataset.name;
       const wasOn = b.getAttribute("aria-pressed") === "true";
-      if (name === "scope" || name === "qsize" || name === "dwc-precision"  || name === "habitat" || name === "rkregion" || name === "planmode") {
+      if (name === "scope" || name === "qsize" || name === "dwc-precision"  || name === "habitat" || name === "rkregion" || name === "planmode" || name === "tmeasure" || name === "tscale") {
         setSeg(name, b.dataset.value);
+        if (name === "tmeasure") { $("#t-scale-seg").classList.toggle("hidden", b.dataset.value !== "scale"); $("#t-counts-field").classList.toggle("hidden", b.dataset.value === "count"); }
         if (name === "habitat") setSurveyHabitat(b.dataset.value);
         if (name === "dwc-precision") renderDwcSummary();
         if (name === "qsize") $("#qsize-custom").classList.toggle("hidden", b.dataset.value !== "custom");
@@ -1490,7 +1634,7 @@ const APP_CONFIG = {
 
   /* ---------- Views ---------- */
   function show(view) {
-    ["home", "survey", "record", "plan", "fixed", "data", "export"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== view));
+    ["home", "survey", "record", "plan", "fixed", "template", "data", "export"].forEach(v => $("#view-" + v).classList.toggle("hidden", v !== view));
     $$(".tabs button").forEach(b => {
       if (b.dataset.tab === view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     });
@@ -1542,6 +1686,12 @@ const APP_CONFIG = {
     } else {
       side = Math.round(Math.sqrt(Number(qsel)) * 100);
     }
+    const hab = getSeg("habitat") || "seagrass";
+    let tpl = null;
+    if (hab === "custom") {
+      tpl = (await loadTemplates()).find(t => t.id === $("#s-template").value);
+      if (!tpl) { toast("Make or import a template first", true); return; }
+    }
     if (getSeg("design") === "other" && !$("#s-design-other").value.trim()) { toast("Describe how quadrats were placed, or pick another option", true); $("#s-design-other").focus(); return; }
     const existingSessions = await all("sessions");
     const taken = new Set(codeMap(existingSessions).values());
@@ -1554,7 +1704,9 @@ const APP_CONFIG = {
       surveyor: $("#s-surveyor").value.trim(),
       notes: $("#s-notes").value.trim(),
       habitat: getSeg("habitat") || "seagrass",
-      rkRegion: (getSeg("habitat") || "seagrass") !== "seagrass" ? (getSeg("rkregion") || "nea") : null,
+      rkRegion: hab !== "seagrass" && hab !== "custom" ? (getSeg("rkregion") || "nea") : null,
+      template: tpl ? JSON.parse(JSON.stringify(tpl)) : undefined,
+      templateId: tpl ? tpl.id : undefined,
       region: (getSeg("habitat") || "seagrass") !== "seagrass" ? "tna" : ($("#s-region").value || "tna"),
       design: getSeg("design"),
       designOther: getSeg("design") === "other" ? $("#s-design-other").value.trim() : "",
@@ -1564,7 +1716,10 @@ const APP_CONFIG = {
       created: new Date().toISOString()
     };
     await put("sessions", session);
-    await put("meta", { key: "lastRegion", value: session.region });
+    if (hab === "custom") delete session.region;
+    if (!tpl) { delete session.template; delete session.templateId; }
+    else await put("meta", { key: "lastTemplate", value: tpl.id });
+    if (hab === "seagrass") await put("meta", { key: "lastRegion", value: session.region });
     const wantPlan = session.design === "random" && $("#s-plan").checked;
     const wantFixed = session.design === "fixed" && $("#s-fixed").checked;
     await put("meta", { key: "lastDesign", value: session.design || "", other: session.designOther || "", plan: wantPlan, fixed: wantFixed });
@@ -1602,7 +1757,7 @@ const APP_CONFIG = {
       const o = document.createElement("option");
       const n = counts[x.id] || 0;
       o.value = x.id;
-      o.textContent = x.site + ", " + niceDate(x.date) + " (" + (habitatOf(x) === "rocky" ? "rocky shore, " : "") + n + (n === 1 ? " quadrat)" : " quadrats)");
+      o.textContent = x.site + ", " + niceDate(x.date) + " (" + (habitatOf(x) === "rocky" ? "rocky shore, " : habitatOf(x) === "custom" && tplOf(x) ? tplOf(x).name + ", " : "") + n + (n === 1 ? " quadrat)" : " quadrats)");
       if (state.session && state.session.id === x.id) o.selected = true;
       sel.append(o);
     });
@@ -1629,7 +1784,7 @@ const APP_CONFIG = {
       name.textContent = s.site;
       const sub = document.createElement("span");
       const n = counts[s.id] || 0;
-      sub.textContent = niceDate(s.date) + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (habitatOf(s) === "rocky" ? ", rocky shore, " + RK_REGION_NAME[rkRegionOf(s)] : (s.region ? ", " + regionLabel(s.region) : ""));
+      sub.textContent = niceDate(s.date) + ", " + n + (n === 1 ? " quadrat" : " quadrats") + (s.quadratSideCm ? ", " + sizeLabel(s) : "") + (habitatOf(s) === "rocky" ? ", rocky shore, " + RK_REGION_NAME[rkRegionOf(s)] : habitatOf(s) === "custom" ? ", custom: " + (tplOf(s) ? tplOf(s).name : "") : (s.region && habitatOf(s) === "seagrass" ? ", " + regionLabel(s.region) : ""));
       info.append(name, sub);
       li.append(info);
       const btns = document.createElement("span");
@@ -2339,6 +2494,7 @@ const APP_CONFIG = {
     resetRocky(keepSticky);
     resetSalt(keepSticky);
     resetMud(keepSticky);
+    resetCustom(keepSticky);
     renderHabitatForm();
     $("#f-qnum").value = await nextQuadratNumber();
     $("#del-empty-wrap").classList.toggle("hidden", !state.session || !!state.session.plan || Number($("#f-qnum").value) !== 1);
@@ -2360,7 +2516,15 @@ const APP_CONFIG = {
     const qn = parseInt($("#f-qnum").value, 10);
     if (!qn || qn < 1) { toast("Add a quadrat number", true); $("#f-qnum").focus(); return; }
     let specific;
-    if (habitatOf(state.session) === "mudflat") {
+    if (habitatOf(state.session) === "custom") {
+      const t = tplOf(state.session);
+      if (!t) { toast("This survey has no template", true); return; }
+      const noClass = t.measure === "scale" && Array.from(state.cu.sel.entries()).find(([, x]) => !x.value);
+      if (noClass) { toast("Pick a " + CU_SCALES[t.scale || "domin"].name + " class for " + noClass[0], true); return; }
+      specific = customRecordPart();
+      const nothing = !specific.taxa.some(x => x.kind !== "presence" || x.present) && !Object.keys(specific.fields).length;
+      if (nothing && Date.now() - state.cu.emptyAt > 8000) { state.cu.emptyAt = Date.now(); toast("Nothing recorded. Tap Save again to save an empty quadrat.", true); return; }
+    } else if (habitatOf(state.session) === "mudflat") {
       if ((num($("#f-water").value) ?? 0) > 100) { toast("Surface water can't be more than 100%", true); return; }
       if (!state.mf.sel.size && !getSeg("mfsed")) { toast("Add at least one sign, animal or cover, or the sediment type", true); return; }
       specific = mudRecordPart();
@@ -2456,7 +2620,8 @@ const APP_CONFIG = {
     state.gpsMode = "saved";
     renderGps();
     renderHabitatForm();
-    if (habitatOf(state.session) === "mudflat") loadMud(q);
+    if (habitatOf(state.session) === "custom") loadCustom(q);
+    else if (habitatOf(state.session) === "mudflat") loadMud(q);
     else if (habitatOf(state.session) === "saltmarsh") loadSalt(q);
     else if (habitatOf(state.session) === "rocky") loadRocky(q);
     else {
@@ -2560,6 +2725,8 @@ const APP_CONFIG = {
         if (q.bare != null) bits.push(q.bare + (q.habitat === "saltmarsh" ? "% bare ground" : "% bare rock"));
         if (q.grazing && q.grazing !== "None") bits.push(q.grazing.toLowerCase() + " grazing");
         if (q.coreId) bits.push("core " + q.coreId);
+        const ct = q.habitat === "custom" ? tplOf(state.session) : null;
+        if (ct) ct.fields.forEach(f => { const v = cfValue(f, (q.fields || {})[f.id]); if (v !== null && bits.length < 4) bits.push(f.label + " " + v + (f.type === "number" && f.unit ? " " + f.unit : "")); });
         meta.textContent = bits.join(", ") || new Date(q.recordedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
         mid.append(meta);
         b.append(qn, mid, pct);
@@ -2656,14 +2823,14 @@ const APP_CONFIG = {
   }
 
   /* ---------- Export ---------- */
-  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "habitat", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design", "survey_area_m2",
+  const COLS = ["survey_id", "quadrat_id", "site", "surveyor", "survey_date", "habitat", "survey_template", "region", "quadrat_side_cm", "quadrat_area_m2", "sampling_design", "survey_area_m2",
     "conditions_time", "weather", "air_temp_c", "wind_speed_kmh", "wind_from", "wind_gust_kmh", "pressure_hpa", "tide_height_m_msl", "tide_state",
     "quadrat", "transect", "distance_from_start_m", "plot_id", "point_id", "planned_latitude", "planned_longitude", "distance_from_point_m", "recorded_at", "latitude", "longitude", "gps_accuracy_m", "gps_altitude_m", "gps_altitude_accuracy_m", "seagrass_cover_pct", "n_species", "epiphytes",
     "algae_cover_pct", "sediment", "zone", "height_above_cd_m", "elevation_m", "substrate", "rock_pool", "bare_rock_pct", "canopy_total_pct", "understorey_total_pct",
     "bare_ground_pct", "litter_pct", "vegetation_height_mean_cm", "vegetation_height_n", "vegetation_heights_cm", "grazing",
     "boot_sink_cm", "black_layer_depth_cm", "surface_water_pct", "ripples", "core_id", "cover_grid_squares", "bare_grid_squares",
     "photo_files", "notes"];
-  const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "habitat", "quadrat", "species", "evidence", "layer", "species_cover_pct", "domin",
+  const SP_COLS = ["survey_id", "quadrat_id", "site", "survey_date", "habitat", "quadrat", "species", "evidence", "layer", "species_cover_pct", "domin", "braun_blanquet", "presence",
     "count", "subsample_area_m2", "count_per_quadrat", "count_density_m2", "shoot_count", "shoot_density_m2", "canopy_height_mean_cm", "canopy_height_n", "canopy_heights_cm", "grid_squares", "grid_squares_n"];
   // Grid squares numbered 1–25, row by row from the top-left of the on-screen grid.
   const sqText = cells => Array.isArray(cells) ? cells.map(i => i + 1).join(";") : null;
@@ -2703,6 +2870,10 @@ const APP_CONFIG = {
     const mapItems = [];
     const qidById = new Map(), accById = new Map();
     const photoFiles = [];
+    // Custom surveys add one column per quadrat detail, after the standard columns.
+    const cfCols = [];
+    chosen.forEach(s => { const t = habitatOf(s) === "custom" && tplOf(s); if (t) t.fields.forEach(f => { const c = cfCol(f); if (!cfCols.includes(c)) cfCols.push(c); }); });
+    const QCOLS = COLS.concat(cfCols);
     for (const s of chosen.sort((a, b) => a.date.localeCompare(b.date))) {
       const qs = (await byIndex("quadrats", "sessionId", s.id)).sort((a, b) => a.quadrat - b.quadrat);
       for (const q of qs) {
@@ -2719,17 +2890,17 @@ const APP_CONFIG = {
         qidById.set(q.id, qid);
         if (q.acc != null) accById.set(q.id, q.acc);
         const tx = taxaOf(q);
+        const hab = habitatOf(s), rk = hab === "rocky", sm = hab === "saltmarsh", mf = hab === "mudflat", sg = hab === "seagrass", cu = hab === "custom", tpl = cu ? tplOf(s) : null;
         photoFiles.filter(f => f.q === q).forEach(f => {
-          const sp = tx.map(t => t.name).filter(Boolean);
+          const sp = tx.filter(t => sg || isPresent(t)).map(t => t.name).filter(Boolean);
           f.meta = { lat: q.lat, lon: q.lon, acc: q.acc, when: q.recordedAt ? new Date(q.recordedAt) : null,
             desc: (sp.length ? sp.join(", ") + ". " : "") + s.site + ", quadrat " + q.quadrat + " (" + qid + "). Recorded with QuadratNotes." };
           delete f.q;
         });
-        const hab = habitatOf(s), rk = hab === "rocky", sm = hab === "saltmarsh", mf = hab === "mudflat", sg = hab === "seagrass";
         const vh = q.vegHeights || [];
         const cond = condCells(s.conditions);
-        const qrow = { survey_id: code, quadrat_id: qid, site: s.site, surveyor: s.surveyor, survey_date: s.date, habitat: HABITAT_NAME[hab],
-          region: sg ? (s.region ? regionLabel(s.region) : null) : RK_REGION_NAME[rkRegionOf(s)], quadrat_side_cm: s.quadratSideCm || null, quadrat_area_m2: area,
+        const qrow = { survey_id: code, quadrat_id: qid, site: s.site, surveyor: s.surveyor, survey_date: s.date, habitat: HABITAT_NAME[hab], survey_template: tpl ? tpl.name : null,
+          region: sg ? (s.region ? regionLabel(s.region) : null) : cu ? null : RK_REGION_NAME[rkRegionOf(s)], quadrat_side_cm: s.quadratSideCm || null, quadrat_area_m2: area,
           sampling_design: designLabel(s), survey_area_m2: s.plan ? s.plan.areaM2 : null, quadrat: q.quadrat, transect: q.transect, distance_from_start_m: q.distance, plot_id: q.plot,
           point_id: q.point != null ? fixedLabel(s, q.point) : null, planned_latitude: q.plannedLat ?? null, planned_longitude: q.plannedLon ?? null, distance_from_point_m: q.pointOffset ?? null, recorded_at: q.recordedAt,
           latitude: q.lat, longitude: q.lon, gps_accuracy_m: q.acc, gps_altitude_m: q.alt ?? null, gps_altitude_accuracy_m: q.altAcc ?? null, seagrass_cover_pct: sg ? q.cover : null, n_species: sg ? tx.length : tx.filter(isPresent).length,
@@ -2742,8 +2913,11 @@ const APP_CONFIG = {
           ripples: mf ? (q.ripples ? "yes" : "no") : null, core_id: mf ? q.coreId : null,
           cover_grid_squares: sg ? sqText(q.coverCells) : null, bare_grid_squares: (rk || sm) ? sqText(q.bareCells) : null, photo_files: names.join(";"), notes: q.notes };
         COND_COLS.forEach((c, i) => { qrow[c] = cond[i]; });
-        rows.push(COLS.map(c => qrow[c] ?? null));
+        if (tpl) tpl.fields.forEach(f => { qrow[cfCol(f)] = cfValue(f, (q.fields || {})[f.id]); });
+        rows.push(QCOLS.map(c => qrow[c] ?? null));
         const spSummary = tx.filter(t => sg || isPresent(t)).map(t => {
+          if (t.kind === "presence") return t.name;
+          if (t.kind === "scale") return t.name + " " + (t.scale === "bb" ? "BB " : "Domin ") + t.cls;
           if (t.kind === "count") return t.name + " " + (t.count ?? 0) + (t.evidence ? " " + t.evidence : "");
           const c = t.cover ?? (sg && tx.length === 1 ? q.cover : null);
           return t.name + (c != null ? " " + c + "%" : "") + (rk && t.kind === "cover" ? " (" + (t.layer === "canopy" ? "canopy" : "understorey") + ")" : "");
@@ -2752,8 +2926,14 @@ const APP_CONFIG = {
         const baseRow = { survey_id: code, quadrat_id: qid, site: s.site, survey_date: s.date, habitat: HABITAT_NAME[hab], quadrat: q.quadrat };
         const spush = o => { const r = Object.assign({}, baseRow, o); spRows.push(SP_COLS.map(c => r[c] ?? null)); };
         const gridOf = t => Array.isArray(t.cells) ? { grid_squares: sqText(t.cells), grid_squares_n: t.cells.length } : {};
-        if (!tx.length) spush({ species: "None", species_cover_pct: 0 });
+        if (!tx.length) spush(cu ? { species: "None" } : { species: "None", species_cover_pct: 0 });
         tx.forEach(t => {
+          if (cu) {
+            if (t.kind === "presence") return spush({ species: t.name, presence: t.present ? 1 : 0 });
+            if (t.kind === "scale") return spush(t.scale === "bb" ? { species: t.name, braun_blanquet: t.cls } : { species: t.name, domin: t.cls });
+            if (t.kind === "count") return spush({ species: t.name, count: t.count, count_density_m2: (area && t.count != null) ? r1(t.count / area) : null });
+            return spush({ ...gridOf(t), species: t.name, species_cover_pct: t.cover });
+          }
           if (sm) return spush({ ...gridOf(t), species: t.name, species_cover_pct: t.cover, domin: t.domin ?? (t.cover > 0 && t.cover < 4 ? "1-3" : null) });
           if (rk) return spush({ ...gridOf(t), species: t.name, layer: t.kind === "cover" ? (t.layer === "canopy" ? "canopy" : "understorey") : null,
             species_cover_pct: t.kind === "cover" ? t.cover : null, count: t.kind === "count" ? t.count : null,
@@ -2773,7 +2953,7 @@ const APP_CONFIG = {
         });
       }
     }
-    const csv = [COLS.join(",")].concat(rows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
+    const csv = [QCOLS.join(",")].concat(rows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
     const base = scope === "all" ? "all-surveys_" + today() : (state.session ? slug(state.session.site) + "_" + state.session.date : "survey");
     const spCsv = [SP_COLS.join(",")].concat(spRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n";
     const plans = chosen.filter(s => s.plan && Array.isArray(s.plan.points) && s.plan.corners && s.plan.corners.length >= 3)
@@ -2794,7 +2974,17 @@ const APP_CONFIG = {
     const fxRows = [];
     fixed.forEach(({ s, code, points }) => points.forEach(t => fxRows.push([code, s.site, s.date, t.point_id, t.lat, t.lon, t.acc, t.how, t.status, t.skip_reason, t.quadrat_id, t.quadrat_gps_accuracy_m])));
     const fxCsv = fixed.length ? [FX_COLS.join(",")].concat(fxRows.map(r => r.map(csvCell).join(","))).join("\r\n") + "\r\n" : null;
-    return { csv, spCsv, photoFiles, rows: rows.length, base, mapItems, plans, ptCsv, fixed, fxCsv };
+    // Custom surveys: the template each survey used, as a re-importable file (one per distinct version).
+    const tplFiles = [], seenTpl = new Map(), usedNames = new Set();
+    chosen.filter(s => habitatOf(s) === "custom" && tplOf(s)).forEach(s => {
+      const t = tplOf(s), key = t.id + "|" + JSON.stringify([t.species, t.counts, t.fields, t.measure, t.scale]);
+      if (seenTpl.has(key)) return;
+      let name = "templates/" + slug(t.name) + ".quadratnotes-template.json", n = 2;
+      while (usedNames.has(name)) name = "templates/" + slug(t.name) + "-" + n++ + ".quadratnotes-template.json";
+      usedNames.add(name); seenTpl.set(key, name);
+      tplFiles.push({ name, data: tplFileData(t) });
+    });
+    return { csv, spCsv, photoFiles, rows: rows.length, base, mapItems, plans, ptCsv, fixed, fxCsv, tplFiles };
   }
 
   /* ---------- Darwin Core archive (OBIS event core + occurrence + extended measurement or fact) ---------- */
@@ -2861,7 +3051,7 @@ const APP_CONFIG = {
     }
     if (!perSession.length) return null;
     perSession.forEach(({ s, qs }) => {
-      if (habitatOf(s) !== "rocky" && !qs.some(q => taxaOf(q).length)) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => allNames.add(x[0]));
+      if (habitatOf(s) === "seagrass" && !qs.some(q => taxaOf(q).length)) (SPECIES[regionOf(s)] || []).filter(x => x[1]).forEach(x => allNames.add(x[0]));
     });
     const ids = {};
     let lookedUp = 0;
@@ -2872,9 +3062,10 @@ const APP_CONFIG = {
     for (const { s, qs } of perSession) {
       const code = codes.get(s.id);
       const side = s.quadratSideCm, area = s.quadratAreaM2;
-      const isR = habitatOf(s) === "rocky", isS = habitatOf(s) === "saltmarsh", isM = habitatOf(s) === "mudflat", multi = isR || isS || isM;
-      const habName = isR ? "Rocky shore" : isS ? "Saltmarsh" : isM ? "Intertidal mudflat" : "Seagrass meadow";
-      const protocol = HABITAT_NAME[habitatOf(s)] + " quadrat survey" + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + (s.design ? ", " + designSentence(s) : "") + ", recorded with the QuadratNotes app";
+      const isR = habitatOf(s) === "rocky", isS = habitatOf(s) === "saltmarsh", isM = habitatOf(s) === "mudflat", isC = habitatOf(s) === "custom", multi = isR || isS || isM || isC;
+      const tpl = isC ? (tplOf(s) || { name: "Custom survey", measure: "cover", fields: [] }) : null;
+      const habName = isC ? tpl.name : isR ? "Rocky shore" : isS ? "Saltmarsh" : isM ? "Intertidal mudflat" : "Seagrass meadow";
+      const protocol = (isC ? "Quadrat survey using the \"" + tpl.name + "\" template, species scored as " + cuMeasureText(tpl) : HABITAT_NAME[habitatOf(s)] + " quadrat survey") + (side ? " using a " + side + " x " + side + " cm quadrat" : "") + (s.design ? ", " + designSentence(s) : "") + ", recorded with the QuadratNotes app";
       const fp = s.plan && s.plan.corners && s.plan.corners.length >= 3 && prec === "exact"
         ? "POLYGON ((" + ring(s.plan.corners).map(c => c[0] + " " + c[1]).join(", ") + "))" : "";
       events.push({ eventID: code, eventDate: s.date, samplingProtocol: protocol, habitat: habName, locality: s.site,
@@ -2908,11 +3099,13 @@ const APP_CONFIG = {
         if (lat != null) lats.push(lat);
         if (lon != null) lons.push(lon);
         events.push({ eventID: qid, parentEventID: code, eventDate: q.recordedAt, samplingProtocol: protocol,
-          sampleSizeValue: area ?? "", sampleSizeUnit: area ? "square metre" : "", habitat: isM ? ["Intertidal mudflat", q.zone, q.sediment].filter(Boolean).join("; ") : isS ? ["Saltmarsh", q.zone].filter(Boolean).join("; ") : isR ? ["Rocky shore", q.zone, q.substrate, q.rockPool ? "rock pool" : null].filter(Boolean).join("; ") : "Seagrass meadow" + (q.sediment ? "; sediment: " + q.sediment : ""),
+          sampleSizeValue: area ?? "", sampleSizeUnit: area ? "square metre" : "", habitat: isC ? tpl.name : isM ? ["Intertidal mudflat", q.zone, q.sediment].filter(Boolean).join("; ") : isS ? ["Saltmarsh", q.zone].filter(Boolean).join("; ") : isR ? ["Rocky shore", q.zone, q.substrate, q.rockPool ? "rock pool" : null].filter(Boolean).join("; ") : "Seagrass meadow" + (q.sediment ? "; sediment: " + q.sediment : ""),
           locality: s.site, decimalLatitude: lat ?? "", decimalLongitude: lon ?? "", geodeticDatum: lat != null ? "WGS84" : "",
           coordinateUncertaintyInMeters: unc ?? "", dataGeneralizations: gen, eventRemarks: q.notes || "" });
         const ev = (type, value, unit) => { if (value !== null && value !== undefined && value !== "") mof.push({ eventID: qid, measurementType: type, measurementValue: value, measurementUnit: unit || "" }); };
-        if (isM) {
+        if (isC) {
+          tpl.fields.forEach(f => ev(f.label, cfValue(f, (q.fields || {})[f.id]), f.type === "number" ? (f.unit || "") : ""));
+        } else if (isM) {
           ev("position on mudflat", q.zone, "");
           ev("elevation", q.elevation, "m");
           ev("sediment type", q.sediment, "");
@@ -2955,6 +3148,15 @@ const APP_CONFIG = {
             occurrenceStatus: pres ? "present" : "absent", recordedBy: withNames ? (s.surveyor || "") : "",
             occurrenceRemarks: (isM && t.evidence) ? "Recorded from surface " + t.evidence + ", not individuals" : "" });
           const om = (type, value, unit, remark) => { if (value !== null && value !== undefined && value !== "") mof.push({ eventID: qid, occurrenceID: oid, measurementType: type, measurementValue: value, measurementUnit: unit || "", measurementRemarks: remark || "" }); };
+          if (isC) {
+            if (!pres) return;
+            if (t.kind === "cover") om("percent cover", t.cover, "%");
+            else if (t.kind === "count") {
+              om("abundance", t.count, "individuals per quadrat");
+              if (area) om("density", r1(t.count / area), "individuals per square metre", "Calculated from count and quadrat area");
+            } else if (t.kind === "scale") om(CU_SCALES[t.scale || "domin"].term, t.cls, "");
+            return;
+          }
           if (isM) {
             if (!pres) return;
             if (t.kind === "cover") { om("percent cover", t.cover, "%"); return; }
@@ -3009,8 +3211,9 @@ const APP_CONFIG = {
     const sites = Array.from(new Set(perSession.map(p => p.s.site)));
     const d0 = dates.slice().sort()[0], d1 = dates.slice().sort().slice(-1)[0];
     const habs = new Set(perSession.map(p => habitatOf(p.s)));
-    const habWord = habs.size > 1 ? "Coastal" : HABITAT_NAME[Array.from(habs)[0]];
-    const title = habWord + " quadrat surveys: " + sites.join(", ") + " (" + (d0 === d1 ? d0 : d0 + " to " + d1) + ")";
+    const tplNames = Array.from(new Set(perSession.filter(p => habitatOf(p.s) === "custom").map(p => (tplOf(p.s) || {}).name || "Custom survey")));
+    const habWord = habs.has("custom") ? (habs.size === 1 && tplNames.length === 1 ? tplNames[0] : null) : habs.size > 1 ? "Coastal" : HABITAT_NAME[Array.from(habs)[0]];
+    const title = (habWord ? habWord + " quadrat surveys: " : "Quadrat surveys: ") + sites.join(", ") + " (" + (d0 === d1 ? d0 : d0 + " to " + d1) + ")";
     const party = creator ? (() => { const p = creator.split(/\s+/); const sur = p.pop(); return "<individualName>" + (p.length ? "<givenName>" + xmlEsc(p.join(" ")) + "</givenName>" : "") + "<surName>" + xmlEsc(sur) + "</surName></individualName>"; })()
       : "<organizationName>QuadratNotes user</organizationName>";
     const bbox = lats.length ? "<boundingCoordinates><westBoundingCoordinate>" + Math.min(...lons) + "</westBoundingCoordinate><eastBoundingCoordinate>" + Math.max(...lons) +
@@ -3022,10 +3225,11 @@ const APP_CONFIG = {
       '<dataset>\n<title xml:lang="en">' + xmlEsc(title) + '</title>\n' +
       '<creator>' + party + '</creator>\n<metadataProvider>' + party + '</metadataProvider>\n' +
       '<pubDate>' + today() + '</pubDate>\n<language>en</language>\n' +
-      '<abstract><para>' + xmlEsc("Quadrat-based " + habWord.toLowerCase() + " survey data from " + sites.join(", ") + ": " + nQ + " quadrats with species present and absent" +
+      '<abstract><para>' + xmlEsc("Quadrat-based " + (habWord ? habWord.toLowerCase() + " " : "") + "survey data from " + sites.join(", ") + ": " + nQ + " quadrats with species present and absent" +
         (habs.has("seagrass") ? "; seagrass cover, shoot counts and canopy heights where measured, and sediment type" : "") +
         (habs.has("rocky") ? "; percent cover of seaweeds and attached animals in canopy and understorey layers, counts of mobile animals, shore zone and substrate" : "") +
         (habs.has("mudflat") ? "; counts of surface signs (casts, tubes, siphon holes, burrows) and small animals, surface cover of algal mats and diatom film, sediment type and softness" : "") +
+        (habs.has("custom") ? "; species scored with the surveyor's own template (" + tplNames.join(", ") + ") and any quadrat details it defines" : "") +
         (habs.has("saltmarsh") ? "; percent cover and Domin class of saltmarsh plants, marsh zone, bare ground, litter, vegetation height and grazing" : "") +
         "; and survey conditions. Recorded in the field with the QuadratNotes app.") + '</para></abstract>\n' +
       '<intellectualRights><para>This work is licensed under a <ulink url="' + lic.url + '"><citetitle>' + xmlEsc(lic.name) + '</citetitle></ulink>.</para></intellectualRights>\n' +
@@ -3033,7 +3237,7 @@ const APP_CONFIG = {
       '<temporalCoverage><rangeOfDates><beginDate><calendarDate>' + d0 + '</calendarDate></beginDate><endDate><calendarDate>' + d1 + '</calendarDate></endDate></rangeOfDates></temporalCoverage></coverage>\n' +
       '<contact>' + party + '</contact>\n' +
       '<methods><methodStep><description><para>' + xmlEsc("Each survey is a parent event; each quadrat is a child event with its own position and time. In seagrass surveys, cover was estimated per quadrat, and per species where more than one species was present; absences are recorded for species found elsewhere in the same survey, and where a survey found no seagrass at all, for the main seagrass species of the region. In rocky shore surveys, seaweeds and attached animals were recorded as percent cover in a canopy layer and an understorey layer (each up to 100%, understorey including bare rock), and mobile animals were counted; species listed but recorded as zero are absences. In saltmarsh surveys, the percent cover of each plant species was estimated (species can overlap, so totals can exceed 100%) and converted to the Domin scale; species listed but recorded as zero are absences. In mudflat surveys, buried animals were recorded from surface signs (casts, tubes, siphon holes, burrows, feeding marks), counted per quadrat or in a stated sub-sample and scaled to density; these are counts of signs, not individuals. Surface cover was estimated as percent of the quadrat; items listed but recorded as zero are absences. Weather and modelled tide values were looked up from Open-Meteo at the start of the survey.") + '</para></description></methodStep>' +
-      '<sampling><studyExtent><description><para>' + xmlEsc(sites.join("; ")) + '</para></description></studyExtent><samplingDescription><para>' + xmlEsc(habWord === "Seagrass" ? "Quadrat surveys of intertidal and shallow subtidal seagrass." : habWord === "Rocky shore" ? "Quadrat surveys of intertidal rocky shores." : habWord === "Saltmarsh" ? "Quadrat surveys of saltmarsh vegetation." : habWord === "Mudflat" ? "Quadrat surveys of intertidal mudflats." : "Quadrat surveys of intertidal and shallow subtidal coastal habitats.") + '</para></samplingDescription></sampling></methods>\n' +
+      '<sampling><studyExtent><description><para>' + xmlEsc(sites.join("; ")) + '</para></description></studyExtent><samplingDescription><para>' + xmlEsc(habs.has("custom") ? "Quadrat surveys recorded with the surveyor's own species list and scoring method: " + perSession.filter(p => habitatOf(p.s) === "custom").map(p => tplOf(p.s)).filter(Boolean).map(t => t.name + " (species scored as " + cuMeasureText(t) + ")").filter((x, i, a) => a.indexOf(x) === i).join("; ") + (habs.size > 1 ? "; and coastal quadrat surveys." : ".") : habWord === "Seagrass" ? "Quadrat surveys of intertidal and shallow subtidal seagrass." : habWord === "Rocky shore" ? "Quadrat surveys of intertidal rocky shores." : habWord === "Saltmarsh" ? "Quadrat surveys of saltmarsh vegetation." : habWord === "Mudflat" ? "Quadrat surveys of intertidal mudflats." : "Quadrat surveys of intertidal and shallow subtidal coastal habitats.") + '</para></samplingDescription></sampling></methods>\n' +
       '</dataset>\n</eml:eml>\n';
 
     const base = scope === "all" ? "all-surveys_" + today() : (state.session ? slug(state.session.site) + "_" + state.session.date : "survey");
@@ -3104,7 +3308,8 @@ const APP_CONFIG = {
     if (n) { show("survey"); return; }
     const s0 = state.session;
     await deleteSurvey(s0.id, true);
-    setSurveyHabitat(habitatOf(s0));
+    if (s0.templateId) await put("meta", { key: "lastTemplate", value: s0.templateId });
+    setSurveyHabitat(habitatOf(s0), s0.templateId);
     $("#s-site").value = s0.site || ""; $("#s-date").value = s0.date || today(); $("#s-surveyor").value = s0.surveyor || ""; $("#s-notes").value = s0.notes || "";
     if (habitatOf(s0) === "seagrass" && s0.region) { $("#s-region").value = s0.region; showRegionPlaces(); }
     if (s0.rkRegion) setSeg("rkregion", s0.rkRegion);
@@ -3160,7 +3365,7 @@ const APP_CONFIG = {
       zip.file(BACKUP_JSON, JSON.stringify({
         app: "QuadratNotes", format: BACKUP_FORMAT, appVersion: APP_CONFIG.version, created: started,
         counts: { surveys: sessions.length, quadrats: quads.length, photos: photos.length },
-        sessions, quadrats: quads, photos: photos.map(ph => ({ id: ph.id, quadratId: ph.quadratId, file: "photos/" + ph.id + ".jpg" }))
+        sessions, quadrats: quads, templates: await loadTemplates(), photos: photos.map(ph => ({ id: ph.id, quadratId: ph.quadratId, file: "photos/" + ph.id + ".jpg" }))
       }, null, 1));
       zip.file("README.txt", "QuadratNotes backup made " + started + " with app version " + APP_CONFIG.version + ".\r\n" +
         sessions.length + " surveys, " + quads.length + " quadrats, " + photos.length + " photos.\r\n\r\n" +
@@ -3226,6 +3431,12 @@ const APP_CONFIG = {
       haveS.add(sv.id);
       r.surveys++;
     }
+    // Templates: add any this phone doesn't have, including copies kept with custom surveys.
+    const tpls = await loadTemplates(), tplIds = new Set(tpls.map(t => t.id));
+    (Array.isArray(data.templates) ? data.templates : []).concat(data.sessions.filter(x => x && x.template).map(x => x.template)).forEach(t0 => {
+      const t = cleanTemplate(t0); if (t && !tplIds.has(t.id)) { tpls.push(t); tplIds.add(t.id); }
+    });
+    await saveTemplates(tpls);
     const photoMeta = new Map((data.photos || []).map(x => [x.id, x]));
     const wantPhotos = new Set();
     for (const q of data.quadrats) {
@@ -3357,7 +3568,7 @@ const APP_CONFIG = {
   $("#btn-geojson").addEventListener("click", () => exportMap("geojson"));
   $("#btn-kml").addEventListener("click", () => exportMap("kml"));
 
-  const MIME = { ".zip": "application/zip", ".csv": "text/csv", ".geojson": "application/geo+json", ".kml": "application/vnd.google-earth.kml+xml" };
+  const MIME = { ".json": "application/json", ".zip": "application/zip", ".csv": "text/csv", ".geojson": "application/geo+json", ".kml": "application/vnd.google-earth.kml+xml" };
   const mimeOf = f => MIME[(f.match(/\.[a-z]+$/i) || [""])[0].toLowerCase()] || "application/octet-stream";
   async function saveFile(filename, data) {
     let downloads = null;
@@ -3430,6 +3641,7 @@ const APP_CONFIG = {
       if (out.ptCsv) zip.file(out.base + "_random_points.csv", out.ptCsv);
       if (out.fxCsv) zip.file(out.base + "_fixed_points.csv", out.fxCsv);
       if (out.ptCsv || out.fxCsv) zip.file(out.base + "_map.geojson", buildGeoJSON(out.mapItems, out.plans, out.fixed));
+      out.tplFiles.forEach(f => zip.file(f.name, f.data));
       const folder = zip.folder("photos");
       for (const p of out.photoFiles) folder.file(p.name, p.meta ? await withPhotoMeta(p.blob, p.meta) : p.blob);
       const blob = await zip.generateAsync({ type: "blob" });
@@ -4486,13 +4698,15 @@ const APP_CONFIG = {
 
   /* ---------- Habitats ---------- */
   const habitatOf = sess => (sess && sess.habitat) || "seagrass";
-  const HABITAT_NAME = { seagrass: "Seagrass", rocky: "Rocky shore", saltmarsh: "Saltmarsh", mudflat: "Mudflat" };
-  function setSurveyHabitat(h) {
+  const HABITAT_NAME = { seagrass: "Seagrass", rocky: "Rocky shore", saltmarsh: "Saltmarsh", mudflat: "Mudflat", custom: "Custom survey" };
+  function setSurveyHabitat(h, tplId) {
     setSeg("habitat", h);
     $("#region-field").classList.toggle("hidden", h !== "seagrass");
-    $("#rocky-region-field").classList.toggle("hidden", h === "seagrass");
-    $("#h-survey").textContent = "Start a " + HABITAT_NAME[h].toLowerCase() + " survey";
-    $("#s-site").placeholder = h === "rocky" ? "e.g. Wembury reef" : h === "saltmarsh" ? "e.g. Tamar saltmarsh" : h === "mudflat" ? "e.g. Erme estuary flats" : "e.g. Wilcove meadow";
+    $("#rocky-region-field").classList.toggle("hidden", h === "seagrass" || h === "custom");
+    $("#custom-template-field").classList.toggle("hidden", h !== "custom");
+    if (h === "custom") renderTplPicker(tplId);
+    $("#h-survey").textContent = h === "custom" ? "Start a custom survey" : "Start a " + HABITAT_NAME[h].toLowerCase() + " survey";
+    $("#s-site").placeholder = h === "rocky" ? "e.g. Wembury reef" : h === "saltmarsh" ? "e.g. Tamar saltmarsh" : h === "mudflat" ? "e.g. Erme estuary flats" : h === "custom" ? "e.g. Castle Hill meadow" : "e.g. Wilcove meadow";
   }
   // Hide habitats that are switched off. Surveys already recorded in them still open, show and export.
   ["mudflat"].forEach(h => {
@@ -4507,7 +4721,8 @@ const APP_CONFIG = {
     $("#rocky-form").classList.toggle("hidden", h !== "rocky");
     $("#salt-form").classList.toggle("hidden", h !== "saltmarsh");
     $("#mud-form").classList.toggle("hidden", h !== "mudflat");
-    $('label[for="f-notes"] .hint').textContent = h === "mudflat" ? "birds feeding, shellfish, debris" : h === "rocky" ? "other species, rock pool details, damage" : h === "saltmarsh" ? "creeks, pans, erosion, damage" : "fauna, burrows, damage";
+    $("#custom-form").classList.toggle("hidden", h !== "custom");
+    $('label[for="f-notes"] .hint').textContent = h === "custom" ? "anything else worth noting" : h === "mudflat" ? "birds feeding, shellfish, debris" : h === "rocky" ? "other species, rock pool details, damage" : h === "saltmarsh" ? "creeks, pans, erosion, damage" : "fauna, burrows, damage";
   }
   // Generic expanding info panels
   $$(".info-toggle").forEach(b => b.addEventListener("click", () => {
@@ -4590,7 +4805,7 @@ const APP_CONFIG = {
     const c = state.rk.custom.find(x => x.name === name);
     return c ? { name: c.name, label: null, kind: c.kind, layer: c.kind === "cover" ? "under" : null, kingdom: "", core: true, group: "custom" } : null;
   }
-  const kingdomOf = (name, sess) => habitatOf(sess) === "rocky" ? ((rkDef(name) || {}).kingdom || "") : habitatOf(sess) === "mudflat" ? ((mfDef(name) || {}).kingdom || "") : "Plantae";
+  const kingdomOf = (name, sess) => habitatOf(sess) === "custom" ? "" : habitatOf(sess) === "rocky" ? ((rkDef(name) || {}).kingdom || "") : habitatOf(sess) === "mudflat" ? ((mfDef(name) || {}).kingdom || "") : "Plantae";
   function rkNameEl(name) {
     const d = rkDef(name);
     const span = document.createElement("span");
@@ -4732,7 +4947,7 @@ const APP_CONFIG = {
     $("#f-hcd").value = q.heightCD ?? ""; $("#f-bare").value = q.bare ?? ""; $("#f-pool").checked = !!q.rockPool;
     renderRockyPicker(); renderRockyRows();
   }
-  const isPresent = t => (t.kind === "count" ? (t.count || 0) : (t.cover || 0)) > 0;
+  const isPresent = t => t.kind === "presence" ? !!t.present : t.kind === "scale" ? !!t.cls : (t.kind === "count" ? (t.count || 0) : (t.cover || 0)) > 0;
   function rockyRecordPart() {
     const taxa = Array.from(state.rk.sel.entries()).map(([name, t]) => ({ name, kind: t.kind,
       cells: t.kind === "cover" && t.cells ? t.cells.slice().sort((a, b) => a - b) : null,
@@ -4904,7 +5119,8 @@ const APP_CONFIG = {
       inp.addEventListener("input", () => { const v = num(inp.value); t.value = v === null ? null : Math.max(0, Math.min(100, v)); t.cells = null; refresh(); });
       const d0 = smDef(name);
       const g = gridButton(name, () => openGrid({
-        title: (d0 && d0.label) || name, value: t.value, cells: t.cells,
+        title: (d0 && d0.label) || name, value: t.value, cells: t.cells, othersNote: "Shaded squares are used by other species. Plants can overlap, so you can tap those too.",
+        others: cellsOf(Array.from(state.sm.sel.entries()).filter(([n]) => n !== name).map(([, o]) => o.cells)),
         onDone: (v, cells) => { t.value = v; t.cells = cells; renderSaltRows(); }
       }));
       ctrl.append(g, inp, unit, dm);
@@ -5138,6 +5354,480 @@ const APP_CONFIG = {
   }
 
   /* ---------- Home ---------- */
+  /* ---------- Custom survey ----------
+     A template is the user's own species list, one way of scoring them and optional quadrat details.
+     Templates are kept in the meta store. Each survey keeps its own copy (session.template), so editing
+     a template later never changes data already recorded. */
+  const CU_MEASURE = { cover: "% cover", count: "Count", presence: "Present / absent", scale: "Cover scale" };
+  const CU_SCALES = {
+    domin: { name: "Domin", term: "Domin cover class", classes: [["1", "1: under 4%, few"], ["2", "2: under 4%, several"], ["3", "3: under 4%, many"], ["4", "4: 4–10%"],
+      ["5", "5: 11–25%"], ["6", "6: 26–33%"], ["7", "7: 34–50%"], ["8", "8: 51–75%"], ["9", "9: 76–90%"], ["10", "10: 91–100%"]] },
+    bb: { name: "Braun-Blanquet", term: "Braun-Blanquet cover-abundance class", classes: [["r", "r: one or a few, tiny cover"], ["+", "+: few, under 5%"], ["1", "1: many, under 5%"],
+      ["2", "2: 5–25%"], ["3", "3: 25–50%"], ["4", "4: 50–75%"], ["5", "5: 75–100%"]] }
+  };
+  const CU_TYPES = { number: "Number", choice: "Choice list", yesno: "Yes / no", text: "Text" };
+  const tplOf = sess => (sess && sess.template) || null;
+  const cuMeasureText = t => t.measure === "scale" ? CU_SCALES[t.scale || "domin"].name + " classes" : t.measure === "presence" ? "presence or absence" : t.measure === "count" ? "counts" : "percent cover";
+  // Export column for a quadrat detail, e.g. "Soil depth" in cm -> cf_soil_depth_cm
+  const cfCol = f => "cf_" + slug((f.label + (f.type === "number" && f.unit ? " " + f.unit : "")).replace(/%/g, " pct")).replace(/-/g, "_");
+  const cfValue = (f, v) => (v === null || v === undefined || v === "") ? null : f.type === "yesno" ? (v === true || v === "yes" ? "yes" : "no") : v;
+  state.cu = { sel: new Map(), custom: [], csel: new Map(), ccustom: [], emptyAt: 0 };
+  state.tplEdit = null;
+
+  async function loadTemplates() { const m = await get("meta", "templates"); return (m && Array.isArray(m.value)) ? m.value : []; }
+  async function saveTemplates(list) { await put("meta", { key: "templates", value: list }); }
+  function cleanTemplate(t) {
+    if (!t || typeof t !== "object") return null;
+    const name = String(t.name || "").trim().slice(0, 80);
+    if (!name) return null;
+    const measure = CU_MEASURE[t.measure] ? t.measure : "cover";
+    const seen = new Set();
+    const species = (Array.isArray(t.species) ? t.species : []).map(x => String(x || "").replace(/\s+/g, " ").trim().slice(0, 120))
+      .filter(x => { const k = x.toLowerCase(); if (!x || seen.has(k)) return false; seen.add(k); return true; }).slice(0, 400);
+    const counts = measure === "count" ? [] : (Array.isArray(t.counts) ? t.counts : []).map(x => String(x || "").replace(/\s+/g, " ").trim().slice(0, 120))
+      .filter(x => { const k = x.toLowerCase(); if (!x || seen.has(k)) return false; seen.add(k); return true; }).slice(0, 200);
+    const ids = new Set(), cols = new Set();
+    const fields = (Array.isArray(t.fields) ? t.fields : []).map(f => {
+      if (!f || typeof f !== "object") return null;
+      const label = String(f.label || "").trim().slice(0, 60);
+      if (!label) return null;
+      let type = CU_TYPES[f.type] ? f.type : "text";
+      const options = type === "choice" ? Array.from(new Set((Array.isArray(f.options) ? f.options : []).map(o => String(o || "").trim().slice(0, 40)).filter(Boolean))).slice(0, 12) : null;
+      if (type === "choice" && !options.length) type = "text";
+      let id = String(f.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 16) || uid().replace(/[^a-z0-9]/gi, "").slice(0, 8);
+      while (ids.has(id)) id = uid().replace(/[^a-z0-9]/gi, "").slice(0, 8);
+      const out = { id, label, type };
+      if (type === "number") out.unit = String(f.unit || "").trim().slice(0, 20);
+      if (type === "choice") out.options = options;
+      if (cols.has(cfCol(out))) return null;
+      ids.add(id); cols.add(cfCol(out));
+      return out;
+    }).filter(Boolean).slice(0, 20);
+    return { id: String(t.id || "").slice(0, 60) || uid(), name, measure, scale: measure === "scale" ? (CU_SCALES[t.scale] ? t.scale : "domin") : null,
+      species, counts, fields, updated: typeof t.updated === "string" ? t.updated : new Date().toISOString() };
+  }
+  const tplSummary = t => [t.measure === "scale" ? CU_SCALES[t.scale].name + " scale" : CU_MEASURE[t.measure],
+    t.species.length + " species", (t.counts || []).length ? t.counts.length + " counted" : null, t.fields.length ? t.fields.length + (t.fields.length === 1 ? " quadrat detail" : " quadrat details") : null].filter(Boolean).join(", ");
+
+  /* Setup screen: pick a template */
+  async function renderTplPicker(selectId) {
+    const list = (await loadTemplates()).slice().sort((a, b) => a.name.localeCompare(b.name));
+    const sel = $("#s-template");
+    const last = await get("meta", "lastTemplate");
+    const want = [selectId, sel.value, last && last.value].find(id => id && list.some(t => t.id === id)) || (list[0] && list[0].id) || "";
+    sel.innerHTML = "";
+    if (!list.length) { const o = document.createElement("option"); o.value = ""; o.textContent = "No templates yet: make one first"; sel.append(o); }
+    list.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = t.name; sel.append(o); });
+    sel.value = want;
+    sel.disabled = !list.length;
+    $("#btn-tpl-edit").classList.toggle("hidden", !list.length);
+    const t = list.find(x => x.id === want);
+    $("#tpl-summary").textContent = t ? tplSummary(t) : "";
+  }
+  $("#s-template").addEventListener("change", () => renderTplPicker($("#s-template").value));
+
+  /* Template editor */
+  function openTplEditor(t) {
+    const blank = { id: uid(), name: "", measure: "cover", scale: "domin", species: [], fields: [] };
+    const src = t || blank;
+    state.tplEdit = { id: src.id, isNew: !t, fields: src.fields.map(f => ({ ...f, options: f.options ? f.options.slice() : undefined })) };
+    $("#h-template").firstChild.textContent = (t ? "Edit template" : "New template") + "\n    ";
+    $("#t-name").value = src.name;
+    setSeg("tmeasure", src.measure); setSeg("tscale", src.scale || "domin");
+    $("#t-scale-seg").classList.toggle("hidden", src.measure !== "scale");
+    $("#t-species").value = src.species.join("\n");
+    $("#t-counts").value = (src.counts || []).join("\n");
+    $("#t-check-list").innerHTML = ""; $("#t-check-sum").textContent = ""; $("#btn-t-check").disabled = false; state.checkRun = (state.checkRun || 0) + 1;
+    $("#t-counts-field").classList.toggle("hidden", src.measure === "count");
+    $("#btn-t-delete").closest("p").classList.toggle("hidden", !t);
+    renderTplFields();
+    show("template");
+  }
+  function renderTplFields() {
+    const wrap = $("#t-fields"); wrap.innerHTML = "";
+    const fs = state.tplEdit.fields;
+    $("#t-fields-empty").classList.toggle("hidden", fs.length > 0);
+    $("#btn-t-addfield").classList.toggle("hidden", fs.length >= 20);
+    fs.forEach((f, i) => {
+      const box = document.createElement("div"); box.className = "tfield";
+      const top = document.createElement("div"); top.className = "tfield-top";
+      const lab = document.createElement("input");
+      Object.assign(lab, { type: "text", value: f.label || "", placeholder: "Name, e.g. Soil depth", maxLength: 60, autocomplete: "off" });
+      lab.setAttribute("aria-label", "Detail " + (i + 1) + " name");
+      lab.addEventListener("input", () => { f.label = lab.value; });
+      const type = document.createElement("select");
+      type.setAttribute("aria-label", "Detail " + (i + 1) + " type");
+      Object.entries(CU_TYPES).forEach(([v, l]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; type.append(o); });
+      type.value = f.type || "number";
+      type.addEventListener("change", () => { f.type = type.value; renderTplFields(); });
+      top.append(lab, type);
+      box.append(top);
+      if (f.type === "number") {
+        const u = document.createElement("input");
+        Object.assign(u, { type: "text", value: f.unit || "", placeholder: "Unit, e.g. cm (optional)", maxLength: 20, autocomplete: "off" });
+        u.setAttribute("aria-label", "Detail " + (i + 1) + " unit");
+        u.addEventListener("input", () => { f.unit = u.value; });
+        box.append(u);
+      } else if (f.type === "choice") {
+        const o = document.createElement("input");
+        Object.assign(o, { type: "text", value: (f.options || []).join(", "), placeholder: "Options, separated by commas", autocomplete: "off" });
+        o.setAttribute("aria-label", "Detail " + (i + 1) + " options");
+        o.addEventListener("input", () => { f.options = o.value.split(",").map(x => x.trim()).filter(Boolean); });
+        box.append(o);
+      }
+      const rm = document.createElement("button"); rm.type = "button"; rm.className = "linkish danger"; rm.textContent = "Remove";
+      rm.setAttribute("aria-label", "Remove detail " + (f.label || i + 1));
+      rm.addEventListener("click", () => { fs.splice(i, 1); renderTplFields(); });
+      box.append(rm);
+      wrap.append(box);
+    });
+  }
+  $("#btn-t-addfield").addEventListener("click", () => {
+    state.tplEdit.fields.push({ id: uid().replace(/[^a-z0-9]/gi, "").slice(0, 8), label: "", type: "number", unit: "" });
+    renderTplFields();
+    const ins = $$("#t-fields .tfield-top input"); if (ins.length) ins[ins.length - 1].focus();
+  });
+  // Read the editor, check it and save to the library. Returns the saved template, or null.
+  async function saveTplFromEditor() {
+    const e = state.tplEdit;
+    const name = $("#t-name").value.trim();
+    if (!name) { toast("Give the template a name", true); $("#t-name").focus(); return null; }
+    const measure = getSeg("tmeasure") || "cover";
+    const species = $("#t-species").value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+    const named = e.fields.filter(f => (f.label || "").trim());
+    if (named.length < e.fields.length) { toast("Give each quadrat detail a name, or remove it", true); return null; }
+    const noOpts = named.find(f => f.type === "choice" && !(f.options || []).length);
+    if (noOpts) { toast("Add the options for " + noOpts.label.trim(), true); return null; }
+    const cols = named.map(f => cfCol({ ...f, label: f.label.trim(), unit: (f.unit || "").trim() }));
+    if (new Set(cols).size < cols.length) { toast("Two quadrat details have the same name", true); return null; }
+    if (measure === "presence" && !species.length) { toast("Add the species to look for, one per line", true); $("#t-species").focus(); return null; }
+    const counts = measure === "count" ? [] : $("#t-counts").value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+    const both = species.map(x => x.toLowerCase()).find(x => counts.some(c => c.toLowerCase() === x));
+    if (both) { toast("A species can't be in both lists: " + both, true); return null; }
+    if (!species.length && !counts.length && !named.length) { toast("Add at least one species or quadrat detail", true); $("#t-species").focus(); return null; }
+    const t = cleanTemplate({ id: e.id, name, measure, scale: getSeg("tscale"), species, counts, fields: named, updated: new Date().toISOString() });
+    const list = await loadTemplates();
+    const i = list.findIndex(x => x.id === t.id);
+    if (i >= 0) list[i] = t; else list.push(t);
+    await saveTemplates(list);
+    await put("meta", { key: "lastTemplate", value: t.id });
+    e.isNew = false;
+    return t;
+  }
+  function tplFileName(t) { return slug(t.name) + ".quadratnotes-template.json"; }
+  function tplFileData(t) {
+    return JSON.stringify({ app: "QuadratNotes", kind: "survey-template", format: 1, appVersion: APP_CONFIG.version,
+      template: { id: t.id, name: t.name, measure: t.measure, scale: t.scale, species: t.species, counts: t.counts || [], fields: t.fields, updated: t.updated } }, null, 1);
+  }
+  $("#btn-t-save").addEventListener("click", async () => {
+    const t = await saveTplFromEditor(); if (!t) return;
+    state.tplEdit = null;
+    setSurveyHabitat("custom", t.id);
+    show("survey");
+    toast("Template saved");
+  });
+  $("#btn-t-share").addEventListener("click", async () => {
+    const t = await saveTplFromEditor(); if (!t) return;
+    $("#btn-t-delete").closest("p").classList.remove("hidden");
+    await saveFile(tplFileName(t), tplFileData(t));
+  });
+  $("#btn-t-cancel").addEventListener("click", () => { state.tplEdit = null; show("survey"); });
+  armButton($("#btn-t-delete"), "Tap again to delete", async () => {
+    if (!state.tplEdit) return;
+    await saveTemplates((await loadTemplates()).filter(x => x.id !== state.tplEdit.id));
+    state.tplEdit = null;
+    setSurveyHabitat("custom");
+    show("survey");
+    toast("Template deleted. Surveys that used it keep their copy.");
+  });
+  $("#btn-tpl-new").addEventListener("click", () => openTplEditor(null));
+  $("#btn-tpl-edit").addEventListener("click", async () => {
+    const t = (await loadTemplates()).find(x => x.id === $("#s-template").value);
+    if (t) openTplEditor(t);
+  });
+  $("#btn-tpl-import").addEventListener("click", () => $("#f-tpl-import").click());
+  $("#f-tpl-import").addEventListener("change", async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const bad = "That file isn't a QuadratNotes template. Choose the file ending .quadratnotes-template.json.";
+    let data;
+    try { data = JSON.parse(await file.text()); } catch (err) { toast(bad, true); return; }
+    if (!data || data.app !== "QuadratNotes" || data.kind !== "survey-template") { toast(bad, true); return; }
+    if (data.format > 1) { toast("This template was made by a newer version of QuadratNotes. Update the app (close and reopen it), then try again.", true); return; }
+    const t = cleanTemplate(data.template);
+    if (!t) { toast(bad, true); return; }
+    const list = await loadTemplates();
+    const i = list.findIndex(x => x.id === t.id);
+    if (i >= 0) list[i] = t; else list.push(t);
+    await saveTemplates(list);
+    await put("meta", { key: "lastTemplate", value: t.id });
+    await renderTplPicker(t.id);
+    toast((i >= 0 ? "Updated template " : "Added template ") + t.name);
+  });
+
+  /* Name check: GBIF species match. Only the names are sent, and only when the user taps the button. */
+  const gbifCache = new Map();
+  async function gbifMatch(name) {
+    if (gbifCache.has(name)) return gbifCache.get(name);
+    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 10000);
+    try {
+      const r = await fetch("https://api.gbif.org/v1/species/match?name=" + encodeURIComponent(name), { signal: ctrl.signal });
+      if (!r.ok) throw new Error("http " + r.status);
+      const j = await r.json();
+      gbifCache.set(name, j);
+      return j;
+    } finally { clearTimeout(t); }
+  }
+  // Returns null if the name looks fine, otherwise { msg, use } (use = suggested replacement, or null).
+  function judgeName(name, m) {
+    const type = m && m.matchType, canon = m && m.canonicalName, rank = ((m && m.rank) || "").toLowerCase();
+    if (!m || type === "NONE" || !canon) return { msg: "Common name, or not found. Common names aren't checked; if this is a scientific name, check the spelling.", use: null };
+    if (type === "FUZZY") return { msg: "Possible spelling slip.", use: canon };
+    if (type === "HIGHERRANK") return { msg: "Only matched to the " + rank + " " + canon + ".", use: null };
+    if (canon !== name && canon.toLowerCase() === name.toLowerCase()) return { msg: "Usual spelling: " + canon + ".", use: canon };
+    if (m.status === "SYNONYM" || m.status === "HETEROTYPIC_SYNONYM" || m.status === "HOMOTYPIC_SYNONYM") return { msg: "GBIF lists this as a synonym (an older or alternative name).", use: null };
+    if (m.status === "DOUBTFUL") return { msg: "GBIF marks this name as doubtful.", use: null };
+    return null;
+  }
+  function useName(oldName, newName) {
+    ["#t-species", "#t-counts"].forEach(sel => {
+      const ta = $(sel);
+      ta.value = ta.value.split(/\r?\n/).map(l => l.trim() === oldName ? newName : l).join("\n");
+    });
+  }
+  $("#btn-t-check").addEventListener("click", async () => {
+    const lines = sel => $(sel).value.split(/\r?\n/).map(x => x.replace(/\s+/g, " ").trim()).filter(Boolean);
+    const names = Array.from(new Set(lines("#t-species").concat(getSeg("tmeasure") === "count" ? [] : lines("#t-counts"))));
+    const list = $("#t-check-list"), sum = $("#t-check-sum"), btn = $("#btn-t-check");
+    list.innerHTML = "";
+    if (!names.length) { sum.textContent = "Add some names first."; return; }
+    const run = state.checkRun = (state.checkRun || 0) + 1;
+    btn.disabled = true; sum.textContent = "Checking " + names.length + (names.length === 1 ? " name…" : " names…");
+    const results = new Map();
+    let failed = 0;
+    for (let i = 0; i < names.length; i += 6) {
+      await Promise.all(names.slice(i, i + 6).map(async n => { try { results.set(n, await gbifMatch(n)); } catch (e) { failed++; } }));
+      if (failed) break;
+    }
+    if (run !== state.checkRun) return; // the editor was closed or reopened meanwhile
+    btn.disabled = false;
+    if (failed) { sum.textContent = "Couldn't reach GBIF. Check your signal and try again."; return; }
+    const issues = names.map(n => ({ n, j: judgeName(n, results.get(n)) })).filter(x => x.j);
+    sum.textContent = issues.length ? (names.length - issues.length) + " of " + names.length + " names matched. Have a look at these:" : "All " + names.length + " names matched the GBIF species list.";
+    issues.forEach(({ n, j }) => {
+      const li = document.createElement("li");
+      const b = document.createElement("b"); b.textContent = n;
+      li.append(b, document.createTextNode(j.msg));
+      if (j.use) {
+        const u = document.createElement("button"); u.type = "button"; u.className = "btn btn-small"; u.textContent = "Use " + j.use;
+        u.addEventListener("click", () => { useName(n, j.use); li.className = "ok"; li.textContent = n + " → " + j.use; });
+        li.append(document.createElement("br"), u);
+      }
+      list.append(li);
+    });
+  });
+
+  /* Record screen */
+  // Same name ignoring case, spacing and a plural ending ("Snail" and "snails")
+  const nameKey = n => { const k = n.toLowerCase().replace(/\s+/g, " ").trim(); return k.length > 3 ? k.replace(/([^s])s$/, "$1") : k; };
+  const sameName = (a, b) => nameKey(a) === nameKey(b);
+  const cuList = () => { const t = tplOf(state.session); const base = t ? t.species : []; return base.concat(state.cu.custom.filter(n => !base.includes(n))); };
+  function renderCuPicker() {
+    const t = tplOf(state.session), wrap = $("#cu-picker"); wrap.innerHTML = "";
+    if (!t) return;
+    const hint = { cover: "% cover", count: "count in the quadrat", presence: "tap the ones you find", scale: CU_SCALES[t.scale || "domin"].name + " class" }[t.measure];
+    $("#cu-label").innerHTML = ""; $("#cu-label").append("Species ");
+    const h = document.createElement("span"); h.className = "hint"; h.textContent = hint; $("#cu-label").append(h);
+    const seg = document.createElement("div"); seg.className = "seg"; seg.dataset.multi = "1";
+    cuList().forEach(n => {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.value = n; b.textContent = n;
+      b.setAttribute("aria-pressed", String(state.cu.sel.has(n)));
+      b.addEventListener("click", () => {
+        if (state.cu.sel.has(n)) state.cu.sel.delete(n); else state.cu.sel.set(n, { value: null, cells: null });
+        renderCuPicker(); renderCuRows();
+      });
+      seg.append(b);
+    });
+    wrap.append(seg);
+  }
+  function renderCuRows() {
+    const t = tplOf(state.session), wrap = $("#cu-rows"); wrap.innerHTML = "";
+    if (!t) return;
+    const pres = t.measure === "presence";
+    $("#cu-empty").textContent = pres ? "Tap the species you find. Species you don't tap are recorded as absent." : "Tap species above to add them to this quadrat.";
+    $("#cu-empty").classList.toggle("hidden", state.cu.sel.size > 0 || !cuList().length);
+    if (pres) return;
+    state.cu.sel.forEach((x, name) => {
+      const row = document.createElement("div"); row.className = "rrow";
+      const nm = document.createElement("div"); nm.className = "rrow-name"; nm.textContent = name;
+      const ctrl = document.createElement("div"); ctrl.className = "rrow-ctrl";
+      if (t.measure === "scale") {
+        const sc = CU_SCALES[t.scale || "domin"];
+        const s = document.createElement("select"); s.className = "cu-scale";
+        s.setAttribute("aria-label", sc.name + " class for " + name);
+        const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Pick a class"; s.append(o0);
+        sc.classes.forEach(([v, l]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; s.append(o); });
+        s.value = x.value || "";
+        s.addEventListener("change", () => { x.value = s.value || null; });
+        ctrl.append(s);
+      } else {
+        const inp = document.createElement("input");
+        const cnt = t.measure === "count";
+        Object.assign(inp, { type: "number", min: "0", step: cnt ? "1" : "any", placeholder: "0", inputMode: cnt ? "numeric" : "decimal" });
+        if (!cnt) inp.max = "100";
+        inp.value = x.value ?? "";
+        inp.setAttribute("aria-label", (cnt ? "Count of " : "Percent cover of ") + name);
+        inp.addEventListener("input", () => { const v = num(inp.value); x.value = v === null ? null : cnt ? Math.max(0, Math.round(v)) : Math.max(0, Math.min(100, v)); x.cells = null; });
+        if (!cnt) ctrl.append(gridButton(name, () => openGrid({ title: name, value: x.value, cells: x.cells, othersNote: "Shaded squares are used by other species. Plants can overlap, so you can tap those too.",
+          others: cellsOf(Array.from(state.cu.sel.entries()).filter(([n]) => n !== name).map(([, o]) => o.cells)),
+          onDone: (v, cells) => { x.value = v; x.cells = cells; renderCuRows(); } })));
+        ctrl.append(inp);
+        if (!cnt) { const u = document.createElement("span"); u.className = "unit"; u.textContent = "%"; ctrl.append(u); }
+      }
+      row.append(nm, ctrl);
+      wrap.append(row);
+    });
+  }
+  // Counts alongside the main scoring (e.g. snails in a % cover survey). Not used when the template itself counts.
+  const cuCountList = () => { const t = tplOf(state.session); const base = (t && t.counts) || []; return base.concat(state.cu.ccustom.filter(n => !base.includes(n))); };
+  function renderCuCounts() {
+    const t = tplOf(state.session);
+    const on = !!t && t.measure !== "count";
+    $("#cu-count-block").classList.toggle("hidden", !on);
+    const pick = $("#cu-cpicker"), rows = $("#cu-crows"); pick.innerHTML = ""; rows.innerHTML = "";
+    if (!on) return;
+    const seg = document.createElement("div"); seg.className = "seg"; seg.dataset.multi = "1";
+    cuCountList().forEach(n => {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.value = n; b.textContent = n;
+      b.setAttribute("aria-pressed", String(state.cu.csel.has(n)));
+      b.addEventListener("click", () => { if (state.cu.csel.has(n)) state.cu.csel.delete(n); else state.cu.csel.set(n, { value: null }); renderCuCounts(); });
+      seg.append(b);
+    });
+    if (seg.children.length) pick.append(seg);
+    state.cu.csel.forEach((x, name) => {
+      const row = document.createElement("div"); row.className = "rrow";
+      const nm = document.createElement("div"); nm.className = "rrow-name"; nm.textContent = name;
+      const ctrl = document.createElement("div"); ctrl.className = "rrow-ctrl";
+      const inp = document.createElement("input");
+      Object.assign(inp, { type: "number", min: "0", step: "1", placeholder: "0", inputMode: "numeric" });
+      inp.value = x.value ?? ""; inp.setAttribute("aria-label", "Count of " + name);
+      inp.addEventListener("input", () => { const v = num(inp.value); x.value = v === null ? null : Math.max(0, Math.round(v)); });
+      ctrl.append(inp); row.append(nm, ctrl); rows.append(row);
+    });
+  }
+  $("#btn-cu-cother").addEventListener("click", () => { $("#cu-cother-wrap").classList.remove("hidden"); $("#cu-cother-name").focus(); });
+  function addCuCount() {
+    const name = $("#cu-cother-name").value.replace(/\s+/g, " ").trim().slice(0, 120);
+    if (!name) { toast("Type what you're counting", true); return; }
+    if (cuList().some(n => sameName(n, name))) { toast(name + " is already in the species list above", true); return; }
+    const have = cuCountList().find(n => sameName(n, name));
+    const n = have || name;
+    if (!have) state.cu.ccustom.push(n);
+    if (!state.cu.csel.has(n)) state.cu.csel.set(n, { value: null });
+    $("#cu-cother-name").value = ""; $("#cu-cother-wrap").classList.add("hidden");
+    renderCuCounts(); toast("Added " + n);
+    const inp = $('#cu-crows input[aria-label="Count of ' + n.replace(/"/g, '\\"') + '"]'); if (inp) inp.focus();
+  }
+  $("#btn-cu-cother-add").addEventListener("click", addCuCount);
+  $("#cu-cother-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addCuCount(); } });
+  function cuSegToggle(seg) {
+    seg.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      const on = b.getAttribute("aria-pressed") === "true";
+      seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b && !on)));
+    });
+  }
+  function renderCuFields(values) {
+    const t = tplOf(state.session), wrap = $("#cu-fields"); wrap.innerHTML = "";
+    if (!t) return;
+    const v0 = values || {};
+    t.fields.forEach(f => {
+      const div = document.createElement("div"); div.className = "field";
+      const id = "cf-" + f.id, val = v0[f.id];
+      if (f.type === "number" || f.type === "text") {
+        const lab = document.createElement("label"); lab.htmlFor = id; lab.textContent = f.label + " ";
+        if (f.unit) { const h = document.createElement("span"); h.className = "hint"; h.textContent = f.unit; lab.append(h); }
+        const inp = document.createElement("input"); inp.id = id; inp.dataset.cf = f.id;
+        if (f.type === "number") Object.assign(inp, { type: "number", step: "any", inputMode: "decimal" });
+        else Object.assign(inp, { type: "text", autocomplete: "off", maxLength: 200 });
+        inp.value = val ?? "";
+        div.append(lab, inp);
+      } else {
+        const lab = document.createElement("span"); lab.className = "label"; lab.id = id + "-l"; lab.textContent = f.label;
+        const seg = document.createElement("div"); seg.className = "seg"; seg.dataset.name = id; seg.dataset.cf = f.id;
+        seg.setAttribute("role", "group"); seg.setAttribute("aria-labelledby", id + "-l");
+        const opts = f.type === "yesno" ? [["yes", "Yes"], ["no", "No"]] : f.options.map(o => [o, o]);
+        const on = val === true ? "yes" : val === false ? "no" : (val ?? null);
+        opts.forEach(([v, l]) => { const b = document.createElement("button"); b.type = "button"; b.dataset.value = v; b.textContent = l; b.setAttribute("aria-pressed", String(v === on)); seg.append(b); });
+        cuSegToggle(seg);
+        div.append(lab, seg);
+      }
+      wrap.append(div);
+    });
+  }
+  function cuFieldValues() {
+    const t = tplOf(state.session), out = {};
+    (t ? t.fields : []).forEach(f => {
+      let v;
+      if (f.type === "number") v = num(($("#cf-" + f.id) || {}).value);
+      else if (f.type === "text") v = (($("#cf-" + f.id) || {}).value || "").trim() || null;
+      else v = getSeg("cf-" + f.id);
+      if (v !== null && v !== undefined && v !== "") out[f.id] = v;
+    });
+    return out;
+  }
+  function resetCustom(keepSticky) {
+    state.cu.emptyAt = 0;
+    const t = tplOf(state.session);
+    if (keepSticky && t && t.measure !== "presence") state.cu.sel.forEach(x => { x.value = null; x.cells = null; });
+    else state.cu.sel = new Map();
+    if (!keepSticky) state.cu.custom = [];
+    if (keepSticky) state.cu.csel.forEach(x => { x.value = null; }); else { state.cu.csel = new Map(); state.cu.ccustom = []; }
+    $("#cu-other-name").value = ""; $("#cu-other-wrap").classList.add("hidden");
+    $("#cu-cother-name").value = ""; $("#cu-cother-wrap").classList.add("hidden");
+    renderCuPicker(); renderCuRows(); renderCuCounts(); renderCuFields(null);
+  }
+  function loadCustom(q) {
+    const t = tplOf(state.session);
+    state.cu.sel = new Map(); state.cu.csel = new Map(); state.cu.emptyAt = 0;
+    (q.taxa || []).forEach(x => {
+      if (x.kind === "count" && t && t.measure !== "count") {
+        if (!(t.counts || []).includes(x.name) && !state.cu.ccustom.includes(x.name)) state.cu.ccustom.push(x.name);
+        state.cu.csel.set(x.name, { value: x.count ?? null }); return;
+      }
+      if (!(t && t.species.includes(x.name)) && !state.cu.custom.includes(x.name)) state.cu.custom.push(x.name);
+      if (x.kind === "presence") { if (x.present) state.cu.sel.set(x.name, { value: null, cells: null }); return; }
+      state.cu.sel.set(x.name, { value: x.kind === "scale" ? x.cls : x.kind === "count" ? x.count ?? null : x.cover ?? null, cells: x.cells || null });
+    });
+    renderCuPicker(); renderCuRows(); renderCuCounts(); renderCuFields(q.fields || {});
+  }
+  function customRecordPart() {
+    const t = tplOf(state.session);
+    const taxa = t.measure === "presence"
+      ? cuList().map(name => ({ name, kind: "presence", present: state.cu.sel.has(name) }))
+      : Array.from(state.cu.sel.entries()).map(([name, x]) =>
+        t.measure === "scale" ? { name, kind: "scale", scale: t.scale || "domin", cls: x.value || null }
+        : t.measure === "count" ? { name, kind: "count", count: x.value ?? 0 }
+        : { name, kind: "cover", cover: x.value ?? 0, cells: x.cells ? x.cells.slice().sort((a, b) => a - b) : null });
+    if (t.measure !== "count") state.cu.csel.forEach((x, name) => taxa.push({ name, kind: "count", count: x.value ?? 0 }));
+    return { habitat: "custom", taxa, species: taxa.filter(isPresent).map(x => x.name), cover: null, fields: cuFieldValues() };
+  }
+  $("#btn-cu-other").addEventListener("click", () => { $("#cu-other-wrap").classList.remove("hidden"); $("#cu-other-name").focus(); });
+  function addCuOther() {
+    const name = $("#cu-other-name").value.replace(/\s+/g, " ").trim().slice(0, 120);
+    if (!name) { toast("Type a species name", true); return; }
+    if (tplOf(state.session) && tplOf(state.session).measure !== "count" && cuCountList().some(n => sameName(n, name))) { toast(name + " is already in the counts below", true); return; }
+    const have = cuList().find(n => sameName(n, name));
+    const n = have || name;
+    if (!have) state.cu.custom.push(n);
+    if (!state.cu.sel.has(n)) state.cu.sel.set(n, { value: null, cells: null });
+    $("#cu-other-name").value = ""; $("#cu-other-wrap").classList.add("hidden");
+    renderCuPicker(); renderCuRows(); toast("Added " + n);
+  }
+  $("#btn-cu-other-add").addEventListener("click", addCuOther);
+  $("#cu-other-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addCuOther(); } });
+
   async function renderHome() {
     const card = $("#continue-card");
     if (!state.session) { card.classList.add("hidden"); return; }
@@ -5152,6 +5842,7 @@ const APP_CONFIG = {
   $("#btn-change-habitat").addEventListener("click", () => show("home"));
   $("#btn-start-saltmarsh").addEventListener("click", () => { setSurveyHabitat("saltmarsh"); show("survey"); });
   $("#btn-start-mudflat").addEventListener("click", () => { setSurveyHabitat("mudflat"); show("survey"); });
+  $("#btn-start-custom").addEventListener("click", () => { setSurveyHabitat("custom"); show("survey"); });
   $("#btn-all-surveys").addEventListener("click", () => show("survey"));
 
   /* ---------- Offline support ---------- */

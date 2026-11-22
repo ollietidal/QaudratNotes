@@ -4,7 +4,7 @@
 
 ![QuadratNotes: free, offline quadrat surveys for coastal habitats](docs/banner.jpg)
 
-**Free, offline quadrat surveys for coastal habitats: seagrass, rocky shore and saltmarsh.**
+**Free, offline quadrat surveys for seagrass, rocky shore and saltmarsh, or any habitat with a custom survey.**
 
 QuadratNotes is a free, open-source app for recording quadrat surveys on a phone or tablet,
 built by a marine biologist for coastal fieldwork. It works without signal, keeps everything on
@@ -29,6 +29,9 @@ Full guide: [quadratnotes.com/help.html](https://quadratnotes.com/help.html).
 - **Rocky shore:** seaweed and sessile animal cover in canopy and understorey layers, counts of
   limpets, topshells and other mobile animals, shore zone, height and substrate.
 - **Saltmarsh:** plant cover with Domin classes, bare ground, litter, vegetation height and grazing.
+- **Custom survey:** your own species list, scored as % cover (with the grid), counts, present/absent,
+  or Domin or Braun-Blanquet classes, an optional list of animals to count alongside, plus your own quadrat details (numbers with units, choice lists,
+  yes/no, text). Saved as a template on the phone and shared as a file, so a team records the same way.
 - **Every survey:** site, date, surveyor, quadrat size, sampling design, GPS position and accuracy,
   photos, notes, and optional weather and modelled tide from Open-Meteo.
 
@@ -60,6 +63,7 @@ and files are flagged in [CHANGELOG.md](CHANGELOG.md).
   random points and fixed points if used.
 - Points tables: `_random_points.csv` and `_fixed_points.csv`, with each point's status, skip
   reason and linked quadrat. A fixed points file can be imported into a later survey.
+- Custom survey templates, in a `templates` folder in the zip, ready to import.
 - A Darwin Core archive for sharing with OBIS and GBIF.
 
 ### Importing fixed points

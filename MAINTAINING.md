@@ -10,10 +10,19 @@ The `CNAME` file holds the domain; keep it.
 - Replace `index.html` (and any other changed files) and commit. Phones pick up the new version the
   next time they open the app with signal.
 - If you change `jszip.min.js`, the `leaflet/` files, fonts or icons, also bump the cache version in
-  `sw.js` (e.g. `quadratnotes-v6` to `quadratnotes-v7`).
+  `sw.js` (e.g. `quadratnotes-v8` to `quadratnotes-v9`). The service worker caches only the site's own files;
+  look-ups to other sites (weather, species names, map tiles) always go to the network.
 - Settings such as the support link, contact email, habitats offered, version and DOI are in
   `APP_CONFIG` near the top of the script in `index.html`. Keep `version` there and in
   `CITATION.cff` the same.
+
+## Custom survey templates
+- Templates are kept on the phone (IndexedDB `meta` store, key `templates`) and included in backups.
+  Each survey stores its own copy in `session.template`, so editing a template never changes recorded data.
+- A shared template file (`*.quadratnotes-template.json`) is JSON with `app: "QuadratNotes"`,
+  `kind: "survey-template"`, `format: 1` and the `template` itself (`name`, `measure`, `scale`, `species`,
+  `counts`, `fields`). If the structure changes in a way older versions can't read, raise `format`: older apps
+  then ask the user to update instead of importing it wrongly.
 
 ## Releases and DOIs
 - Publish a GitHub release (tag like `0.17.4`, no "v") after a meaningful batch of changes.

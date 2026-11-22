@@ -1,6 +1,7 @@
 # QuadratNotes export guide
 
-Version 0.18.3. Every export uses the same columns whatever the habitat; columns that don't apply are left blank.
+Version 0.19.0. Every export uses the same columns whatever the habitat; columns that don't apply are left blank.
+Custom surveys add one column per quadrat detail at the end of the quadrats table (see below).
 Changes to export columns and files are listed in [CHANGELOG.md](../CHANGELOG.md).
 
 General conventions:
@@ -9,8 +10,9 @@ General conventions:
 - Coordinates are WGS84 decimal degrees.
 - **Grid squares** are numbered 1–25, row by row from the top-left of the on-screen grid (1–5 is the top row).
   Positions only mean something if the quadrat is always held the same way round.
-- In rocky shore and saltmarsh surveys, species stay listed from quadrat to quadrat. A species listed but left at 0
-  is a **recorded absence**, so zeros are real data.
+- In rocky shore, saltmarsh and custom surveys, species stay listed from quadrat to quadrat. A species listed but left
+  at 0 is a **recorded absence**, so zeros are real data. In present/absent custom surveys every species on the
+  template is recorded in every quadrat, as `presence` 1 or 0.
 
 ## Quadrats table (`*_quadrats.csv`): one row per quadrat
 
@@ -19,8 +21,9 @@ General conventions:
 | survey_id | all | Readable survey code: site and date, e.g. `wilcove-2026-10-14` (`-2` added for a second survey the same day). Accented letters are folded to plain ones (Porth Llŷn → `porth-llyn`) |
 | quadrat_id | all | Survey code plus quadrat, e.g. `wilcove-2026-10-14-Q01`. Use this to join to the species table |
 | site, surveyor, survey_date | all | As entered at survey setup |
-| habitat | all | Seagrass, Rocky shore or Saltmarsh |
-| region | all | Seagrass: bioregion (Short et al. 2007). Rocky shore and saltmarsh: `NE Atlantic` or `Elsewhere (broad groups)` |
+| habitat | all | Seagrass, Rocky shore, Saltmarsh or Custom survey |
+| survey_template | custom | Name of the template the survey used, e.g. `Chalk grassland` |
+| region | seagrass, rocky, saltmarsh | Seagrass: bioregion (Short et al. 2007). Rocky shore and saltmarsh: `NE Atlantic` or `Elsewhere (broad groups)`. Blank for custom surveys |
 | quadrat_side_cm, quadrat_area_m2 | all | Quadrat size |
 | sampling_design | all | random, haphazard, nonrandom, transect, fixed, or `other: <description>` |
 | survey_area_m2 | all | Area of the survey outline, if random points were placed in a drawn or walked area |
@@ -38,7 +41,7 @@ General conventions:
 | gps_accuracy_m | all | Reported horizontal GPS accuracy (blank if coordinates were typed). Kept to the centimetre for external GNSS/DGPS/RTK receivers |
 | gps_altitude_m, gps_altitude_accuracy_m | all | Height and vertical accuracy exactly as the device reports them. The reference level depends on the device (often the WGS84 ellipsoid, not sea level or chart datum), and phone heights are usually only good to ±10–30 m, so convert and check before use |
 | seagrass_cover_pct | seagrass | Total seagrass cover |
-| n_species | all | Seagrass: species listed. Rocky shore and saltmarsh: taxa present (above 0) |
+| n_species | all | Seagrass: species listed. Other habitats: taxa present (above 0, class given, or present) |
 | epiphytes | seagrass | None, Low, Medium or High |
 | algae_cover_pct | seagrass | Macroalgae cover |
 | sediment | seagrass | Mud, Muddy sand, Sand, Gravel or Mixed |
@@ -58,20 +61,23 @@ General conventions:
 | bare_grid_squares | rocky, saltmarsh | Grid squares tapped for bare rock or bare ground |
 | photo_files | all | Photo file names in the zip's `photos` folder |
 | notes | all | Quadrat notes |
+| cf_… | custom | One column per quadrat detail in the template, named `cf_` plus the detail's name and unit, e.g. `cf_soil_depth_cm`, `cf_aspect`, `cf_grazed`. Numbers as entered; choice lists as the option chosen; yes/no as `yes` or `no`. Blank if not filled in. In an all-surveys export, templates' columns are combined, and a detail with the same name and unit shares a column |
 
 ## Species table (`*_species.csv`): one row per species per quadrat
 
 | Column | Habitats | Meaning |
 |---|---|---|
 | survey_id, quadrat_id, site, survey_date, habitat, quadrat | all | As above; join on `quadrat_id` |
-| species | all | Scientific name or broad group (e.g. `Balanomorpha` for barnacles, `Rhodophyta` for red algal turf). `None` for a seagrass quadrat with no seagrass |
+| species | all | Scientific name or broad group (e.g. `Balanomorpha` for barnacles, `Rhodophyta` for red algal turf). Custom surveys: as typed in the template. `None` for a quadrat with nothing recorded |
 | evidence | mudflat | Type of surface sign counted (casts, burrows…); counts are signs, not individuals |
 | layer | rocky | canopy or understorey, for cover species |
-| species_cover_pct | all | % of the quadrat. Seagrass: each species' share (together up to 100). Rocky: within its layer (each layer up to 100). Saltmarsh: plants overlap, so totals can exceed 100 |
-| domin | saltmarsh | Domin class 1–10 from % cover; below 4% it uses few, several or many plants, or `1-3` if not chosen |
-| count | rocky, mudflat | Number of individuals counted (in the sub-sample, if one was used) |
+| species_cover_pct | all | % of the quadrat. Seagrass: each species' share (together up to 100). Rocky: within its layer (each layer up to 100). Saltmarsh and custom: plants overlap, so totals can exceed 100 |
+| domin | saltmarsh, custom | Saltmarsh: Domin class 1–10 from % cover; below 4% it uses few, several or many plants, or `1-3` if not chosen. Custom (Domin scale): the class picked, 1–10 |
+| braun_blanquet | custom | Braun-Blanquet class picked: `r`, `+`, `1`–`5` |
+| presence | custom | Present/absent surveys: 1 present, 0 absent |
+| count | rocky, mudflat, custom | Number of individuals counted (in the sub-sample, if one was used). Custom: count surveys, and anything on a template's "Also count" list or added to count in the field |
 | subsample_area_m2, count_per_quadrat | mudflat | Sub-sample size and the count scaled to the whole quadrat |
-| count_density_m2 | rocky, mudflat | Count per square metre |
+| count_density_m2 | rocky, mudflat, custom | Count per square metre |
 | shoot_count, shoot_density_m2 | seagrass | Shoots in the quadrat and per square metre |
 | canopy_height_mean_cm, canopy_height_n, canopy_heights_cm | seagrass | Canopy height: mean, number of measurements, all values |
 | grid_squares, grid_squares_n | all | Grid squares tapped for that species, and how many (sub-quadrat frequency out of 25) |
@@ -119,6 +125,11 @@ The file can be imported into a later survey, so the same points and names are r
 | skip_reason | Underwater, Unsafe, Can't reach or Other |
 | quadrat_id, quadrat_gps_accuracy_m | The quadrat recorded at the point, and its GPS accuracy |
 
+## Templates (`templates/*.quadratnotes-template.json`)
+
+Included in the zip for custom surveys: the template each survey used (species list, scoring, counted list and
+quadrat details), as a file that can be imported into the app with "Import a template file".
+
 ## Map files (More formats → GeoJSON or KML)
 
 One point per quadrat with its details and a species summary, plus, if used, the survey area outline,
@@ -139,8 +150,13 @@ Backups keep the photos exactly as stored.
 |---|---|
 | event.txt | Each survey as a parent event, each quadrat as a child event (date and time, position, quadrat area, habitat, sampling protocol) |
 | occurrence.txt | Each species per quadrat as present or absent, with kingdom and WoRMS ID (`scientificNameID`) where it could be looked up |
-| extendedmeasurementorfact.txt | Cover (with layer), Domin, counts and densities, shoot counts, canopy heights, quadrat measurements and survey conditions |
+| extendedmeasurementorfact.txt | Cover (with layer), Domin and Braun-Blanquet classes, counts and densities, shoot counts, canopy heights, quadrat measurements (for custom surveys, each quadrat detail under its own name and unit) and survey conditions |
 | meta.xml, eml.xml | File map and dataset description (title, dates, area, method, licence, credit) |
 
 Defaults: CC BY 4.0, exact locations, no surveyor names, credit taken from the Surveyor field. All can be changed under Options.
 Grid square positions are not included, as they aren't a standard OBIS field.
+
+Custom surveys: `habitat` is the template name, `samplingProtocol` names the template and how species were scored,
+and `kingdom` is left blank. Taxon IDs come from WoRMS, which covers marine and many freshwater and land species,
+so some land plant or insect names may have no `scientificNameID`. GBIF matches names itself when the data is
+published there.

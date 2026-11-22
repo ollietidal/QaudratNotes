@@ -71,10 +71,10 @@ dd { margin: 2px 0 8px; }
 <p>Before your first real survey, try a test survey at home: start one, save a quadrat, export it and check you can open the files.</p>
 
 <h2 id="survey">2. Starting a survey</h2>
-<p>A survey is one site visit. On the home screen, tap <span class="ui">Start a survey</span> under Seagrass, Rocky shore or Saltmarsh, then fill in:</p>
+<p>A survey is one site visit. On the home screen, tap <span class="ui">Start a survey</span> under Seagrass, Rocky shore, Saltmarsh or Custom survey, then fill in:</p>
 <dl>
 <dt>Site, Date, Surveyor</dt><dd>The site name is used in file names and survey codes, e.g. <code>porth-llyn-2026-11-21</code>.</dd>
-<dt>Region</dt><dd>Sets which species are listed. For seagrass it's the seagrass bioregion; for rocky shore and saltmarsh choose NE Atlantic, or Elsewhere for broad groups.</dd>
+<dt>Region</dt><dd>Sets which species are listed. For seagrass it's the seagrass bioregion; for rocky shore and saltmarsh choose NE Atlantic, or Elsewhere for broad groups. Custom surveys use a template instead (see below).</dd>
 <dt>Quadrat size</dt><dd>25 × 25 cm, 50 × 50 cm, 1 × 1 m, or Other for any square quadrat. Densities are worked out from this.</dd>
 <dt>Sampling design</dt><dd>How quadrats were placed: Random, Haphazard, Non-random, Along transects, Fixed plots or Other. Tap the <span class="ui">i</span> for definitions. Random and Fixed plots offer guidance to points (sections 6 and 7).</dd>
 <dt>Conditions</dt><dd>Optional and needs signal: <span class="ui">Get current conditions</span> looks up weather and a modelled tide for your location.</dd>
@@ -98,6 +98,24 @@ dd { margin: 2px 0 8px; }
 <p>Shore zone, optional height above chart datum, substrate and whether the quadrat is in a rock pool. Seaweeds and attached animals are recorded as % cover in a canopy layer and an understorey layer (each up to 100%, with bare rock counting towards the understorey); mobile animals like limpets and topshells as counts. Species stay listed from quadrat to quadrat, and a species left at 0 is recorded as absent.</p>
 <h3>Saltmarsh</h3>
 <p>Marsh zone, optional elevation, % cover of each plant (plants overlap, so totals can exceed 100%), with the Domin class shown. Below 4% cover, pick few, several or many plants. Also bare ground, litter and strandline, vegetation height and grazing or trampling.</p>
+
+<h3 id="custom">Custom survey</h3>
+<p>For any other habitat, on land or water: a meadow, dune slack, heath or school field. You make a <strong>template</strong> with your own species list and choose one way to score them:</p>
+<dl>
+<dt>% cover</dt><dd>Type a % or use the grid. Plants overlap, so totals can exceed 100%.</dd>
+<dt>Count</dt><dd>Individuals in the quadrat; a density per m² is worked out on export.</dd>
+<dt>Present / absent</dt><dd>Tap the species you find. Every other species on the list is recorded as absent in that quadrat.</dd>
+<dt>Cover scale</dt><dd>Pick a Domin (1–10) or Braun-Blanquet (r, +, 1–5) class for each species.</dd>
+</dl>
+<p><strong>Also count</strong> (optional) is a second list scored as counts whatever the main scoring, e.g. snails, woodlice or ants in a % cover survey. In the field, <span class="ui">Add something to count</span> adds more, and <span class="ui">Add a species not listed</span> adds to the main list. Both stay listed for the rest of the survey.</p>
+<p>You can also add <strong>quadrat details</strong>, recorded once per quadrat: a number with a unit (soil depth, cm), a choice list with one answer per quadrat (aspect: N, E, S, W), yes/no (grazed) or free text. Transects, random points and fixed points work as in the other surveys.</p>
+<ul>
+<li>On the setup screen, tap <span class="ui">New template</span>, fill it in and <span class="ui">Save template</span>. Templates stay on the phone for next time; <span class="ui">Edit</span> changes them.</li>
+<li><span class="ui">Share as a file</span> saves the template as a small file. Send it to your team; they tap <span class="ui">Import a template file</span>, so everyone records the same way.</li>
+<li>Each survey keeps a copy of its template, so editing a template later doesn't change surveys already recorded.</li>
+<li>Use scientific names where you can: they're what databases match on. <span class="ui">Check scientific names</span> (needs signal) looks each name up in the GBIF species list and flags spelling slips and names it doesn't know, with suggestions you can tap to use. Common names aren't checked.</li>
+<li>The data export zip includes each survey's template in a <code>templates</code> folder, so whoever gets the data can see how it was recorded and reuse the template.</li>
+</ul>
 
 <h2 id="data">5. Checking and editing</h2>
 <p>The <span class="ui">Data</span> tab lists the quadrats in a survey with a summary. Tap a quadrat to open and edit it, then save again, or delete it. Use the <span class="ui">Survey</span> menu at the top to switch surveys, and <span class="ui">Delete this survey</span> to remove one.</p>
@@ -134,7 +152,7 @@ dd { margin: 2px 0 8px; }
 <p>Your surveys live only on your phone. If the phone is lost, or the browser's data is cleared, they're gone, so back up after every survey.</p>
 <ul>
 <li>On the <span class="ui">Export</span> tab, tap <span class="ui">Back up everything (.zip)</span> and save the file somewhere safe, such as your email, Google Drive or iCloud.</li>
-<li><span class="ui">Restore from a backup</span> adds the surveys in a backup to the phone without changing anything already there. You can also use it to combine surveys from several phones.</li>
+<li><span class="ui">Restore from a backup</span> adds the surveys in a backup to the phone without changing anything already there. You can also use it to combine surveys from several phones. Custom survey templates are included.</li>
 </ul>
 
 <h2 id="export">10. Exporting your data</h2>
