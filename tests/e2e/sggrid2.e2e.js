@@ -1,0 +1,63 @@
+const { chromium } = require("playwright");
+const http = require("http"), fs = require("fs"), path = require("path");
+const ROOT = process.env.QN_ROOT || require("path").resolve(__dirname, "../.."), OUT = process.argv[2] || require("path").join(require("os").tmpdir(), "qn-e2e", "sggrid2");
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2" };
+const srv = http.createServer((q, r) => { let f = path.join(ROOT, decodeURIComponent(q.url.split("?")[0])); if (f.endsWith("/")) f += "index.html";
+  fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { "Content-Type": types[path.extname(f)] || "application/octet-stream" }); r.end(d); }); }).listen(8774);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const log = (...a) => console.log(...a);
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, geolocation: { latitude: 50.31, longitude: -4.1, accuracy: 5 }, permissions: ["geolocation"], serviceWorkers: "block", acceptDownloads: true });
+  const page = await ctx.newPage(); const errs = []; page.on("pageerror", e => errs.push(e.message));
+  await page.goto("http://localhost:8774/");
+  await page.click("#btn-start-seagrass"); await page.fill("#s-site", "Mixed"); await page.click('#survey-form button[type="submit"]'); await sleep(600);
+  const chips = await page.locator("#species-chips button").allTextContents(); log("chips:", chips.join(" | "));
+  await page.locator("#species-chips button").nth(0).click(); await page.locator("#species-chips button").nth(1).click(); await sleep(300);
+  log("taxa cards:", await page.locator("#taxa-cards .taxon h3").allTextContents(), "| grid buttons:", await page.locator("#taxa-cards .gbtn").count());
+  const sheetCells = () => page.evaluate(() => [...document.querySelectorAll("#gs-grid button")].map((x, i) => x.getAttribute("aria-pressed") === "true" ? "X" : x.classList.contains("other") ? "o" : ".").join(""));
+  await page.locator("#taxa-cards .gbtn").nth(0).click(); await sleep(200);
+  for (const i of [0, 1, 2, 5]) await page.locator("#gs-grid button").nth(i).click();
+  await page.click("#gs-done"); await sleep(200);
+  log("species 1 cover box:", await page.inputValue("#tx0c"), "| total:", await page.textContent("#cover-big"));
+  await page.locator("#taxa-cards .gbtn").nth(1).click(); await sleep(200);
+  log("species 2 sheet before (o = shaded):", await sheetCells(), "| hint:", await page.textContent("#gs-hint"));
+  for (const i of [5, 10, 11]) await page.locator("#gs-grid button").nth(i).click();
+  const box = await page.locator("#grid-sheet").boundingBox();
+  await page.screenshot({ path: OUT + "/sheet.png" });
+  await page.click("#gs-done"); await sleep(200);
+  log("species 2 cover box:", await page.inputValue("#tx1c"), "| total:", await page.textContent("#cover-big"));
+  log("total grid squares on screen:", await page.evaluate(() => [...document.querySelectorAll("#grid button")].map(x => x.getAttribute("aria-pressed") === "true" ? "X" : ".").join("")));
+  log("message:", await page.textContent("#taxa-sum"));
+  await page.click("#taxa-sum .info-btn"); await sleep(200);
+  log("info open:", await page.isVisible("#shared-info"));
+  await page.locator("#taxa-sum").scrollIntoViewIfNeeded(); await page.evaluate(() => window.scrollBy(0, -120));
+  await page.screenshot({ path: OUT + "/msg.png", clip: { x: 0, y: 0, width: 390, height: 520 } });
+  await page.locator("#taxa-cards .taxon").nth(0).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: OUT + "/card.png" });
+  await page.click("#btn-save"); await sleep(500); log("save:", await page.textContent("#toast"));
+  // both species in all 25 squares: 200% total species cover, should still save
+  await page.locator("#taxa-cards .gbtn").nth(0).click(); await sleep(150);
+  for (let i = 0; i < 25; i++) if ((await page.locator("#gs-grid button").nth(i).getAttribute("aria-pressed")) !== "true") await page.locator("#gs-grid button").nth(i).click();
+  await page.click("#gs-done");
+  await page.locator("#taxa-cards .gbtn").nth(1).click(); await sleep(150);
+  for (let i = 0; i < 25; i++) if ((await page.locator("#gs-grid button").nth(i).getAttribute("aria-pressed")) !== "true") await page.locator("#gs-grid button").nth(i).click();
+  await page.click("#gs-done"); await sleep(200);
+  log("full overlap message:", await page.textContent("#taxa-sum"));
+  await page.click("#btn-save"); await sleep(500); log("save at 200%:", await page.textContent("#toast"));
+  // typed values over 100 still blocked
+  await page.fill("#tx0c", "70"); await page.fill("#tx1c", "60"); await page.locator("#grid button").nth(0).click(); await sleep(100);
+  log("typed 130% message:", await page.textContent("#taxa-sum"));
+  await page.click("#btn-save"); await sleep(400); log("typed 130% save:", await page.textContent("#toast"));
+  await page.fill("#tx0c", "10"); await page.fill("#tx1c", "10"); await page.click("#btn-save"); await sleep(500);
+  // edit and check restored
+  await page.click('.tabs button[data-tab="data"]'); await sleep(300); await page.click("#qlist li >> nth=0"); await sleep(600);
+  log("on edit, message:", await page.textContent("#taxa-sum"));
+  await page.locator("#taxa-cards .gbtn").nth(1).click(); await sleep(200);
+  log("after edit, species 2 sheet:", await sheetCells()); await page.click("#gs-cancel");
+  // typing a value clears that species' squares
+  await page.fill("#tx0c", "20"); await page.click("#btn-save"); await sleep(500); log("edit save:", await page.textContent("#toast"));
+  await page.click('.tabs button[data-tab="export"]');
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#btn-sp-csv")]); await dl.saveAs(OUT + "/sp.csv");
+  log("errors:", errs.length ? errs : "none"); await b.close(); srv.close();
+})();

@@ -1,0 +1,33 @@
+const { chromium } = require("playwright");
+const http = require("http"), fs = require("fs"), path = require("path");
+const ROOT = process.env.QN_ROOT || require("path").resolve(__dirname, "../.."), OUT = process.argv[2] || require("path").join(require("os").tmpdir(), "qn-e2e", "alt");
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2" };
+const srv = http.createServer((q, r) => { let f = path.join(ROOT, decodeURIComponent(q.url.split("?")[0])); if (f.endsWith("/")) f += "index.html";
+  fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { "Content-Type": types[path.extname(f)] || "application/octet-stream" }); r.end(d); }); }).listen(8769);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block", acceptDownloads: true });
+  await ctx.addInitScript(() => {
+    window.__fix = { latitude: 50.3123456, longitude: -4.1054321, accuracy: 0.02, altitude: 54.3217, altitudeAccuracy: 0.035 };
+    const subs = [];
+    const emit = cb => cb({ coords: Object.assign({}, window.__fix), timestamp: Date.now() });
+    const geo = { watchPosition: cb => { subs.push(cb); setTimeout(() => emit(cb), 50); return subs.length; }, clearWatch: () => {}, getCurrentPosition: cb => setTimeout(() => emit(cb), 50) };
+    Object.defineProperty(navigator, "geolocation", { value: geo });
+    navigator.permissions.query = async () => ({ state: "granted", onchange: null });
+    window.__push = () => subs.forEach(emit);
+  });
+  const page = await ctx.newPage(); const errs = []; page.on("pageerror", e => errs.push(e.message));
+  await page.goto("http://localhost:8769/");
+  await page.click("#btn-start-seagrass"); await page.fill("#s-site", "Alt");
+  await page.click('#survey-form button[type="submit"]'); await sleep(500);
+  console.log("gps line:", await page.textContent("#gps-text"));
+  await page.click("#btn-zero"); await page.click("#btn-save"); await sleep(400);
+  await page.evaluate(() => { window.__fix = { latitude: 50.3124, longitude: -4.1055, accuracy: 6, altitude: null, altitudeAccuracy: null }; window.__push(); });
+  await sleep(300);
+  await page.click("#btn-zero"); await page.click("#btn-save"); await sleep(400);
+  await page.click('.tabs button[data-tab="export"]');
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#btn-csv")]);
+  await dl.saveAs(OUT + "/alt.csv");
+  console.log("errors:", errs.length ? errs : "none"); await b.close(); srv.close();
+})();

@@ -1,0 +1,24 @@
+const { chromium } = require("playwright");
+const http = require("http"), fs = require("fs"), path = require("path");
+const ROOT = process.env.QN_ROOT || require("path").resolve(__dirname, "../.."), OUT = process.argv[2] || require("path").join(require("os").tmpdir(), "qn-e2e", "info");
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2" };
+const srv = http.createServer((q, r) => { let f = path.join(ROOT, decodeURIComponent(q.url.split("?")[0])); if (f.endsWith("/")) f += "index.html";
+  fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { "Content-Type": types[path.extname(f)] || "application/octet-stream" }); r.end(d); }); }).listen(8766);
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, geolocation: { latitude: 50.31, longitude: -4.1, accuracy: 4 }, permissions: ["geolocation"], serviceWorkers: "block" });
+  await ctx.route(/tile\.openstreetmap/, r => r.abort());
+  const page = await ctx.newPage(); const errs = []; page.on("pageerror", e => errs.push(e.message));
+  await page.goto("http://localhost:8766/");
+  await page.click("#btn-start-rocky"); await page.fill("#s-site", "T");
+  await page.click('.seg[data-name="design"] button[data-value="random"]');
+  await page.click('[data-info="plan-info-setup"]');
+  console.log("checkbox still unticked:", !(await page.isChecked("#s-plan")));
+  const el = await page.$("#plan-check-wrap"); await el.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: OUT + "/i1.png", clip: await (async () => { const bb = await el.boundingBox(); return { x: 0, y: bb.y - 10, width: 390, height: bb.height + 20 }; })() });
+  await page.check("#s-plan"); await page.click('#survey-form button[type="submit"]');
+  await page.waitForSelector("#view-plan:not(.hidden)"); await page.waitForTimeout(800);
+  await page.click('[data-info="plan-info"]'); await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(2800);
+  await page.screenshot({ path: OUT + "/i2.png" });
+  console.log("errors:", errs.length ? errs : "none"); await b.close(); srv.close();
+})();

@@ -1,6 +1,7 @@
 # QuadratNotes
 
 [![DOI](https://zenodo.org/badge/1414708264.svg)](https://doi.org/10.5281/zenodo.24295028)
+[![Tests](https://github.com/ollietidal/quadratnotes/actions/workflows/tests.yml/badge.svg)](https://github.com/ollietidal/quadratnotes/actions/workflows/tests.yml)
 
 ![QuadratNotes: free, offline quadrat surveys for coastal habitats](docs/banner.jpg)
 
@@ -84,8 +85,25 @@ Open-Meteo for the weather and tide; map tiles come from OpenStreetMap when the 
 from the app's field-testers note goes through Web3Forms to hello@quadratnotes.com and contains only the
 optional 1–5 rating, what the person types and the app version. Full details: [privacy notice](https://quadratnotes.com/privacy.html).
 
-## Feedback and contributing
-Bug reports and suggestions are welcome as GitHub issues, or by email to hello@quadratnotes.com.
+## Feedback, support and contributing
+- **Help and support:** see [SUPPORT.md](SUPPORT.md) for where to ask and what response to expect.
+- **Bugs and ideas:** open a GitHub issue (there are forms for bug reports and feature requests), or
+  email hello@quadratnotes.com.
+- **Contributing:** see [CONTRIBUTING.md](CONTRIBUTING.md) for how the code is organised and the rules
+  that keep exported data reliable.
+
+## Tests
+The `tests/` folder holds simulated-browser tests (jsdom) for each habitat and real-browser tests
+(Playwright, Chromium) covering surveys, random and fixed points, the custom survey, exports, photo
+details, backups and the offline cache. They run automatically on GitHub for every change. To run them
+yourself:
+
+```sh
+cd tests
+npm ci
+npx playwright install chromium
+npm test && npm run e2e
+```
 
 ## How to cite
 Thomas, O. R. (2026). *QuadratNotes* [Computer software]. Zenodo.

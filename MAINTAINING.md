@@ -16,6 +16,14 @@ The `CNAME` file holds the domain; keep it.
   `APP_CONFIG` near the top of the script in `index.html`. Keep `version` there and in
   `CITATION.cff` the same.
 
+## Tests
+- The tests run on GitHub for every push (Actions tab, workflow "Tests"); a green tick on the latest
+  commit means they passed. If they fail, open the run to see which test and why.
+- Run them locally before uploading a change (see CONTRIBUTING.md): `cd tests`, `npm ci`, then
+  `npm test` and `npm run e2e`.
+- `tests/package-lock.json` pins the test tools. Playwright needs updating occasionally: change its
+  version in `tests/package.json`, run `npm install` in `tests/`, and upload both files.
+
 ## Custom survey templates
 - Templates are kept on the phone (IndexedDB `meta` store, key `templates`) and included in backups.
   Each survey stores its own copy in `session.template`, so editing a template never changes recorded data.

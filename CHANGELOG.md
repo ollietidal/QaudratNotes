@@ -5,6 +5,11 @@ contents) is marked **Export change**, so analysis scripts can be checked. Expor
 [docs/DATA-DICTIONARY.md](docs/DATA-DICTIONARY.md). Released versions are archived on Zenodo:
 [10.5281/zenodo.24295028](https://doi.org/10.5281/zenodo.24295028).
 
+## Unreleased
+- Tests are now in the repository (`tests/`) and run automatically on GitHub for every change.
+- Contributing guide (`CONTRIBUTING.md`), support note (`SUPPORT.md`) and issue forms for bug reports
+  and feature requests. No change to the app or its exports.
+
 ## 0.19.0 (21 Nov 2026)
 - **Custom survey** for any habitat: make a template with your own species list, one way of scoring them
   (% cover with the grid, count, present/absent, or a Domin or Braun-Blanquet class), an optional "Also count" list

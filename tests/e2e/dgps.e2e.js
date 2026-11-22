@@ -1,0 +1,36 @@
+const { chromium } = require("playwright");
+const http = require("http"), fs = require("fs"), path = require("path");
+const ROOT = process.env.QN_ROOT || require("path").resolve(__dirname, "../.."), OUT = process.argv[2] || require("path").join(require("os").tmpdir(), "qn-e2e", "dgps");
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2" };
+const srv = http.createServer((q, r) => { let f = path.join(ROOT, decodeURIComponent(q.url.split("?")[0])); if (f.endsWith("/")) f += "index.html";
+  fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { "Content-Type": types[path.extname(f)] || "application/octet-stream" }); r.end(d); }); }).listen(8768);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, geolocation: { latitude: 50.3120, longitude: -4.1060, accuracy: 4 }, permissions: ["geolocation"], serviceWorkers: "block", acceptDownloads: true });
+  await ctx.route(/tile\.openstreetmap/, r => r.abort());
+  const page = await ctx.newPage(); const errs = []; page.on("pageerror", e => errs.push(e.message));
+  await page.goto("http://localhost:8768/");
+  await page.click("#btn-start-seagrass"); await page.fill("#s-site", "Walk");
+  await page.click('.seg[data-name="design"] button[data-value="random"]'); await page.check("#s-plan");
+  await page.click('#survey-form button[type="submit"]'); await page.waitForSelector("#view-plan:not(.hidden)"); await sleep(600);
+  await page.click('.seg[data-name="planmode"] button[data-value="walk"]');
+  const cs = [[50.3120, -4.1060, 0.02], [50.3120, -4.1050, 0.3], [50.3127, -4.1050, 0.45], [50.3127, -4.1060, 4]];
+  for (const [la, lo, acc] of cs) { await ctx.setGeolocation({ latitude: la, longitude: lo, accuracy: acc }); await sleep(1300); await page.click("#btn-plan-corner"); await sleep(200); }
+  console.log(await page.textContent("#plan-area"));
+  await page.fill("#plan-n", "5"); await page.click("#btn-plan-go"); await page.click("#btn-plan-use"); await sleep(400);
+  const sess = await page.evaluate(() => new Promise(res => { const r = indexedDB.open("quadrat-notebook"); r.onsuccess = () => { const t = r.result.transaction("sessions").objectStore("sessions").getAll(); t.onsuccess = () => res(t.result); }; }));
+  const p1 = sess[0].plan.points[0];
+  console.log("method", sess[0].plan.method, "cornerAcc", sess[0].plan.cornerAcc);
+  await ctx.setGeolocation({ latitude: p1.lat + 0.0000123, longitude: p1.lon + 0.0000071, accuracy: 0.3 }); await sleep(1500);
+  console.log("nav at ~1.5 m off:", await page.textContent("#nav-title"), "/", await page.textContent("#nav-sub"));
+  await page.click("#btn-zero"); await page.click("#btn-save"); await sleep(500);
+  console.log(await page.textContent("#toast"));
+  await page.click('.tabs button[data-tab="export"]');
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#btn-zip")]);
+  await dl.saveAs(OUT + "/walk.zip");
+  await page.evaluate(() => document.querySelectorAll("#view-export details").forEach(d => d.open = true));
+  const [dk] = await Promise.all([page.waitForEvent("download"), page.click("#btn-kml")]);
+  await dk.saveAs(OUT + "/walk.kml");
+  console.log("errors:", errs.length ? errs : "none"); await b.close(); srv.close();
+})();

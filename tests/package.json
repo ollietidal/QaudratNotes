@@ -1,0 +1,16 @@
+{
+  "name": "quadratnotes-tests",
+  "private": true,
+  "description": "Tests for QuadratNotes: simulated-browser (jsdom) tests and real-browser (Playwright) tests",
+  "scripts": {
+    "test": "node run-all.js",
+    "e2e": "node e2e/run-e2e.js",
+    "test:all": "node run-all.js && node e2e/run-e2e.js"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6",
+    "jsdom": "24",
+    "jszip": "3.10.1",
+    "playwright": "1.63.0"
+  }
+}

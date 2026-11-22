@@ -1,0 +1,30 @@
+// Service worker: app works offline, and other hosts' replies are never cached.
+const { chromium } = require("playwright");
+const http = require("http"), fs = require("fs"), path = require("path");
+const ROOT = process.env.QN_ROOT || require("path").resolve(__dirname, "../..");
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2", ".webmanifest": "application/manifest+json" };
+const srv = http.createServer((q, r) => { let f = path.join(ROOT, decodeURIComponent(q.url.split("?")[0])); if (f.endsWith("/")) f += "index.html";
+  fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { "Content-Type": types[path.extname(f)] || "application/octet-stream" }); r.end(d); }); }).listen(8795);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await b.newContext();
+  let n = 0;
+  await ctx.route(/open-meteo|gbif/, r => r.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify({ n: ++n }) }));
+  const page = await ctx.newPage(); const errs = []; page.on("pageerror", e => errs.push(e.message));
+  await page.goto("http://localhost:8795/");
+  await page.evaluate(() => navigator.serviceWorker.register("sw.js"));
+  await page.evaluate(() => navigator.serviceWorker.ready); await sleep(800);
+  await page.reload(); await sleep(800);
+  const ctl = await page.evaluate(() => !!navigator.serviceWorker.controller);
+  const a = await page.evaluate(() => fetch("https://api.open-meteo.com/v1/forecast?latitude=50.36").then(r => r.json()));
+  const c = await page.evaluate(() => fetch("https://api.open-meteo.com/v1/forecast?latitude=50.36").then(r => r.json()));
+  await page.evaluate(() => fetch("https://api.gbif.org/v1/species/match?name=x").then(r => r.json()));
+  const keys = await page.evaluate(async () => { const out = []; for (const k of await caches.keys()) { const c = await caches.open(k); (await c.keys()).forEach(r => out.push(k + " " + r.url)); } return out; });
+  console.log("controlled:", ctl, "| weather fetched fresh twice:", a.n !== c.n, a.n, c.n);
+  console.log("cache name:", [...new Set(keys.map(k => k.split(" ")[0]))].join(), "| other-host entries:", keys.filter(k => !k.includes("localhost:8795")).length, "| entries:", keys.length);
+  await ctx.setOffline(true);
+  await page.reload(); await sleep(800);
+  console.log("offline reload works:", await page.isVisible("#card-custom"), "| errors:", errs.join(";") || "none");
+  await b.close(); srv.close();
+})();
