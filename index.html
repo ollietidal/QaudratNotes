@@ -296,6 +296,10 @@ select:focus { border-color: var(--ink); outline: none; }
 .fb-status.fb-err { color: var(--tape); }
 .fb-note { display: block; margin: 8px 0 0; font-size: .85rem; }
 .early-info a { color: var(--ink); font-weight: 700; }
+.setup-pill { display: flex; width: fit-content; margin: 8px auto 0; }
+.setup-list { margin: 0 0 8px; padding-left: 1.3em; }
+.setup-list li { margin: 4px 0; }
+.setup-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
 .continue-card { background: var(--green); color: var(--green-ink); border-radius: var(--radius-l); padding: 14px 16px; margin: 22px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .continue-card small { display: block; opacity: .85; font-size: .9rem; }
 .continue-card strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -514,6 +518,20 @@ details.about-box, details.about-box * { box-sizing: border-box; }
         <p class="hint fb-note" id="fb-note"></p>
       </form>
     </div>
+    <p class="early setup-pill hidden" id="setup-card"><span>Works best from your home screen</span>
+      <button class="info-btn info-inline" type="button" data-info="setup-steps" aria-expanded="false" aria-controls="setup-steps" aria-label="How to add QuadratNotes to your home screen">i</button></p>
+    <div class="info-panel hidden early-info" id="setup-steps">
+      <ol class="setup-list">
+        <li id="setup-step-install"></li>
+        <li>Open it from the home screen icon and allow location.</li>
+        <li>Try a practice quadrat, then delete it from the <b>Data</b> tab.</li>
+      </ol>
+      <div class="setup-btns">
+        <button class="btn btn-primary btn-small hidden" type="button" id="btn-install">Install app</button>
+        <a href="help.html#start">More help</a>
+        <button class="linkish" type="button" id="btn-setup-done">Hide this tip</button>
+      </div>
+    </div>
   </div>
 
   <div class="continue-card hidden" id="continue-card">
@@ -524,6 +542,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </div>
     <button class="btn btn-small" type="button" id="btn-continue">Continue</button>
   </div>
+
 
   <div class="habitats">
     <article class="habitat-card">
@@ -1488,7 +1507,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.19.0",
+  version: "0.19.1",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -5828,7 +5847,34 @@ const APP_CONFIG = {
   $("#btn-cu-other-add").addEventListener("click", addCuOther);
   $("#cu-other-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addCuOther(); } });
 
+  // "Get set up" card: shown until the app is installed to the home screen or the user hides it.
+  let installPrompt = null;
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; $("#btn-install").classList.remove("hidden"); renderSetup(); });
+  window.addEventListener("appinstalled", () => { installPrompt = null; $("#setup-card").classList.add("hidden"); $("#setup-steps").classList.add("hidden"); });
+  $("#btn-install").addEventListener("click", async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    try { await installPrompt.userChoice; } catch (e) {}
+    installPrompt = null; $("#btn-install").classList.add("hidden");
+  });
+  $("#btn-setup-done").addEventListener("click", async () => {
+    await put("meta", { key: "setupHidden", value: true });
+    $("#setup-card").classList.add("hidden");
+    $("#setup-steps").classList.add("hidden");
+  });
+  async function renderSetup() {
+    const hidden = await get("meta", "setupHidden");
+    const show = !isInstalled && !(hidden && hidden.value);
+    $("#setup-card").classList.toggle("hidden", !show);
+    if (!show) return;
+    $("#setup-step-install").innerHTML = isIOS
+      ? "In Safari, tap <b>Share</b>, then <b>Add to Home Screen</b>. This also stops Safari clearing your surveys."
+      : isAndroid
+        ? (installPrompt ? "Tap <b>Install app</b> below." : "Tap the browser's \u22ee menu, then <b>Install app</b> or <b>Add to Home screen</b>.")
+        : "Open <b>quadratnotes.com</b> on your phone and add it to the home screen.";
+  }
   async function renderHome() {
+    await renderSetup();
     const card = $("#continue-card");
     if (!state.session) { card.classList.add("hidden"); return; }
     const qs = await byIndex("quadrats", "sessionId", state.session.id);

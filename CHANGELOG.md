@@ -5,7 +5,10 @@ contents) is marked **Export change**, so analysis scripts can be checked. Expor
 [docs/DATA-DICTIONARY.md](docs/DATA-DICTIONARY.md). Released versions are archived on Zenodo:
 [10.5281/zenodo.24295028](https://doi.org/10.5281/zenodo.24295028).
 
-## Unreleased
+## 0.19.1 (22 Nov 2026)
+- Home screen: a "Works best from your home screen" pill under "field testers wanted", shown until the app is
+  installed. Its i opens three short steps for your phone (iPhone, Android or computer), with an Install button
+  where the browser offers one, and "Hide this tip".
 - Tests are now in the repository (`tests/`) and run automatically on GitHub for every change.
 - Contributing guide (`CONTRIBUTING.md`), support note (`SUPPORT.md`) and issue forms for bug reports
   and feature requests. No change to the app or its exports.

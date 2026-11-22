@@ -21,6 +21,7 @@ species look-ups, feedback) are blocked or answered with fixed replies, so no re
 - sggrid2.e2e.js: per-species seagrass grid and shared squares
 - three.e2e.js: map zoom-to-me, location at survey start, Back to setup
 - info.e2e.js: info panels on the random points screens
+- setup.e2e.js: "Works best from your home screen" tip (steps per device, opens from its i, hidden by "Hide this tip", never shown when installed)
 - sw.e2e.js: offline cache (app loads offline; replies from other sites are never cached)
 - inat.e2e.js / fixed.e2e.js: photo details (EXIF) in exports; fixed points
 - custom.e2e.js: custom survey (template editor, all four scoring methods, quadrat details, share/import
