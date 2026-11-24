@@ -7,7 +7,7 @@ authors:
   - family-names: Thomas
     given-names: Oliver R
     orcid: "https://orcid.org/0009-0000-1636-9492"
-version: 0.19.2
+version: 0.19.3
 doi: 10.5281/zenodo.24295028
 date-released: 2026-11-24
 url: "https://quadratnotes.com"

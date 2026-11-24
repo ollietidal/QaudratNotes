@@ -5,6 +5,11 @@ contents) is marked **Export change**, so analysis scripts can be checked. Expor
 [docs/DATA-DICTIONARY.md](docs/DATA-DICTIONARY.md). Released versions are archived on Zenodo:
 [10.5281/zenodo.24295028](https://doi.org/10.5281/zenodo.24295028).
 
+## 0.19.3 (24 Nov 2026)
+- New look for the home-screen badges (seagrass, rocky shore, saltmarsh, custom survey): each layer sits on
+  a soft shadow, like cut paper, with deeper shadows in dark mode. Same drawings otherwise; the logo stays flat.
+- README banner and link-preview image updated to match. No change to exports.
+
 ## 0.19.2 (24 Nov 2026)
 - Ko-fi link in one place only: the home-screen footer, plus one line at the end of the help guide and in the
   README. Removed the "Found this useful?" line that appeared after exporting and the support line in About.
