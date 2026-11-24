@@ -5,6 +5,10 @@ contents) is marked **Export change**, so analysis scripts can be checked. Expor
 [docs/DATA-DICTIONARY.md](docs/DATA-DICTIONARY.md). Released versions are archived on Zenodo:
 [10.5281/zenodo.24295028](https://doi.org/10.5281/zenodo.24295028).
 
+## 0.19.4 (24 Nov 2026)
+- Appearance choice in About: Automatic (follows the phone), Light or Dark, remembered on the phone.
+- The survey setup screen shows the habitat's badge beside its heading. Help guide updated. No change to exports.
+
 ## 0.19.3 (24 Nov 2026)
 - New look for the home-screen badges (seagrass, rocky shore, saltmarsh, custom survey): each layer sits on
   a soft shadow, like cut paper, with deeper shadows in dark mode. Same drawings otherwise; the logo stays flat.

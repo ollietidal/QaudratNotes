@@ -22,6 +22,7 @@
 <script src="jszip.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#17242C">
+<script>try { var t = localStorage.getItem("qn-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="QuadratNotes">
@@ -278,6 +279,13 @@ select:focus { border-color: var(--ink); outline: none; }
 .other-species { margin-top: 8px; }
 .home-hero { text-align: center; padding: 18px 0 8px; }
 .pc-shadow { flood-color: var(--pc-shadow); flood-opacity: var(--pc-shadow-o); }
+.survey-head { display: flex; align-items: center; gap: 14px; margin: 8px 0 4px; }
+.survey-head h1 { margin: 0; }
+#survey-badge { flex: none; width: 56px; height: 56px; }
+#survey-badge:empty { display: none; }
+#survey-badge svg { width: 56px; height: 56px; display: block; }
+.theme-pick { margin: 0 0 14px; }
+.theme-pick p { margin: 0 0 8px; }
 .home-logo { width: 96px; height: 96px; display: block; margin: 0 auto 14px; }
 .home-title { font-family: "Nunito", "Varela Round", "Segoe UI", system-ui, sans-serif; font-weight: 800; font-size: 2.4rem; line-height: 1.05; margin: 0; letter-spacing: -.01em; }
 .back-link { font-size: .92rem; padding: 4px 0; margin: 4px 0 2px; }
@@ -475,6 +483,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false"><defs><filter id="pc" x="-10%" y="-10%" width="120%" height="125%"><feDropShadow class="pc-shadow" dx="0" dy="2.2" stdDeviation="1.6"/></filter></defs></svg>
 
 <header class="top">
   <div class="top-site">
@@ -575,7 +584,6 @@ details.about-box, details.about-box * { box-sizing: border-box; }
   </div>
 
 
-  <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false"><defs><filter id="pc" x="-10%" y="-10%" width="120%" height="125%"><feDropShadow class="pc-shadow" dx="0" dy="2.2" stdDeviation="1.6"/></filter></defs></svg>
   <div class="habitats">
     <article class="habitat-card">
       <svg class="habitat-art round" viewBox="0 0 120 120" aria-hidden="true">
@@ -685,6 +693,8 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself. <a href="privacy.html">Privacy notice</a>.</p>
     <p>If you send feedback from the field-testers note, only your rating, what you type and the app version are sent.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
+    <div class="theme-pick"><p id="theme-label"><strong>Appearance</strong> <span class="hint">Automatic follows your phone's light or dark setting.</span></p>
+      <div class="seg" data-name="theme" role="group" aria-labelledby="theme-label"><button type="button" data-value="auto" aria-pressed="true">Automatic</button><button type="button" data-value="light" aria-pressed="false">Light</button><button type="button" data-value="dark" aria-pressed="false">Dark</button></div></div>
     <p><strong>How to cite:</strong> <span id="cite-text"></span> <button class="linkish" type="button" id="btn-copy-cite">Copy</button></p>
     <p>&copy; 2026 Oliver R Thomas. The code is free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>; the QuadratNotes name and logo are not covered by it.</p>
     <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
@@ -695,7 +705,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <!-- SURVEY SETUP -->
 <section id="view-survey" class="hidden" aria-labelledby="h-survey">
   <button class="linkish back-link" type="button" id="btn-change-habitat">← Choose a different habitat</button>
-  <h1 id="h-survey">Start a survey</h1>
+  <div class="survey-head"><span id="survey-badge" aria-hidden="true"></span><h1 id="h-survey">Start a survey</h1></div>
   <p class="lead">Each survey is one site visit. Quadrats you record are saved to this phone as you go.</p>
   <form id="survey-form" autocomplete="off">
     <div class="field hidden" aria-hidden="true">
@@ -1537,7 +1547,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.19.3",
+  version: "0.19.4",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -1632,7 +1642,7 @@ const APP_CONFIG = {
       if (!b) return;
       const name = seg.dataset.name;
       const wasOn = b.getAttribute("aria-pressed") === "true";
-      if (name === "scope" || name === "qsize" || name === "dwc-precision"  || name === "habitat" || name === "rkregion" || name === "planmode" || name === "tmeasure" || name === "tscale") {
+      if (name === "theme" || name === "scope" || name === "qsize" || name === "dwc-precision"  || name === "habitat" || name === "rkregion" || name === "planmode" || name === "tmeasure" || name === "tscale") {
         setSeg(name, b.dataset.value);
         if (name === "tmeasure") { $("#t-scale-seg").classList.toggle("hidden", b.dataset.value !== "scale"); $("#t-counts-field").classList.toggle("hidden", b.dataset.value === "count"); }
         if (name === "habitat") setSurveyHabitat(b.dataset.value);
@@ -3717,6 +3727,14 @@ const APP_CONFIG = {
   });
 
   /* ---------- About and support ---------- */
+  // Appearance: Automatic (follow the phone), Light or Dark. Saved on this device only.
+  function applyTheme(t) {
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    else delete document.documentElement.dataset.theme;
+    try { if (t === "light" || t === "dark") localStorage.setItem("qn-theme", t); else localStorage.removeItem("qn-theme"); } catch (e) {}
+  }
+  setSeg("theme", document.documentElement.dataset.theme || "auto");
+  $('.seg[data-name="theme"]').addEventListener("click", () => applyTheme(getSeg("theme")));
   $("#app-version").textContent = "v" + APP_CONFIG.version;
   // Ko-fi link: one place only (home footer, class "donate"). Empty supportUrl hides it.
   if (APP_CONFIG.supportUrl) $("#support-link-home").href = APP_CONFIG.supportUrl;
@@ -4767,6 +4785,9 @@ const APP_CONFIG = {
     $("#custom-template-field").classList.toggle("hidden", h !== "custom");
     if (h === "custom") renderTplPicker(tplId);
     $("#h-survey").textContent = h === "custom" ? "Start a custom survey" : "Start a " + HABITAT_NAME[h].toLowerCase() + " survey";
+    // Small copy of the habitat's home-screen badge beside the heading (clip ids renamed to stay unique)
+    const art = $("#btn-start-" + h) && $("#btn-start-" + h).closest(".habitat-card").querySelector(".habitat-art.round");
+    $("#survey-badge").innerHTML = art ? art.outerHTML.replace(/hab-cc/g, "svb-cc").replace(' class="habitat-art round"', "") : "";
     $("#s-site").placeholder = h === "rocky" ? "e.g. Wembury reef" : h === "saltmarsh" ? "e.g. Tamar saltmarsh" : h === "mudflat" ? "e.g. Erme estuary flats" : h === "custom" ? "e.g. Castle Hill meadow" : "e.g. Wilcove meadow";
   }
   // Hide habitats that are switched off. Surveys already recorded in them still open, show and export.
