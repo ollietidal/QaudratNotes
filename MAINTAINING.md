@@ -15,6 +15,10 @@ The `CNAME` file holds the domain; keep it.
 - Settings such as the support link, contact email, habitats offered, version and DOI are in
   `APP_CONFIG` near the top of the script in `index.html`. Keep `version` there and in
   `CITATION.cff` the same.
+- The Ko-fi link appears only in elements with class `donate` (home footer, last line of `help.html`).
+  App-store builds must hide these: Apple and Google don't allow links to outside tip pages in apps.
+  An empty `supportUrl` removes the footer link. Ko-fi is the only support route; GitHub's Sponsor
+  button comes from `.github/FUNDING.yml`.
 
 ## Tests
 - The tests run on GitHub for every push (Actions tab, workflow "Tests"); a green tick on the latest

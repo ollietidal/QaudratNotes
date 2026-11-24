@@ -89,6 +89,8 @@ optional 1–5 rating, what the person types and the app version. Full details: 
 - **Help and support:** see [SUPPORT.md](SUPPORT.md) for where to ask and what response to expect.
 - **Bugs and ideas:** open a GitHub issue (there are forms for bug reports and feature requests), or
   email hello@quadratnotes.com.
+- **Supporting the app:** QuadratNotes is free. If it's saved you time, you can support it on
+  [Ko-fi](https://ko-fi.com/quadratnotes).
 - **Contributing:** see [CONTRIBUTING.md](CONTRIBUTING.md) for how the code is organised and the rules
   that keep exported data reliable.
 

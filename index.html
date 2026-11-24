@@ -265,8 +265,6 @@ textarea { min-height: 88px; resize: vertical; }
 .toast.err { background: var(--tape); color: #fff; }
 .about p { margin: 0 0 10px; }
 .about a { color: var(--ink); font-weight: 700; }
-.support-line { margin: 10px 0 0; }
-.support-line a { color: var(--ink); font-weight: 700; }
 .photo-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .sr-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
 .thumb.pending { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .8rem; background: var(--surface); }
@@ -675,7 +673,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     </article>
   </div>
   <p class="home-soon"><button class="linkish" type="button" id="btn-all-surveys">See all your surveys</button></p>
-  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<span class="foot-line"><a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="help.html">Help</a></span><span class="foot-line"><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a></span></p>
+  <p class="home-foot">Free to use. Your data stays on this phone until you export it.<span class="foot-line"><a href="mailto:hello@quadratnotes.com?subject=QuadratNotes">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="help.html">Help</a></span><span class="foot-line donate" id="support-home"><a id="support-link-home" href="https://ko-fi.com/quadratnotes" target="_blank" rel="noopener">Support QuadratNotes on Ko-fi</a></span></p>
   <details class="about-box">
   <summary>About QuadratNotes</summary>
   <div class="about">
@@ -683,7 +681,6 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <p>Everything you record stays on this device. There are no accounts, no tracking and no analytics, and nothing leaves your phone unless you export it yourself. <a href="privacy.html">Privacy notice</a>.</p>
     <p>If you send feedback from the field-testers note, only your rating, what you type and the app version are sent.</p>
     <p>If you tap Get current conditions, your approximate location (to about 1 km) is sent to Open-Meteo to look up the weather and tide. Weather and tide data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
-    <p class="hidden" id="support-about">The app is free and always will be. If it saves you time, you can <a id="support-link-2" href="#" target="_blank" rel="noopener">support its development</a>.</p>
     <p><strong>How to cite:</strong> <span id="cite-text"></span> <button class="linkish" type="button" id="btn-copy-cite">Copy</button></p>
     <p>&copy; 2026 Oliver R Thomas. The code is free and open source under the <a href="LICENSE.txt" target="_blank" rel="noopener">MIT licence</a>; the QuadratNotes name and logo are not covered by it.</p>
     <p class="hidden" id="contact-about">Questions, bugs or ideas: <a id="contact-link" href="#"></a></p>
@@ -1430,8 +1427,6 @@ details.about-box, details.about-box * { box-sizing: border-box; }
     <button class="btn btn-wide" type="button" id="btn-sp-csv">Download species table (.csv)</button>
   </div>
 
-  <p class="hint support-line hidden" id="support-line">Found this useful? <a id="support-link-1" href="#" target="_blank" rel="noopener">Help keep it free</a>.</p>
-
   <details class="about-box more-formats">
   <summary>More formats</summary>
   <div class="about">
@@ -1538,7 +1533,7 @@ details.about-box, details.about-box * { box-sizing: border-box; }
 <script>
 /* ===== Settings: fill these in before launch ===== */
 const APP_CONFIG = {
-  version: "0.19.1",
+  version: "0.19.2",
   supportUrl: "https://ko-fi.com/quadratnotes",    // e.g. "https://ko-fi.com/yourname" (leave empty to hide)
   contactEmail: "hello@quadratnotes.com",  // leave empty to hide
   // Web3Forms access key for the feedback form (from web3forms.com, sent to contactEmail; it is safe to be public).
@@ -3332,10 +3327,6 @@ const APP_CONFIG = {
   $("#dwc-licence").addEventListener("change", renderDwcSummary);
   $("#dwc-names").addEventListener("change", renderDwcSummary);
   renderDwcSummary();
-  function afterExport() {
-    if (APP_CONFIG.supportUrl) $("#support-line").classList.remove("hidden");
-  }
-
   /* ---------- Deleting a survey ---------- */
   async function deleteSurvey(id, quiet) {
     const qs = await byIndex("quadrats", "sessionId", id);
@@ -3629,7 +3620,6 @@ const APP_CONFIG = {
       try {
         await downloads.save({ filename, data });
         toast("Downloaded " + filename);
-        afterExport();
         return true;
       } catch (e) {
         if (e && e.code === "declined") return false;
@@ -3646,7 +3636,6 @@ const APP_CONFIG = {
         const file = new File([blob], filename, { type });
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: filename });
-          afterExport();
           return true;
         }
       } catch (e) {
@@ -3657,7 +3646,6 @@ const APP_CONFIG = {
     const a = document.createElement("a");
     a.href = url; a.download = filename;
     document.body.append(a); a.click(); a.remove();
-    afterExport();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
     return true;
   }
@@ -3726,10 +3714,9 @@ const APP_CONFIG = {
 
   /* ---------- About and support ---------- */
   $("#app-version").textContent = "v" + APP_CONFIG.version;
-  if (APP_CONFIG.supportUrl) {
-    ["#support-link-1", "#support-link-2"].forEach(s => { $(s).href = APP_CONFIG.supportUrl; });
-    $("#support-about").classList.remove("hidden");
-  }
+  // Ko-fi link: one place only (home footer, class "donate"). Empty supportUrl hides it.
+  if (APP_CONFIG.supportUrl) $("#support-link-home").href = APP_CONFIG.supportUrl;
+  else document.querySelectorAll(".donate").forEach(el => el.remove());
   const citation = "Thomas, O. R. (2026). QuadratNotes (Version " + APP_CONFIG.version + ") [Computer software]. " +
     (APP_CONFIG.doi ? "https://doi.org/" + APP_CONFIG.doi : APP_CONFIG.citeUrl);
   $("#cite-text").textContent = citation;

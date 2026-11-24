@@ -5,6 +5,12 @@ contents) is marked **Export change**, so analysis scripts can be checked. Expor
 [docs/DATA-DICTIONARY.md](docs/DATA-DICTIONARY.md). Released versions are archived on Zenodo:
 [10.5281/zenodo.24295028](https://doi.org/10.5281/zenodo.24295028).
 
+## 0.19.2 (24 Nov 2026)
+- Ko-fi link in one place only: the home-screen footer, plus one line at the end of the help guide and in the
+  README. Removed the "Found this useful?" line that appeared after exporting and the support line in About.
+- GitHub shows a Sponsor button linking to Ko-fi (`.github/FUNDING.yml`). The tests workflow is back in
+  `.github/workflows/` so tests run on every change. No change to exports.
+
 ## 0.19.1 (22 Nov 2026)
 - Home screen: a "Works best from your home screen" pill under "field testers wanted", shown until the app is
   installed. Its i opens three short steps for your phone (iPhone, Android or computer), with an Install button
